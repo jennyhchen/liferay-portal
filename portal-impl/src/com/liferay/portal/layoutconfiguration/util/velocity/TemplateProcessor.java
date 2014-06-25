@@ -23,9 +23,9 @@ import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
 import com.liferay.portal.kernel.settings.ModifiableSettings;
 import com.liferay.portal.kernel.settings.Settings;
 import com.liferay.portal.kernel.settings.SettingsFactoryUtil;
-import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
@@ -202,14 +202,14 @@ public class TemplateProcessor implements ColumnProcessor {
 			WebKeys.THEME_DISPLAY);
 
 		Portlet portlet = PortletLocalServiceUtil.getPortletById(
-				themeDisplay.getCompanyId(), portletId);
+			themeDisplay.getCompanyId(), portletId);
 
 		JSONObject jsonObject = null;
 
 		jsonObject = JSONFactoryUtil.createJSONObject();
 
 		PortletJSONUtil.populatePortletJSONObject(
-				_request, StringPool.BLANK, portlet, jsonObject);
+			_request, StringPool.BLANK, portlet, jsonObject);
 
 		try {
 			if (jsonObject != null) {
@@ -217,11 +217,12 @@ public class TemplateProcessor implements ColumnProcessor {
 			}
 
 			PortletContainerUtil.render(
-					_request, bufferCacheServletResponse, portlet);
+				_request, bufferCacheServletResponse, portlet);
 
 			if (jsonObject != null) {
 				writeFooterPaths(_response, jsonObject);
-			}	
+			}
+
 			return bufferCacheServletResponse.getString();
 		}
 		finally {
@@ -238,7 +239,7 @@ public class TemplateProcessor implements ColumnProcessor {
 			WebKeys.THEME_DISPLAY);
 
 		Settings settings = SettingsFactoryUtil.getPortletInstanceSettings(
-				themeDisplay.getLayout(), portletId);
+			themeDisplay.getLayout(), portletId);
 
 		ModifiableSettings modifiableSettings =
 			settings.getModifiableSettings();
@@ -267,15 +268,15 @@ public class TemplateProcessor implements ColumnProcessor {
 
 	protected static void writeFooterPaths(
 			HttpServletResponse response, JSONObject jsonObject)
-			throws IOException {
+		throws IOException {
 
 		JSONArray footerCssPathsJSONArray = jsonObject.getJSONArray(
-				"footerCssPaths");
+			"footerCssPaths");
 		JSONArray footerJavaScriptPathsJSONArray = jsonObject.getJSONArray(
-				"footerJavaScriptPaths");
+			"footerJavaScriptPaths");
 
 		if ((footerCssPathsJSONArray.length() == 0) &&
-				(footerJavaScriptPathsJSONArray.length() == 0)) {
+			(footerJavaScriptPathsJSONArray.length() == 0)) {
 
 			return;
 		}
@@ -301,15 +302,15 @@ public class TemplateProcessor implements ColumnProcessor {
 
 	protected static void writeHeaderPaths(
 			HttpServletResponse response, JSONObject jsonObject)
-			throws IOException {
+		throws IOException {
 
 		JSONArray headerCssPathsJSONArray = jsonObject.getJSONArray(
-				"headerCssPaths");
+			"headerCssPaths");
 		JSONArray headerJavaScriptPathsJSONArray = jsonObject.getJSONArray(
-				"headerJavaScriptPaths");
+			"headerJavaScriptPaths");
 
 		if ((headerCssPathsJSONArray.length() == 0) &&
-				(headerJavaScriptPathsJSONArray.length() == 0)) {
+			(headerJavaScriptPathsJSONArray.length() == 0)) {
 
 			return;
 		}
