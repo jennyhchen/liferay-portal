@@ -18,16 +18,15 @@ import com.liferay.portal.jcr.JCRConstants;
 import com.liferay.portal.jcr.JCRFactory;
 import com.liferay.portal.jcr.JCRFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.documentlibrary.DuplicateDirectoryException;
 import com.liferay.portlet.documentlibrary.DuplicateFileException;
-import com.liferay.portlet.documentlibrary.NoSuchDirectoryException;
 import com.liferay.portlet.documentlibrary.NoSuchFileException;
 
 import java.io.InputStream;
@@ -99,7 +98,7 @@ public class JCRStore extends BaseStore {
 			session.save();
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -168,7 +167,7 @@ public class JCRStore extends BaseStore {
 				version.getName(), VERSION_DEFAULT, false);
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -187,7 +186,7 @@ public class JCRStore extends BaseStore {
 			session.save();
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -207,6 +206,10 @@ public class JCRStore extends BaseStore {
 
 			Node repositoryNode = getFolderNode(rootNode, repositoryId);
 
+			if (dirName.equals(StringPool.SLASH)) {
+				dirName = StringPool.BLANK;
+			}
+
 			Node dirNode = repositoryNode.getNode(dirName);
 
 			dirNode.remove();
@@ -223,7 +226,7 @@ public class JCRStore extends BaseStore {
 				logFailedDeletion(companyId, repositoryId, dirName);
 			}
 			else {
-				throw new PortalException(re);
+				ReflectionUtil.throwException(re);
 			}
 		}
 		finally {
@@ -278,7 +281,7 @@ public class JCRStore extends BaseStore {
 			return;
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -329,7 +332,7 @@ public class JCRStore extends BaseStore {
 			return;
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -354,7 +357,7 @@ public class JCRStore extends BaseStore {
 			logFailedDeletion(companyId, repositoryId, fileName);
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -419,7 +422,7 @@ public class JCRStore extends BaseStore {
 			logFailedDeletion(companyId, repositoryId, fileName, versionLabel);
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -455,7 +458,7 @@ public class JCRStore extends BaseStore {
 			return binary.getStream();
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			return ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -484,13 +487,16 @@ public class JCRStore extends BaseStore {
 
 				String primaryNodeTypeName = primaryNodeType.getName();
 
-				if (primaryNodeTypeName.equals(JCRConstants.NT_FILE)) {
+				if (primaryNodeTypeName.equals(JCRConstants.NT_FOLDER)) {
+					doGetFileNames(fileNames, node.getName(), node);
+				}
+				else if (primaryNodeTypeName.equals(JCRConstants.NT_FILE)) {
 					fileNames.add(node.getName());
 				}
 			}
 		}
-		catch (Exception e) {
-			throw new SystemException(e);
+		catch (RepositoryException re) {
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -516,25 +522,13 @@ public class JCRStore extends BaseStore {
 
 			Node dirNode = repositoryNode.getNode(dirName);
 
-			NodeIterator itr = dirNode.getNodes();
-
-			while (itr.hasNext()) {
-				Node node = (Node)itr.next();
-
-				NodeType primaryNodeType = node.getPrimaryNodeType();
-
-				String primaryNodeTypeName = primaryNodeType.getName();
-
-				if (primaryNodeTypeName.equals(JCRConstants.NT_FILE)) {
-					fileNames.add(dirName + "/" + node.getName());
-				}
-			}
+			doGetFileNames(fileNames, dirName, dirNode);
 		}
 		catch (PathNotFoundException pnfe) {
 			return new String[0];
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -547,7 +541,7 @@ public class JCRStore extends BaseStore {
 	public long getFileSize(long companyId, long repositoryId, String fileName)
 		throws PortalException {
 
-		long size;
+		long size = 0;
 
 		Session session = null;
 
@@ -560,7 +554,7 @@ public class JCRStore extends BaseStore {
 			size = contentNode.getProperty(JCRConstants.JCR_DATA).getLength();
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -590,11 +584,13 @@ public class JCRStore extends BaseStore {
 			return false;
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
 		}
+
+		return false;
 	}
 
 	@Override
@@ -624,7 +620,7 @@ public class JCRStore extends BaseStore {
 			session.save();
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -685,7 +681,7 @@ public class JCRStore extends BaseStore {
 				companyId, repositoryId, fileName, pnfe);
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -744,7 +740,7 @@ public class JCRStore extends BaseStore {
 				companyId, repositoryId, fileName, pnfe);
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
@@ -804,6 +800,11 @@ public class JCRStore extends BaseStore {
 			VersionHistory versionHistory = versionManager.getVersionHistory(
 				contentNode.getPath());
 
+			if (versionHistory.hasVersionLabel(versionLabel)) {
+				throw new DuplicateFileException(
+					companyId, repositoryId, fileName, versionLabel);
+			}
+
 			versionHistory.addVersionLabel(
 				version.getName(), versionLabel,
 				PropsValues.DL_STORE_JCR_MOVE_VERSION_LABELS);
@@ -813,10 +814,41 @@ public class JCRStore extends BaseStore {
 				companyId, repositoryId, fileName, versionLabel, pnfe);
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 		finally {
 			JCRFactoryUtil.closeSession(session);
+		}
+	}
+
+	protected void doGetFileNames(
+			List<String> fileNames, String dirName, Node node)
+		throws RepositoryException {
+
+		NodeType primaryNodeType = node.getPrimaryNodeType();
+
+		String primaryNodeTypeName = primaryNodeType.getName();
+
+		if (primaryNodeTypeName.equals(JCRConstants.NT_FOLDER)) {
+			NodeIterator itr = node.getNodes();
+
+			while (itr.hasNext()) {
+				Node curNode = itr.nextNode();
+
+				String subDirName = null;
+
+				if (Validator.isBlank(dirName)) {
+					subDirName = curNode.getName();
+				}
+				else {
+					subDirName = dirName + StringPool.SLASH + curNode.getName();
+				}
+
+				doGetFileNames(fileNames, subDirName, curNode);
+			}
+		}
+		else if (primaryNodeTypeName.equals(JCRConstants.NT_FILE)) {
+			fileNames.add(dirName);
 		}
 	}
 
@@ -848,7 +880,7 @@ public class JCRStore extends BaseStore {
 	protected Node getFileContentNode(
 			Session session, long companyId, long repositoryId, String fileName,
 			String versionLabel)
-		throws PortalException {
+		throws NoSuchFileException {
 
 		Node contentNode = null;
 
@@ -885,7 +917,7 @@ public class JCRStore extends BaseStore {
 				companyId, repositoryId, fileName, versionLabel);
 		}
 		catch (RepositoryException re) {
-			throw new SystemException(re);
+			ReflectionUtil.throwException(re);
 		}
 
 		return contentNode;

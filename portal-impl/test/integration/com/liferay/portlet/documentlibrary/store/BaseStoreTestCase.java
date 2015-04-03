@@ -424,6 +424,22 @@ public abstract class BaseStoreTestCase {
 		}
 	}
 
+	@Test(expected = DuplicateFileException.class)
+	public void testUpdateFileVersionDuplicateFileException() throws Exception {
+		String fileName = addFile(0);
+
+		store.updateFileVersion(
+			companyId, repositoryId, fileName, "1.0", "1.0");
+	}
+
+	@Test(expected = NoSuchFileException.class)
+	public void testUpdateFileVersionNoSuchFileException() throws Exception {
+		String fileName = RandomTestUtil.randomString();
+
+		store.updateFileVersion(
+			companyId, repositoryId, fileName, "1.0", "1.1");
+	}
+
 	@Test
 	public void testUpdateFileWithByteArray() throws Exception {
 		String fileName = addFile(0);
@@ -559,22 +575,6 @@ public abstract class BaseStoreTestCase {
 		String fileName2 = RandomTestUtil.randomString();
 
 		store.updateFile(companyId, repositoryId, fileName1, fileName2);
-	}
-
-	@Test(expected = DuplicateFileException.class)
-	public void testUpdateFileVersionDuplicateFileException() throws Exception {
-		String fileName = addFile(0);
-
-		store.updateFileVersion(
-			companyId, repositoryId, fileName, "1.0", "1.0");
-	}
-
-	@Test(expected = NoSuchFileException.class)
-	public void testUpdateFileVersionNoSuchFileException() throws Exception {
-		String fileName = RandomTestUtil.randomString();
-
-		store.updateFileVersion(
-			companyId, repositoryId, fileName, "1.0", "1.1");
 	}
 
 	protected String addFile(int newVersionCount) throws Exception {
