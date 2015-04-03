@@ -59,7 +59,8 @@ public class FileSystemStore extends BaseStore {
 		File dirNameDir = getDirNameDir(companyId, repositoryId, dirName);
 
 		if (dirNameDir.exists()) {
-			throw new DuplicateDirectoryException(dirNameDir.getPath());
+			throw new DuplicateDirectoryException(
+				companyId, repositoryId, dirName);
 		}
 
 		dirNameDir.mkdirs();
@@ -75,7 +76,8 @@ public class FileSystemStore extends BaseStore {
 				companyId, repositoryId, fileName, VERSION_DEFAULT);
 
 			if (fileNameVersionFile.exists()) {
-				throw new DuplicateFileException(fileNameVersionFile.getPath());
+				throw new DuplicateFileException(
+					companyId, repositoryId, fileName);
 			}
 
 			FileUtil.write(fileNameVersionFile, is);
@@ -192,7 +194,8 @@ public class FileSystemStore extends BaseStore {
 			companyId, repositoryId, fileName, versionLabel);
 
 		if (!fileNameVersionFile.exists()) {
-			throw new NoSuchFileException(fileNameVersionFile.getPath());
+			throw new NoSuchFileException(
+				companyId, repositoryId, fileName, versionLabel);
 		}
 
 		return fileNameVersionFile;
@@ -216,7 +219,8 @@ public class FileSystemStore extends BaseStore {
 			return new FileInputStream(fileNameVersionFile);
 		}
 		catch (FileNotFoundException fnfe) {
-			throw new NoSuchFileException(fileNameVersionFile.getPath(), fnfe);
+			throw new NoSuchFileException(
+				companyId, repositoryId, fileName, fnfe);
 		}
 	}
 
@@ -262,7 +266,7 @@ public class FileSystemStore extends BaseStore {
 			companyId, repositoryId, fileName, versionLabel);
 
 		if (!fileNameVersionFile.exists()) {
-			throw new NoSuchFileException(fileNameVersionFile.getPath());
+			throw new NoSuchFileException(companyId, repositoryId, fileName);
 		}
 
 		return fileNameVersionFile.length();
@@ -362,7 +366,8 @@ public class FileSystemStore extends BaseStore {
 				companyId, repositoryId, fileName, versionLabel);
 
 			if (fileNameVersionFile.exists()) {
-				throw new DuplicateFileException(fileNameVersionFile.getPath());
+				throw new DuplicateFileException(
+					companyId, repositoryId, fileName, versionLabel);
 			}
 
 			FileUtil.write(fileNameVersionFile, is);
@@ -385,7 +390,8 @@ public class FileSystemStore extends BaseStore {
 			companyId, repositoryId, fileName, toVersionLabel);
 
 		if (toFileNameVersionFile.exists()) {
-			throw new DuplicateFileException(toFileNameVersionFile.getPath());
+			throw new DuplicateFileException(
+				companyId, repositoryId, fileName, toVersionLabel);
 		}
 
 		boolean renamed = FileUtil.move(

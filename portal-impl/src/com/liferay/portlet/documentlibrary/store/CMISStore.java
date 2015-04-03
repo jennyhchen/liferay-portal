@@ -267,7 +267,7 @@ public class CMISStore extends BaseStore {
 			companyId, repositoryId, dirName, false);
 
 		if (versioningFolder == null) {
-			throw new NoSuchFileException();
+			throw new NoSuchFileException(companyId, repositoryId, dirName);
 		}
 
 		List<Folder> folders = getFolders(versioningFolder);
@@ -392,7 +392,8 @@ public class CMISStore extends BaseStore {
 		Document document = getDocument(versioningFolder, title);
 
 		if (document != null) {
-			throw new DuplicateFileException();
+			throw new DuplicateFileException(
+				companyId, repositoryId, fileName, versionLabel);
 		}
 
 		createDocument(versioningFolder, title, is);
@@ -412,7 +413,8 @@ public class CMISStore extends BaseStore {
 		Document document = getDocument(versioningFolder, title);
 
 		if (document != null) {
-			throw new DuplicateFileException();
+			throw new DuplicateFileException(
+				companyId, repositoryId, fileName, toVersionLabel);
 		}
 
 		document = getVersionedDocument(
@@ -531,13 +533,14 @@ public class CMISStore extends BaseStore {
 			companyId, repositoryId, fileName, false);
 
 		if (versioningFolder == null) {
-			throw new NoSuchFileException();
+			throw new NoSuchFileException(companyId, repositoryId, fileName);
 		}
 
 		Document document = getDocument(versioningFolder, versionLabel);
 
 		if (document == null) {
-			throw new NoSuchFileException();
+			throw new NoSuchFileException(
+				companyId, repositoryId, fileName, versionLabel);
 		}
 
 		return document;
