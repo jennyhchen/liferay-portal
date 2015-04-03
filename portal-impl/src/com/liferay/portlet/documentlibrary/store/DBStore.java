@@ -284,10 +284,6 @@ public class DBStore extends BaseStore {
 	}
 
 	@Override
-	public void move(String srcDir, String destDir) {
-	}
-
-	@Override
 	public void updateFile(
 			long companyId, long repositoryId, long newRepositoryId,
 			String fileName)
@@ -298,7 +294,8 @@ public class DBStore extends BaseStore {
 		}
 
 		if (hasFile(companyId, newRepositoryId, fileName)) {
-			throw new DuplicateFileException();
+			throw new DuplicateFileException(
+				companyId, newRepositoryId, fileName);
 		}
 
 		DLContentLocalServiceUtil.updateDLContent(
@@ -330,9 +327,7 @@ public class DBStore extends BaseStore {
 			String versionLabel, byte[] bytes)
 		throws PortalException {
 
-		if (DLContentLocalServiceUtil.hasContent(
-				companyId, repositoryId, fileName, versionLabel)) {
-
+		if (hasFile(companyId, repositoryId, fileName, versionLabel)) {
 			throw new DuplicateFileException(
 				companyId, repositoryId, fileName, versionLabel);
 		}
@@ -347,9 +342,7 @@ public class DBStore extends BaseStore {
 			String versionLabel, File file)
 		throws DuplicateFileException {
 
-		if (DLContentLocalServiceUtil.hasContent(
-				companyId, repositoryId, fileName, versionLabel)) {
-
+		if (hasFile(companyId, repositoryId, fileName, versionLabel)) {
 			throw new DuplicateFileException(
 				companyId, repositoryId, fileName, versionLabel);
 		}
@@ -374,9 +367,7 @@ public class DBStore extends BaseStore {
 			String versionLabel, InputStream inputStream)
 		throws PortalException {
 
-		if (DLContentLocalServiceUtil.hasContent(
-				companyId, repositoryId, fileName, versionLabel)) {
-
+		if (hasFile(companyId, repositoryId, fileName, versionLabel)) {
 			throw new DuplicateFileException(
 				companyId, repositoryId, fileName, versionLabel);
 		}

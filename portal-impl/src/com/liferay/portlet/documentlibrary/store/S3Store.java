@@ -308,12 +308,7 @@ public class S3Store extends BaseStore {
 				_s3Bucket.getName(),
 				getKey(companyId, repositoryId, fileName, versionLabel), null);
 
-			if (s3Objects.length == 0) {
-				return false;
-			}
-			else {
-				return true;
-			}
+			return (s3Objects.length != 0);
 		}
 		catch (S3ServiceException s3se) {
 			if (isS3NoSuchKeyException(s3se)) {
@@ -322,10 +317,6 @@ public class S3Store extends BaseStore {
 
 			return ReflectionUtil.throwException(s3se);
 		}
-	}
-
-	@Override
-	public void move(String srcDir, String destDir) {
 	}
 
 	@Override
@@ -576,7 +567,7 @@ public class S3Store extends BaseStore {
 	}
 
 	protected String[] getFileNames(S3Object[] s3Objects) {
-		List<String> fileNames = new ArrayList<>();
+		List<String> fileNames = new ArrayList<>(s3Objects.length);
 
 		for (S3Object s3Object : s3Objects) {
 			String fileName = getFileName(s3Object.getKey());

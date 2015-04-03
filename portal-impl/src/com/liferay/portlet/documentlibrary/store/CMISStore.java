@@ -314,16 +314,7 @@ public class CMISStore extends BaseStore {
 
 		Document document = getDocument(versioningFolder, versionLabel);
 
-		if (document == null) {
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-
-	@Override
-	public void move(String srcDir, String destDir) {
+		return (document != null);
 	}
 
 	@Override
