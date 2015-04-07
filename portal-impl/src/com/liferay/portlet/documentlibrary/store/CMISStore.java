@@ -152,11 +152,10 @@ public class CMISStore extends BaseStore {
 
 		if (versioningFolder == null) {
 			logFailedDeletion(companyId, repositoryId, fileName);
-
-			return;
 		}
-
-		versioningFolder.deleteTree(true, UnfileObject.DELETE, false);
+		else {
+			versioningFolder.deleteTree(true, UnfileObject.DELETE, false);
+		}
 	}
 
 	@Override
@@ -169,14 +168,12 @@ public class CMISStore extends BaseStore {
 		try {
 			document = getVersionedDocument(
 				companyId, repositoryId, fileName, versionLabel);
+
+			document.delete(true);
 		}
 		catch (NoSuchFileException nsfe) {
 			logFailedDeletion(companyId, repositoryId, fileName, versionLabel);
-
-			return;
 		}
-
-		document.delete(true);
 	}
 
 	@Override
