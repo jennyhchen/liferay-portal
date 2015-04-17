@@ -15,7 +15,6 @@
 package com.liferay.portlet.documentlibrary.store;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.CharPool;
@@ -23,6 +22,7 @@ import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.documentlibrary.DuplicateFileException;
 import com.liferay.portlet.documentlibrary.NoSuchFileException;
 
 import java.io.File;
@@ -102,7 +103,7 @@ public class S3Store extends BaseStore {
 			_s3Service.putObject(_s3Bucket, s3Object);
 		}
 		catch (S3ServiceException s3se) {
-			throw new SystemException(s3se);
+			ReflectionUtil.throwException(s3se);
 		}
 		finally {
 			StreamUtil.cleanUp(is);
@@ -127,7 +128,11 @@ public class S3Store extends BaseStore {
 			}
 		}
 		catch (S3ServiceException s3se) {
-			throw new SystemException(s3se);
+			if (isS3NoSuchKeyException(s3se)) {
+				logFailedDeletion(companyId, repositoryId, dirName);
+			}
+
+			ReflectionUtil.throwException(s3se);
 		}
 	}
 
@@ -143,7 +148,11 @@ public class S3Store extends BaseStore {
 			}
 		}
 		catch (S3ServiceException s3se) {
-			throw new SystemException(s3se);
+			if (isS3NoSuchKeyException(s3se)) {
+				logFailedDeletion(companyId, repositoryId, fileName);
+			}
+
+			ReflectionUtil.throwException(s3se);
 		}
 	}
 
@@ -158,7 +167,11 @@ public class S3Store extends BaseStore {
 				getKey(companyId, repositoryId, fileName, versionLabel));
 		}
 		catch (S3ServiceException s3se) {
-			throw new SystemException(s3se);
+			if (isS3NoSuchKeyException(s3se)) {
+				logFailedDeletion(companyId, repositoryId, fileName);
+			}
+
+			ReflectionUtil.throwException(s3se);
 		}
 	}
 
@@ -184,11 +197,13 @@ public class S3Store extends BaseStore {
 
 			return tempFile;
 		}
-		catch (IOException ioe) {
-			throw new SystemException(ioe);
-		}
-		catch (ServiceException se) {
-			throw new SystemException(se);
+		catch (Exception e) {
+			if (isS3NoSuchKeyException(e)) {
+				throw new NoSuchFileException(
+					companyId, repositoryId, fileName, versionLabel, e);
+			}
+
+			return ReflectionUtil.throwException(e);
 		}
 	}
 
@@ -211,7 +226,12 @@ public class S3Store extends BaseStore {
 			return s3Object.getDataInputStream();
 		}
 		catch (ServiceException se) {
-			throw new SystemException(se);
+			if (isS3NoSuchKeyException(se)) {
+				throw new NoSuchFileException(
+					companyId, repositoryId, fileName, versionLabel, se);
+			}
+
+			return ReflectionUtil.throwException(se);
 		}
 	}
 
@@ -224,7 +244,11 @@ public class S3Store extends BaseStore {
 			return getFileNames(s3Objects);
 		}
 		catch (S3ServiceException s3se) {
-			throw new SystemException(s3se);
+			if (isS3NoSuchKeyException(s3se)) {
+				return new String[0];
+			}
+
+			return ReflectionUtil.throwException(s3se);
 		}
 	}
 
@@ -240,7 +264,11 @@ public class S3Store extends BaseStore {
 			return getFileNames(s3Objects);
 		}
 		catch (S3ServiceException s3se) {
-			throw new SystemException(s3se);
+			if (isS3NoSuchKeyException(s3se)) {
+				return new String[0];
+			}
+
+			return ReflectionUtil.throwException(s3se);
 		}
 	}
 
@@ -259,7 +287,7 @@ public class S3Store extends BaseStore {
 			return storageObject.getContentLength();
 		}
 		catch (ServiceException se) {
-			throw new SystemException(se);
+			return ReflectionUtil.throwException(se);
 		}
 	}
 
@@ -280,26 +308,22 @@ public class S3Store extends BaseStore {
 				_s3Bucket.getName(),
 				getKey(companyId, repositoryId, fileName, versionLabel), null);
 
-			if (s3Objects.length == 0) {
-				return false;
-			}
-			else {
-				return true;
-			}
+			return (s3Objects.length != 0);
 		}
 		catch (S3ServiceException s3se) {
-			throw new SystemException(s3se);
-		}
-	}
+			if (isS3NoSuchKeyException(s3se)) {
+				return false;
+			}
 
-	@Override
-	public void move(String srcDir, String destDir) {
+			return ReflectionUtil.throwException(s3se);
+		}
 	}
 
 	@Override
 	public void updateFile(
-		long companyId, long repositoryId, long newRepositoryId,
-		String fileName) {
+			long companyId, long repositoryId, long newRepositoryId,
+			String fileName)
+		throws PortalException {
 
 		File tempFile = null;
 		InputStream is = null;
@@ -309,6 +333,16 @@ public class S3Store extends BaseStore {
 			S3Object[] s3Objects = _s3Service.listObjects(
 				_s3Bucket.getName(), getKey(companyId, repositoryId, fileName),
 				null);
+
+			if (s3Objects.length == 0) {
+				throw new NoSuchFileException(
+					companyId, repositoryId, fileName);
+			}
+
+			if (hasFile(companyId, newRepositoryId, fileName)) {
+				throw new DuplicateFileException(
+					companyId, newRepositoryId, fileName);
+			}
 
 			for (S3Object oldS3Object : s3Objects) {
 				String oldKey = oldS3Object.getKey();
@@ -339,11 +373,8 @@ public class S3Store extends BaseStore {
 				_s3Service.deleteObject(_s3Bucket, oldKey);
 			}
 		}
-		catch (IOException ioe) {
-			throw new SystemException(ioe);
-		}
-		catch (ServiceException se) {
-			throw new SystemException(se);
+		catch (Exception e) {
+			ReflectionUtil.throwException(e);
 		}
 		finally {
 			StreamUtil.cleanUp(is);
@@ -354,8 +385,9 @@ public class S3Store extends BaseStore {
 
 	@Override
 	public void updateFile(
-		long companyId, long repositoryId, String fileName,
-		String newFileName) {
+			long companyId, long repositoryId, String fileName,
+			String newFileName)
+		throws PortalException {
 
 		File tempFile = null;
 		InputStream is = null;
@@ -365,6 +397,16 @@ public class S3Store extends BaseStore {
 			S3Object[] s3Objects = _s3Service.listObjects(
 				_s3Bucket.getName(), getKey(companyId, repositoryId, fileName),
 				null);
+
+			if (s3Objects.length == 0) {
+				throw new NoSuchFileException(
+					companyId, repositoryId, fileName);
+			}
+
+			if (hasFile(companyId, repositoryId, newFileName)) {
+				throw new DuplicateFileException(
+					companyId, repositoryId, newFileName);
+			}
 
 			for (S3Object oldS3Object : s3Objects) {
 				String oldKey = oldS3Object.getKey();
@@ -398,11 +440,8 @@ public class S3Store extends BaseStore {
 				_s3Service.deleteObject(_s3Bucket, oldKey);
 			}
 		}
-		catch (IOException ioe) {
-			throw new SystemException(ioe);
-		}
-		catch (ServiceException se) {
-			throw new SystemException(se);
+		catch (Exception e) {
+			ReflectionUtil.throwException(e);
 		}
 		finally {
 			StreamUtil.cleanUp(is);
@@ -413,10 +452,16 @@ public class S3Store extends BaseStore {
 
 	@Override
 	public void updateFile(
-		long companyId, long repositoryId, String fileName, String versionLabel,
-		InputStream is) {
+			long companyId, long repositoryId, String fileName,
+			String versionLabel, InputStream is)
+		throws PortalException {
 
 		try {
+			if (hasFile(companyId, repositoryId, fileName, versionLabel)) {
+				throw new DuplicateFileException(
+					companyId, repositoryId, fileName, versionLabel);
+			}
+
 			S3Object s3Object = new S3Object(
 				_s3Bucket,
 				getKey(companyId, repositoryId, fileName, versionLabel));
@@ -425,8 +470,13 @@ public class S3Store extends BaseStore {
 
 			_s3Service.putObject(_s3Bucket, s3Object);
 		}
-		catch (S3ServiceException s3se) {
-			throw new SystemException(s3se);
+		catch (Exception e) {
+			if (isS3NoSuchKeyException(e)) {
+				throw new NoSuchFileException(
+					companyId, repositoryId, fileName, versionLabel, e);
+			}
+
+			ReflectionUtil.throwException(e);
 		}
 		finally {
 			StreamUtil.cleanUp(is);
@@ -505,7 +555,7 @@ public class S3Store extends BaseStore {
 	protected String getFileName(String key) {
 
 		// Convert /${companyId}/${repositoryId}/${dirName}/${fileName}
-		// /${versionLabel} to /${dirName}/${fileName}
+		// /${versionLabel} to ${dirName}/${fileName}
 
 		int x = key.indexOf(CharPool.SLASH);
 
@@ -513,11 +563,11 @@ public class S3Store extends BaseStore {
 
 		int y = key.lastIndexOf(CharPool.SLASH);
 
-		return key.substring(x, y);
+		return key.substring(x + 1, y);
 	}
 
 	protected String[] getFileNames(S3Object[] s3Objects) {
-		List<String> fileNames = new ArrayList<>();
+		List<String> fileNames = new ArrayList<>(s3Objects.length);
 
 		for (S3Object s3Object : s3Objects) {
 			String fileName = getFileName(s3Object.getKey());
@@ -554,7 +604,7 @@ public class S3Store extends BaseStore {
 			return headKey.substring(x + 1);
 		}
 		else {
-			throw new NoSuchFileException(fileName);
+			throw new NoSuchFileException(companyId, repositoryId, fileName);
 		}
 	}
 
@@ -684,6 +734,18 @@ public class S3Store extends BaseStore {
 		}
 
 		return tempFile;
+	}
+
+	protected boolean isS3NoSuchKeyException(Exception e) {
+		if (e instanceof S3ServiceException) {
+			S3ServiceException s3se = (S3ServiceException)e;
+
+			if (Validator.equals("NoSuchKey", s3se.getS3ErrorCode())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private static final String _ACCESS_KEY = PropsUtil.get(
