@@ -40,6 +40,9 @@ public class PortletPropsKeys {
 	public static final String POWWOW_PROVIDER_API_RETRY_INTERVAL =
 		"powwow.provider.api.retry.interval";
 
+	public static final String POWWOW_PROVIDER_API_TOKEN_TIME_TO_LIVE =
+		"powwow.provider.api.token.time.to.live";
+
 	public static final String POWWOW_PROVIDER_TYPES = "powwow.provider.types";
 
 	public static final String ZOOM_API_CALLBACK_LOGIN =

@@ -50,6 +50,11 @@ public class PortletPropsValues {
 			PortletProps.get(
 				PortletPropsKeys.POWWOW_PROVIDER_API_RETRY_INTERVAL));
 
+	public static final int POWWOW_PROVIDER_API_TOKEN_TIME_TO_LIVE =
+		GetterUtil.getInteger(
+			PortletProps.get(
+				PortletPropsKeys.POWWOW_PROVIDER_API_TOKEN_TIME_TO_LIVE));
+
 	public static final String[] POWWOW_PROVIDER_TYPES = PortletProps.getArray(
 		PortletPropsKeys.POWWOW_PROVIDER_TYPES);
 
