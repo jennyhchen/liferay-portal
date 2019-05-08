@@ -14,6 +14,9 @@
 
 package com.liferay.powwow.provider.zoom;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -35,10 +38,13 @@ import com.liferay.powwow.model.PowwowParticipantConstants;
 import com.liferay.powwow.model.PowwowServer;
 import com.liferay.powwow.provider.BasePowwowServiceProvider;
 import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
+import com.liferay.powwow.util.PortletPropsValues;
 
 import java.io.Serializable;
-
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +56,7 @@ import net.htmlparser.jericho.Source;
 
 /**
  * @author Marco Calderon
+ * @author Tang Hieu Ha
  */
 public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
@@ -315,12 +322,23 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 	}
 
 	protected JSONObject execute(
+		PowwowServer powwowServer, List<String> resourceParams, Http.Method method,
+		Map<String, String> parameterMap) {
+
+		return execute(powwowServer, resourceParams, Http.Method.GET, null, true);
+	}
+
+	// TODO remove when CES-20 is done
+	@Deprecated
+	protected JSONObject execute(
 		PowwowServer powwowServer, String resource, String action,
 		Map<String, String> parameterMap) {
 
 		return execute(powwowServer, resource, action, parameterMap, true);
 	}
 
+	// TODO remove when CES-20 is done
+	@Deprecated
 	protected JSONObject execute(
 		PowwowServer powwowServer, String resource, String action,
 		Map<String, String> parameterMap, boolean throwError) {
@@ -350,6 +368,96 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		options.setParts(parts);
 
 		options.setPost(true);
+
+		try {
+			long elapsedTime = System.currentTimeMillis() - _lastAPICallTime;
+
+			if (elapsedTime < Time.SECOND) {
+				if (_apiCallCount >= 10) {
+					try {
+						Thread.sleep(Time.SECOND + 1 - elapsedTime);
+
+						_apiCallCount = 1;
+					}
+					catch (InterruptedException ie) {
+					}
+				}
+
+				_apiCallCount++;
+			}
+			else {
+				_apiCallCount = 1;
+			}
+
+			if (_apiCallCount == 1) {
+				_lastAPICallTime = System.currentTimeMillis();
+			}
+
+			String response = sendRequest(options);
+
+			JSONObject responseJSONObject = JSONFactoryUtil.createJSONObject(
+				response);
+
+			JSONObject errorJSONObject = responseJSONObject.getJSONObject(
+				"error");
+
+			if (throwError && (errorJSONObject != null)) {
+				throw new SystemException(
+					"Unable to complete request: " + errorJSONObject);
+			}
+
+			return responseJSONObject;
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
+		}
+	}
+
+	protected JSONObject execute(
+		PowwowServer powwowServer, List<String> resourceParams, Http.Method method,
+		Map<String, String> parameterMap, boolean throwError) {
+
+		Http.Options options = new Http.Options();
+
+		StringBundler sb = new StringBundler(4);
+
+		sb.append("https://api.zoom.us/v2");
+		for (String param : resourceParams) {
+			sb.append(StringPool.SLASH);
+			sb.append(param);
+		}
+
+		String location = sb.toString();
+
+		options.setLocation(location);
+
+		Map<String, String> parts = new HashMap<>();
+
+		if (parameterMap != null) {
+			parts.putAll(parameterMap);
+		}
+
+		options.setParts(parts);
+
+		String token = getToken(powwowServer);
+
+		options.addHeader("Authorization", "Bearer " + token);
+
+		switch (method) {
+		case POST:
+			options.setPost(true);
+			break;
+		case PUT:
+			options.setPut(true);
+			break;
+		case DELETE:
+			options.setDelete(true);
+			break;
+		case PATCH:
+			options.setPatch(true);
+			break;
+		default:
+		}
 
 		try {
 			long elapsedTime = System.currentTimeMillis() - _lastAPICallTime;
@@ -517,9 +625,31 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		return parameterMap;
 	}
 
+	protected String getToken(PowwowServer powwowServer) {
+
+		String zoomApiKey = powwowServer.getApiKey();
+		String zoomApiSecret = powwowServer.getSecret();
+		int timeToLive = PortletPropsValues.POWWOW_PROVIDER_API_TOKEN_TIME_TO_LIVE;
+
+		try {
+			Algorithm algorithm = Algorithm.HMAC256(zoomApiSecret);
+			Date expirationDate = Date.from(ZonedDateTime.now().plusSeconds(timeToLive).toInstant());
+			Date issuedAt = Date.from(ZonedDateTime.now().toInstant());
+			return JWT.create()
+					.withIssuedAt(issuedAt).withExpiresAt(expirationDate)
+					.withIssuer(zoomApiKey)
+					.sign(algorithm);
+		}
+		catch (JWTCreationException e) {
+			_log.error("Error while generating token.", e);
+		}
+
+		return null;
+	}
+
 	protected JSONArray getUsersJSONArray(PowwowServer powwowServer) {
 		JSONObject responseJSONObject = execute(
-			powwowServer, "user", "list", null);
+			powwowServer, Arrays.asList("users"), Http.Method.GET, null);
 
 		return responseJSONObject.getJSONArray("users");
 	}
