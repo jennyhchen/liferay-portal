@@ -276,6 +276,14 @@ public abstract class BasePowwowServiceProvider
 				return HttpUtil.URLtoString(options);
 			}
 			catch (Exception e) {
+
+				// Return in case no content returned
+
+				if (options.getResponse().getResponseCode() < ERROR_CODE_300) {
+
+					return "{}";
+				}
+
 				try {
 					Thread.sleep(
 						PortletPropsValues.POWWOW_PROVIDER_API_RETRY_INTERVAL);
@@ -342,5 +350,7 @@ public abstract class BasePowwowServiceProvider
 	protected abstract Map<String, Serializable> updatePowwowMeeting(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting, String name,
 		User creator, Map<String, String> options);
+
+	protected static final int ERROR_CODE_300 = 300;
 
 }
