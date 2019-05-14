@@ -57,6 +57,7 @@ import net.htmlparser.jericho.Source;
 /**
  * @author Marco Calderon
  * @author Tang Hieu Ha
+ * @author Vu Ho
  */
 public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
@@ -187,37 +188,24 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 		String hostId = getHostId(user, powwowServer);
 
-		List<String> resourceParams = new ArrayList<>(3);
+		List<String> resourceParams = new ArrayList<>();
 		resourceParams.add("users");
 		resourceParams.add(hostId);
 		resourceParams.add("meetings");
 
 		String password = options.get(PowwowMeetingConstants.OPTION_PASSWORD);
+		String optionAutoStartVideo = options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO);
 
+		JSONObject meetingJSONObject = _createMeetingJSON(name, password, optionAutoStartVideo);
 
-		JSONObject createMeetingJSON = JSONFactoryUtil.createJSONObject();
-
-		createMeetingJSON.put("topic", name);
-		createMeetingJSON.put("type", _MEETING_TYPE_RECURRING);
-		if (Validator.isNotNull(password)) {
-			createMeetingJSON.put("password", password);
-		}
-
-		JSONObject meetingSettingsJSON = JSONFactoryUtil.createJSONObject();
-
-		meetingSettingsJSON.put("host_video", options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO));
-		meetingSettingsJSON.put("participants_video", options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO));
-
-		createMeetingJSON.put("settings", meetingSettingsJSON);
-
-		JSONObject responseJSONObject = execute(powwowServer, resourceParams, Http.Method.POST, createMeetingJSON);
+		JSONObject responseJSONObject = execute(powwowServer, resourceParams, Http.Method.POST, meetingJSONObject);
 
 		Map<String, Serializable> providerTypeMetadataMap = new HashMap<>();
 
 		providerTypeMetadataMap.put("host_id", hostId);
 		providerTypeMetadataMap.put("id", responseJSONObject.getString("id"));
-		providerTypeMetadataMap.put("host_video", options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO));
-		providerTypeMetadataMap.put("participants_video", options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO));
+		providerTypeMetadataMap.put("host_video", optionAutoStartVideo);
+		providerTypeMetadataMap.put("participants_video", optionAutoStartVideo);
 
 		if (Validator.isNotNull(password)) {
 			providerTypeMetadataMap.put("password", options.get(PowwowMeetingConstants.OPTION_PASSWORD));
@@ -247,7 +235,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 	protected String createZoomHost(User user, PowwowServer powwowServer) {
 
-		List<String> resourceParams = new ArrayList<>(1);
+		List<String> resourceParams = new ArrayList<>();
 		resourceParams.add("users");
 
 		JSONObject userJSONObject = JSONFactoryUtil.createJSONObject();
@@ -271,15 +259,13 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 	protected boolean deletePowwowMeeting(PowwowServer powwowServer, PowwowMeeting powwowMeeting) {
 		Map<String, Serializable> providerTypeMetadataMap = powwowMeeting.getProviderTypeMetadataMap();
 
-		List<String> resourceParams = new ArrayList<>(2);
+		List<String> resourceParams = new ArrayList<>();
 		resourceParams.add("meetings");
 		resourceParams.add(String.valueOf(providerTypeMetadataMap.get("id")));
 
 		JSONObject responseJSONObject = execute(powwowServer, resourceParams, Http.Method.DELETE, null);
 
-		int responseCodeValue = responseJSONObject.getInt("code");
-
-		if (responseCodeValue >= _ERROR_CODE) {
+		if (!_isSuccess(responseJSONObject)) {
 			return false;
 		}
 
@@ -289,7 +275,8 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 	}
 
 	protected void deleteZoomHost(PowwowServer powwowServer, String hostId) {
-		List<String> resourceParams = new ArrayList<>(2);
+
+		List<String> resourceParams = new ArrayList<>();
 		resourceParams.add("users");
 		resourceParams.add(hostId);
 
@@ -297,16 +284,14 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 		String dept = responseJSONObject.getString("dept");
 
-		if (!dept.equals(_DEPT_API)) {
+		if (!_DEPT_API.equals(dept)) {
 			return;
 		}
 
 		responseJSONObject = execute(powwowServer, resourceParams, Http.Method.DELETE, null);
 
-		int responseCodeValue = responseJSONObject.getInt("code");
-
-		if (responseCodeValue >= _ERROR_CODE) {
-			throw new SystemException();
+		if (!_isSuccess(responseJSONObject)) {
+			throw new SystemException("Unable to delete Zoom host. " + _getResponseMessage(responseJSONObject));
 		}
 	}
 
@@ -316,7 +301,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 		Map<String, Serializable> providerTypeMetadataMap = powwowMeeting.getProviderTypeMetadataMap();
 
-		List<String> resourceParams = new ArrayList<>(3);
+		List<String> resourceParams = new ArrayList<>();
 		resourceParams.add("meetings");
 		resourceParams.add(String.valueOf(providerTypeMetadataMap.get("id")));
 		resourceParams.add("status");
@@ -326,13 +311,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 		JSONObject responseJSONObject = execute(powwowServer, resourceParams, Http.Method.PUT, actionJSONObject);
 
-		int responseCodeValue = responseJSONObject.getInt("code");
-
-		if (responseCodeValue != _ERROR_CODE) {
-			return false;
-		}
-
-		return true;
+		return _isSuccess(responseJSONObject);
 	}
 
 	protected JSONObject execute(
@@ -346,7 +325,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		boolean throwError) {
 
 		Http.Options options = new Http.Options();
-		StringBundler sb = new StringBundler(4);
+		StringBundler sb = new StringBundler();
 
 		sb.append("https://api.zoom.us/v2");
 		for (String param : resourceParams) {
@@ -363,7 +342,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		options.addHeader("Content-Type", "application/json");
 
 
-		if (Validator.isNotNull(jsonBodyObject)) {
+		if (Validator.isNotNull(jsonBodyObject) && !Http.Method.GET.equals(method)) {
 			options.setBody(jsonBodyObject.toJSONString(), "application/json", "UTF-8");
 		}
 
@@ -411,10 +390,8 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 			JSONObject responseJSONObject = JSONFactoryUtil.createJSONObject(response);
 
-			int responseCodeValue = responseJSONObject.getInt("code");
-
-			if (throwError && (responseCodeValue >= _ERROR_CODE)) {
-				throw new SystemException("Unable to complete request: " +responseJSONObject.getString("message"));
+			if (throwError && !_isSuccess(responseJSONObject)) {
+				throw new SystemException("Unable to complete request: " + _getResponseMessage(responseJSONObject));
 			}
 
 			return responseJSONObject;
@@ -505,7 +482,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 		Map<String, Serializable> providerTypeMetadataMap = powwowMeeting.getProviderTypeMetadataMap();
 
-		List<String> resourceParams = new ArrayList<>(2);
+		List<String> resourceParams = new ArrayList<>();
 		resourceParams.add("meetings");
 		resourceParams.add(String.valueOf(providerTypeMetadataMap.get("id")));
 
@@ -585,7 +562,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 		Map<String, Serializable> providerTypeMetadataMap = powwowMeeting.getProviderTypeMetadataMap();
 
-		List<String> resourceParams = new ArrayList<>(2);
+		List<String> resourceParams = new ArrayList<>();
 		resourceParams.add("meetings");
 		resourceParams.add(String.valueOf(providerTypeMetadataMap.get("id")));
 
@@ -595,11 +572,9 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 			int code = responseJSONObject.getInt("code");
 
 			if (code == _ERROR_CODE_MEETING_NOT_FOUND) {
-				return null;
+				throw new SystemException(
+					"Unable to retrieve Zoom meeting: " + _getResponseMessage(responseJSONObject));
 			}
-
-			throw new SystemException(
-				"Unable to retrieve Zoom meeting: " + responseJSONObject.getString("message"));
 		}
 
 		if (!responseJSONObject.has("created_at")) {
@@ -642,9 +617,9 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 				return false;
 			}
 
-			int status = zoomMeetingJSONObject.getInt("status");
+			String status = zoomMeetingJSONObject.getString("status");
 
-			if (status == _MEETING_STATUS_IN_PROGRESS) {
+			if (_MEETING_STATUS_IN_PROGRESS.equalsIgnoreCase(status)) {
 				return true;
 			}
 		}
@@ -666,50 +641,73 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		resourceParams.add("meetings");
 		resourceParams.add(String.valueOf(providerTypeMetadataMap.get("id")));
 
-		// Create Meeting JSONObject
-		JSONObject createMeetingJSON = JSONFactoryUtil.createJSONObject();
-
-		createMeetingJSON.put("topic", name);
-		createMeetingJSON.put("type", _MEETING_TYPE_RECURRING);
-
 		String password = options.get(PowwowMeetingConstants.OPTION_PASSWORD);
-		if (Validator.isNotNull(password)) {
-			createMeetingJSON.put("password", password);
-		}
+		String optionAutoStartVideo = options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO);
 
-		JSONObject meetingSettingsJSON = JSONFactoryUtil.createJSONObject();
+		JSONObject meetingJSONObject = _createMeetingJSON(name, password, optionAutoStartVideo);
 
-		meetingSettingsJSON.put("host_video", options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO));
-		meetingSettingsJSON.put("participants_video", options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO));
+		execute(powwowServer, resourceParams, Http.Method.PATCH, meetingJSONObject);
 
-		createMeetingJSON.put("settings", meetingSettingsJSON);
-
-		execute(powwowServer, resourceParams, Http.Method.PATCH, createMeetingJSON);
-
-		providerTypeMetadataMap.put("host_video", options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO));
-		providerTypeMetadataMap.put("participants_video", options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO));
+		providerTypeMetadataMap.put("host_video", optionAutoStartVideo);
+		providerTypeMetadataMap.put("participants_video", optionAutoStartVideo);
 
 		if (Validator.isNull(password)) {
 			providerTypeMetadataMap.remove("password");
 		}
 		else {
-			providerTypeMetadataMap.put("password", options.get(PowwowMeetingConstants.OPTION_PASSWORD));
+			providerTypeMetadataMap.put("password", password);
 		}
 
 		return providerTypeMetadataMap;
+	}
+
+	private JSONObject _createMeetingJSON(String name, String password, String optionAutoStartVideo) {
+
+		JSONObject meetingJSONObject = JSONFactoryUtil.createJSONObject();
+
+		meetingJSONObject.put("topic", name);
+		meetingJSONObject.put("type", _MEETING_TYPE_RECURRING);
+
+		if (Validator.isNotNull(password)) {
+			meetingJSONObject.put("password", password);
+		}
+
+		JSONObject meetingSettingsJSONObject = JSONFactoryUtil.createJSONObject();
+
+		meetingSettingsJSONObject.put("host_video", optionAutoStartVideo);
+		meetingSettingsJSONObject.put("participants_video", optionAutoStartVideo);
+
+		meetingJSONObject.put("settings", meetingSettingsJSONObject);
+		return meetingJSONObject;
+	}
+
+	private String _getResponseMessage(JSONObject responseJSONObject) {
+
+		if (Validator.isNull(responseJSONObject)) {
+			return StringPool.BLANK;
+		}
+
+		return responseJSONObject.getString("message");
+	}
+
+	private boolean _isSuccess(JSONObject responseJSONObject) {
+
+		if (Validator.isNull(responseJSONObject)) {
+			return false;
+		}
+
+		return responseJSONObject.getInt("code") < ERROR_CODE_300;
 	}
 
 	private static final String _DEPT_API = "API";
 
 	private static final int _ERROR_CODE_MEETING_NOT_FOUND = 3001;
 
-	private static final int _MEETING_STATUS_IN_PROGRESS = 1;
+	private static final String _MEETING_STATUS_IN_PROGRESS = "started";
 
 	private static final String _MEETING_TYPE_RECURRING = "3";
 
 	private static final int _USER_TYPE_PRO = 2;
-
-	private static final int _ERROR_CODE = 300;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ZoomPowwowServiceProvider.class);
