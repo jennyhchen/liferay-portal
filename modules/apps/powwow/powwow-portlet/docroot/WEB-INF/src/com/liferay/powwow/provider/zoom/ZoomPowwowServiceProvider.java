@@ -402,20 +402,12 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 	}
 
 	protected String getHostId(User user, PowwowServer powwowServer) {
-		JSONArray usersJSONArray = getUsersJSONArray(powwowServer);
 
-		if (usersJSONArray == null) {
-			return null;
-		}
+		String emailAddress = user.getEmailAddress();
+		JSONObject userJSONObject = getUserJSONObject(powwowServer, emailAddress);
 
-		for (int i = 0; i < usersJSONArray.length(); i++) {
-			JSONObject userJSONObject = usersJSONArray.getJSONObject(i);
-
-			String emailAddress = user.getEmailAddress();
-
-			if (emailAddress.equals(userJSONObject.getString("email"))) {
-				return userJSONObject.getString("id");
-			}
+		if (Validator.isNotNull(userJSONObject)) {
+			return userJSONObject.getString("id");
 		}
 
 		return createZoomHost(user, powwowServer);
@@ -548,6 +540,18 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		}
 
 		return null;
+	}
+
+	protected JSONObject getUserJSONObject(PowwowServer powwowServer, String email) {
+
+		JSONObject responseJSONObject = execute(powwowServer, Arrays.asList("users", email), Http.Method.GET, null,
+			false);
+
+		if (!_isSuccess(responseJSONObject)) {
+			return null;
+		}
+
+		return responseJSONObject;
 	}
 
 	protected JSONArray getUsersJSONArray(PowwowServer powwowServer) {
