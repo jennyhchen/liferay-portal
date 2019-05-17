@@ -27,7 +27,6 @@
 		<column name="powwowServerId" type="long" />
 		<column name="name" type="String" />
 		<column name="description" type="String" />
-		<column name="providerType" type="String" />
 		<column name="providerTypeMetadata" type="String" />
 		<column name="languageId" type="String" />
 		<column name="calendarBookingId" type="long" />
@@ -121,8 +120,6 @@
 		<!-- Other fields -->
 
 		<column name="name" type="String" />
-		<column name="providerType" type="String" />
-		<column name="url" type="String" />
 		<column name="apiKey" type="String" />
 		<column name="secret" type="String" />
 		<column name="active" type="boolean" />
@@ -136,7 +133,6 @@
 		<!-- Finder methods -->
 
 		<finder name="PT_A" return-type="Collection">
-			<finder-column name="providerType" />
 			<finder-column name="active" />
 		</finder>
 
