@@ -16,7 +16,7 @@
 
 <div class="meeting-body">
 	<div class="meeting-header">
-		<c:if test="<%= PowwowServiceProviderUtil.isSupportsOptionAutoStartVideo(powwowMeeting.getProviderType()) %>">
+		<c:if test="<%= PowwowServiceProviderUtil.isSupportsOptionAutoStartVideo() %>">
 			<c:choose>
 				<c:when test="<%= PowwowServiceProviderUtil.getOptionAutoStartVideo(powwowMeetingId) %>">
 					<span class="icon-stack" id="<portlet:namespace />autoStartVideo" title="<liferay-ui:message key="start-meeting-with-video" />">

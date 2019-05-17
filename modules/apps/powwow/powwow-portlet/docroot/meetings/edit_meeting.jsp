@@ -198,22 +198,6 @@ if (powwowMeeting != null) {
 	</c:choose>
 
 	<div class="provider">
-		<aui:select cssClass="provider-type-select" disabled="<%= powwowMeeting != null %>" label="provider" name="providerType" required="<%= true %>">
-
-			<%
-			for (String providerType : PortletPropsValues.POWWOW_PROVIDER_TYPES) {
-				if (PowwowServerLocalServiceUtil.getPowwowServersCount(providerType, true) > 0) {
-			%>
-
-					<aui:option value="<%= providerType %>"><%= LanguageUtil.get(request, PowwowServiceProviderUtil.getBrandingLabel(providerType)) %></aui:option>
-
-			<%
-				}
-			}
-			%>
-
-		</aui:select>
-
 		<div class="provider-branding-features">
 			<i class="icon-info-sign" id="<portlet:namespace />providerBrandingFeaturesIcon"></i>
 		</div>
@@ -295,13 +279,12 @@ if (powwowMeeting != null) {
 		}
 	).render();
 
-	function <portlet:namespace />loadFeatures(providerType) {
+	function <portlet:namespace />loadFeatures() {
 		A.all('.optional-field').get('parentNode').hide();
 
 		A.one('#<portlet:namespace />optionPassword').hide();
 
 		<%
-		for (String providerType : PortletPropsValues.POWWOW_PROVIDER_TYPES) {
 			StringBundler sb = new StringBundler();
 
 			sb.append("<strong>");
@@ -309,7 +292,7 @@ if (powwowMeeting != null) {
 			sb.append("</strong>");
 			sb.append("<ul>");
 
-			for (String brandingFeature : PowwowServiceProviderUtil.getBrandingFeatures(providerType)) {
+			for (String brandingFeature : PowwowServiceProviderUtil.getBrandingFeatures()) {
 				sb.append("<li>");
 				sb.append(UnicodeLanguageUtil.get(request, brandingFeature));
 				sb.append("</li>");
@@ -318,59 +301,38 @@ if (powwowMeeting != null) {
 			sb.append("</ul>");
 		%>
 
-			if (providerType == '<%= providerType %>') {
-				A.one('#<portlet:namespace />providerBrandingFeaturesIcon').attr('data-title', '<%= sb %>');
+			A.one('#<portlet:namespace />providerBrandingFeaturesIcon').attr('data-title', '<%= sb %>');
 
-				<%
-				if (PowwowServiceProviderUtil.isSupportsOptionAutoStartVideo(providerType)) {
-				%>
+			<%
+			if (PowwowServiceProviderUtil.isSupportsOptionAutoStartVideo()) {
+			%>
 
-					A.one('#<portlet:namespace />autoStartVideo').get('parentNode').show();
+				A.one('#<portlet:namespace />autoStartVideo').get('parentNode').show();
 
-				<%
-				}
-				%>
-
-				<%
-				if (PowwowServiceProviderUtil.isSupportsOptionPassword(providerType)) {
-				%>
-
-					A.one('#<portlet:namespace />optionPassword').show();
-
-				<%
-				}
-				%>
-
+			<%
 			}
+			%>
 
-		<%
-		}
-		%>
+			<%
+			if (PowwowServiceProviderUtil.isSupportsOptionPassword()) {
+			%>
+
+				A.one('#<portlet:namespace />optionPassword').show();
+
+			<%
+			}
+			%>
 
 	}
 
-	var selection = A.one('#<portlet:namespace />providerType');
-
-	selection.on(
-		'change',
-		function() {
-			var providerTypeSelected = A.one('#<portlet:namespace />providerType').val();
-
-			<portlet:namespace />loadFeatures(providerTypeSelected);
-		}
-	);
-
 	<%
-	for (String providerType : PortletPropsValues.POWWOW_PROVIDER_TYPES) {
-		if (PowwowServerLocalServiceUtil.getPowwowServersCount(providerType, true) > 0) {
+		if (PowwowServerLocalServiceUtil.getPowwowServersCount(true) > 0) {
 	%>
 
-			<portlet:namespace />loadFeatures('<%= providerType %>');
+		<portlet:namespace />loadFeatures();
 
 	<%
-			break;
 		}
-	}
 	%>
 
 	new A.FormValidator(

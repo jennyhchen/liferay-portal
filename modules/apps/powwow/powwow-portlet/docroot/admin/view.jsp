@@ -53,14 +53,8 @@
 
 		<liferay-ui:search-container-column-text
 			href="<%= rowURL %>"
-			name="provider"
-			value="<%= PowwowServiceProviderUtil.getPowwowServiceProviderName(powwowServer.getProviderType()) %>"
-		/>
-
-		<liferay-ui:search-container-column-text
-			href="<%= rowURL %>"
 			name="branding-name"
-			value="<%= LanguageUtil.get(request, PowwowServiceProviderUtil.getBrandingLabel(powwowServer.getProviderType())) %>"
+			value="<%= LanguageUtil.get(request, PowwowServiceProviderUtil.getBrandingLabel()) %>"
 		/>
 
 		<liferay-ui:search-container-column-text

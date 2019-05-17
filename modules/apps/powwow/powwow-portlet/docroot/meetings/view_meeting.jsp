@@ -55,7 +55,7 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 		</dd>
 	</div>
 
-	<c:if test="<%= PowwowServiceProviderUtil.isSupportsOptionPassword(powwowMeeting.getProviderType()) %>">
+	<c:if test="<%= PowwowServiceProviderUtil.isSupportsOptionPassword() %>">
 		<c:if test="<%= Validator.isNotNull(PowwowServiceProviderUtil.getOptionPassword(powwowMeeting.getPowwowMeetingId())) %>">
 			<div class="meeting-password">
 				<dt>
@@ -68,7 +68,7 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 		</c:if>
 	</c:if>
 
-	<c:if test="<%= PowwowServiceProviderUtil.isSupportsJoinByPhone(powwowMeeting.getProviderType()) %>">
+	<c:if test="<%= PowwowServiceProviderUtil.isSupportsJoinByPhone() %>">
 		<div class="join-by-phone">
 			<dt>
 				<liferay-ui:message key="join-by-phone" />
@@ -77,7 +77,7 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 			<%
 			String joinByPhoneDefaultNumbersString = StringPool.BLANK;
 
-			List<String> joinByPhoneDefaultNumbers = PowwowServiceProviderUtil.getJoinByPhoneDefaultNumbers(powwowMeeting.getProviderType());
+			List<String> joinByPhoneDefaultNumbers = PowwowServiceProviderUtil.getJoinByPhoneDefaultNumbers();
 
 			if ((joinByPhoneDefaultNumbers != null) && !joinByPhoneDefaultNumbers.isEmpty()) {
 				joinByPhoneDefaultNumbersString = StringUtil.merge(joinByPhoneDefaultNumbers, StringPool.SPACE + LanguageUtil.get(request, "or") + StringPool.SPACE);
@@ -91,7 +91,7 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 					</div>
 
 					<div class="access-code">
-						<span class="title"><%= LanguageUtil.get(request, PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel(powwowMeeting.getProviderType())) %>:</span> <%= PowwowServiceProviderUtil.getJoinByPhoneAccessCode(powwowMeetingId) %>
+						<span class="title"><%= LanguageUtil.get(request, PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel()) %>:</span> <%= PowwowServiceProviderUtil.getJoinByPhoneAccessCode(powwowMeetingId) %>
 					</div>
 
 					<div class="international-numbers-toggler" id="<portlet:namespace />internationalNumbersToggler">
@@ -113,7 +113,7 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 			<liferay-ui:message key="provider" />
 		</dt>
 		<dd>
-			<%= LanguageUtil.get(request, PowwowServiceProviderUtil.getBrandingLabel(powwowMeeting.getProviderType())) %>
+			<%= LanguageUtil.get(request, PowwowServiceProviderUtil.getBrandingLabel()) %>
 		</dd>
 	</div>
 
@@ -211,7 +211,7 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 		}
 	}
 
-	<c:if test="<%= PowwowServiceProviderUtil.isSupportsJoinByPhone(powwowMeeting.getProviderType()) %>">
+	<c:if test="<%= PowwowServiceProviderUtil.isSupportsJoinByPhone() %>">
 		new A.Toggler(
 			{
 				animated: true,
@@ -246,7 +246,7 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 		var interationalNumbersDisplay = [];
 
 		<%
-		Map<String, List<String>> internationalNumbers = PowwowServiceProviderUtil.getJoinByPhoneInternationalNumbers(powwowMeeting.getProviderType());
+		Map<String, List<String>> internationalNumbers = PowwowServiceProviderUtil.getJoinByPhoneInternationalNumbers();
 
 		if ((internationalNumbers != null) && !internationalNumbers.isEmpty()) {
 			for (String country : internationalNumbers.keySet()) {
