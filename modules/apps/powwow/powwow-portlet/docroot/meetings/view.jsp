@@ -100,7 +100,7 @@ else {
 
 					<aui:model-context bean="<%= powwowParticipant %>" model="<%= PowwowParticipant.class %>" />
 
-					<c:if test="<%= PowwowServiceProviderUtil.isSupportsPresettingParticipantName(powwowMeeting.getProviderType()) %>">
+					<c:if test="<%= PowwowServiceProviderUtil.isSupportsPresettingParticipantName() %>">
 						<aui:input autoFocus="<%= true %>" label="enter-your-full-name" name="name" />
 					</c:if>
 
@@ -127,7 +127,7 @@ else {
 			form.on(
 				'submit',
 				function(event) {
-					<c:if test="<%= PowwowServiceProviderUtil.isSupportsPresettingParticipantName(powwowMeeting.getProviderType()) %>">
+					<c:if test="<%= PowwowServiceProviderUtil.isSupportsPresettingParticipantName() %>">
 						var name = A.one('#<portlet:namespace />name');
 
 						if (name && !name.val()) {
