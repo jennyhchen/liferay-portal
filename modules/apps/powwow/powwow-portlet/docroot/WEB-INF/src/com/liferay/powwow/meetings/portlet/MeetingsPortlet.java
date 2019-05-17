@@ -61,7 +61,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -165,8 +164,7 @@ public class MeetingsPortlet extends MVCPortlet {
 
 			String name = StringPool.BLANK;
 
-			if (PowwowServiceProviderUtil.isSupportsPresettingParticipantName(
-					powwowMeeting.getProviderType())) {
+			if (PowwowServiceProviderUtil.isSupportsPresettingParticipantName()) {
 
 				name = ParamUtil.getString(actionRequest, "name");
 
@@ -198,14 +196,12 @@ public class MeetingsPortlet extends MVCPortlet {
 				}
 
 				long powwowServerId =
-					PowwowServiceProviderUtil.getPowwowServerId(
-						powwowMeeting.getProviderType());
+					PowwowServiceProviderUtil.getPowwowServerId();
 
 				Map<String, Serializable> providerTypeMetadataMap =
 					PowwowServiceProviderUtil.addPowwowMeeting(
 						powwowMeeting.getUserId(), powwowServerId,
 						powwowMeetingId, powwowMeeting.getName(),
-						powwowMeeting.getProviderType(),
 						new HashMap<String, String>());
 
 				powwowMeeting.setPowwowServerId(powwowServerId);
@@ -283,8 +279,6 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		String name = ParamUtil.getString(actionRequest, "name");
 		String description = ParamUtil.getString(actionRequest, "description");
-		String providerType = ParamUtil.getString(
-			actionRequest, "providerType");
 		String languageId = ParamUtil.getString(actionRequest, "languageId");
 
 		PowwowMeeting powwowMeeting = null;
@@ -331,48 +325,42 @@ public class MeetingsPortlet extends MVCPortlet {
 				PowwowMeetingConstants.POWWOW_SERVER_ID_DEFAULT;
 
 			int addPowwowMeetingStrategy =
-				PowwowServiceProviderUtil.getAddPowwowMeetingStrategy(
-					providerType);
+				PowwowServiceProviderUtil.getAddPowwowMeetingStrategy();
 
 			if (addPowwowMeetingStrategy ==
 					PowwowServiceProvider.ADD_POWWOW_MEETING_STRATEGY_EAGER) {
 
-				powwowServerId = PowwowServiceProviderUtil.getPowwowServerId(
-					providerType);
+				powwowServerId = PowwowServiceProviderUtil.getPowwowServerId();
 
 				providerTypeMetadataMap =
 					PowwowServiceProviderUtil.addPowwowMeeting(
-						hostUserId, powwowServerId, powwowMeetingId, name,
-						providerType, options);
+						hostUserId, powwowServerId, powwowMeetingId, name, options);
 			}
 
 			String portletId = PortalUtil.getPortletId(actionRequest);
 
 			PowwowMeetingServiceUtil.addPowwowMeeting(
 				themeDisplay.getScopeGroupId(), portletId, powwowServerId, name,
-				description, providerType, providerTypeMetadataMap, languageId,
+				description, providerTypeMetadataMap, languageId,
 				calendarBooking.getCalendarBookingId(),
 				PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
 				serviceContext);
 		}
 		else {
 			int addPowwowMeetingStrategy =
-				PowwowServiceProviderUtil.getAddPowwowMeetingStrategy(
-					powwowMeeting.getProviderType());
+				PowwowServiceProviderUtil.getAddPowwowMeetingStrategy();
 
 			if (addPowwowMeetingStrategy ==
 					PowwowServiceProvider.ADD_POWWOW_MEETING_STRATEGY_EAGER) {
 
 				providerTypeMetadataMap =
 					PowwowServiceProviderUtil.updatePowwowMeeting(
-						powwowMeetingId, name, powwowMeeting.getProviderType(),
-						hostUserId, options);
+						powwowMeetingId, name, hostUserId, options);
 			}
 
 			PowwowMeetingServiceUtil.updatePowwowMeeting(
 				powwowMeetingId, powwowMeeting.getPowwowServerId(), name,
-				description, powwowMeeting.getProviderType(),
-				providerTypeMetadataMap, languageId,
+				description, providerTypeMetadataMap, languageId,
 				calendarBooking.getCalendarBookingId(),
 				PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
 				serviceContext);

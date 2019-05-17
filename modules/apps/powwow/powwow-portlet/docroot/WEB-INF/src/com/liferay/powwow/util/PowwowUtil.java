@@ -291,10 +291,8 @@ public class PowwowUtil {
 			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE$]",
 			PowwowServiceProviderUtil.getJoinByPhoneAccessCode(powwowMeetingId),
 			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE_LABEL$]",
-			LanguageUtil.get(
-				serviceContext.getLocale(),
-				PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel(
-					powwowMeeting.getProviderType())),
+			LanguageUtil.get(serviceContext.getLocale(),
+				PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel()),
 			"[$MEETING_NAME$]", powwowMeeting.getName(), "[$MEETING_PASSWORD$]",
 			PowwowServiceProviderUtil.getOptionPassword(
 				powwowMeeting.getPowwowMeetingId()),

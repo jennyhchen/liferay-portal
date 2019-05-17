@@ -17,8 +17,6 @@ package com.liferay.powwow.provider;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowServer;
-import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
-
 import java.io.Serializable;
 
 import java.util.List;
@@ -32,11 +30,10 @@ public class PowwowServiceProviderUtil {
 
 	public static Map<String, Serializable> addPowwowMeeting(
 			long userId, long powwowServerId, long powwowMeetingId, String name,
-			String providerType, Map<String, String> options)
+			Map<String, String> options)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.addPowwowMeeting(
 			userId, powwowServerId, powwowMeetingId, name, options);
@@ -45,8 +42,7 @@ public class PowwowServiceProviderUtil {
 	public static PowwowMeeting deletePowwowMeeting(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.deletePowwowMeeting(powwowMeetingId);
 	}
@@ -54,29 +50,25 @@ public class PowwowServiceProviderUtil {
 	public static PowwowMeeting endPowwowMeeting(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.endPowwowMeeting(powwowMeetingId);
 	}
 
-	public static int getAddPowwowMeetingStrategy(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static int getAddPowwowMeetingStrategy() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getAddPowwowMeetingStrategy();
 	}
 
-	public static List<String> getBrandingFeatures(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static List<String> getBrandingFeatures() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getBrandingFeatures();
 	}
 
-	public static String getBrandingLabel(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static String getBrandingLabel() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getBrandingLabel();
 	}
@@ -84,8 +76,7 @@ public class PowwowServiceProviderUtil {
 	public static Map<String, String> getIndexFields(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getIndexFields(powwowMeetingId);
 	}
@@ -93,33 +84,27 @@ public class PowwowServiceProviderUtil {
 	public static long getJoinByPhoneAccessCode(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinByPhoneAccessCode(powwowMeetingId);
 	}
 
-	public static String getJoinByPhoneAccessCodeLabel(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static String getJoinByPhoneAccessCodeLabel() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinByPhoneAccessCodeLabel();
 	}
 
-	public static List<String> getJoinByPhoneDefaultNumbers(
-		String providerType) {
+	public static List<String> getJoinByPhoneDefaultNumbers() {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinByPhoneDefaultNumbers();
 	}
 
-	public static Map<String, List<String>> getJoinByPhoneInternationalNumbers(
-		String providerType) {
+	public static Map<String, List<String>> getJoinByPhoneInternationalNumbers() {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinByPhoneInternationalNumbers();
 	}
@@ -128,8 +113,7 @@ public class PowwowServiceProviderUtil {
 			long powwowMeetingId, String name, int type)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinPowwowMeetingURL(
 			powwowMeetingId, name, type);
@@ -138,8 +122,7 @@ public class PowwowServiceProviderUtil {
 	public static boolean getOptionAutoStartVideo(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getOptionAutoStartVideo(powwowMeetingId);
 	}
@@ -147,52 +130,39 @@ public class PowwowServiceProviderUtil {
 	public static String getOptionPassword(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getOptionPassword(powwowMeetingId);
 	}
 
-	public static long getPowwowServerId(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static long getPowwowServerId() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
-		return powwowServiceProvider.getPowwowServerId(providerType);
+		return powwowServiceProvider.getPowwowServerId();
 	}
 
-	public static String getPowwowServiceProviderName(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static String getPowwowServiceProviderName() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getPowwowServiceProviderName();
 	}
 
-	public static boolean isFieldAPIKeyRequired(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static boolean isFieldAPIKeyRequired() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isFieldAPIKeyRequired();
 	}
 
-	public static boolean isFieldSecretRequired(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static boolean isFieldSecretRequired() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isFieldSecretRequired();
-	}
-
-	public static boolean isFieldURLRequired(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
-
-		return powwowServiceProvider.isFieldURLRequired();
 	}
 
 	public static boolean isPowwowMeetingCreated(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isPowwowMeetingCreated(powwowMeetingId);
 	}
@@ -200,76 +170,55 @@ public class PowwowServiceProviderUtil {
 	public static boolean isPowwowMeetingRunning(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowMeetingId);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isPowwowMeetingRunning(powwowMeetingId);
 	}
 
 	public static boolean isServerActive(PowwowServer powwowServer) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			powwowServer.getProviderType());
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isServerActive(powwowServer);
 	}
 
-	public static boolean isSupportsJoinByPhone(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static boolean isSupportsJoinByPhone() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isSupportsJoinByPhone();
 	}
 
-	public static boolean isSupportsOptionAutoStartVideo(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static boolean isSupportsOptionAutoStartVideo() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isSupportsOptionAutoStartVideo();
 	}
 
-	public static boolean isSupportsOptionPassword(String providerType) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+	public static boolean isSupportsOptionPassword() {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isSupportsOptionPassword();
 	}
 
-	public static boolean isSupportsPresettingParticipantName(
-		String providerType) {
+	public static boolean isSupportsPresettingParticipantName() {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.isSupportsPresettingParticipantName();
 	}
 
 	public static Map<String, Serializable> updatePowwowMeeting(
-			long powwowMeetingId, String name, String providerType, long userId,
+			long powwowMeetingId, String name, long userId,
 			Map<String, String> options)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider(
-			providerType);
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.updatePowwowMeeting(
 			powwowMeetingId, name, userId, options);
 	}
 
-	protected static PowwowServiceProvider getPowwowServiceProvider(
-			long powwowMeetingId)
-		throws PortalException {
+	protected static PowwowServiceProvider getPowwowServiceProvider() {
 
-		PowwowMeeting powwowMeeting =
-			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
-
-		return getPowwowServiceProvider(powwowMeeting.getProviderType());
+		return PowwowServiceProviderFactory.getPowwowServiceProvider();
 	}
-
-	protected static PowwowServiceProvider getPowwowServiceProvider(
-		String providerType) {
-
-		return PowwowServiceProviderFactory.getPowwowServiceProvider(
-			providerType);
-	}
-
 }

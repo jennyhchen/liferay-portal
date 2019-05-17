@@ -168,8 +168,6 @@ public class PowwowMeetingIndexer extends BaseIndexer {
 
 		document.addKeyword("powwowParticipantKeys", powwowParticipantKeys);
 
-		document.addText("providerType", powwowMeeting.getProviderType());
-
 		Map<String, String> indexFields =
 			PowwowServiceProviderUtil.getIndexFields(
 				powwowMeeting.getPowwowMeetingId());

@@ -176,11 +176,11 @@ public abstract class BasePowwowServiceProvider
 	}
 
 	@Override
-	public long getPowwowServerId(String providerType) {
+	public long getPowwowServerId() {
 		PowwowServerLocalServiceUtil.checkPowwowServers();
 
 		List<PowwowServer> powwowServers =
-			PowwowServerLocalServiceUtil.getPowwowServers(providerType, true);
+			PowwowServerLocalServiceUtil.getPowwowServers(true);
 
 		if (powwowServers.isEmpty()) {
 			return PowwowMeetingConstants.POWWOW_SERVER_ID_DEFAULT;
