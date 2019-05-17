@@ -63,8 +63,7 @@ public class PowwowMeetingLocalServiceImpl
 	@Override
 	public PowwowMeeting addPowwowMeeting(
 			long userId, long groupId, long powwowServerId, String name,
-			String description, String providerType,
-			Map<String, Serializable> providerTypeMetadataMap,
+			String description, Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,
 			ServiceContext serviceContext)
@@ -89,7 +88,6 @@ public class PowwowMeetingLocalServiceImpl
 		powwowMeeting.setPowwowServerId(powwowServerId);
 		powwowMeeting.setName(name);
 		powwowMeeting.setDescription(description);
-		powwowMeeting.setProviderType(providerType);
 		powwowMeeting.setProviderTypeMetadata(
 			JSONFactoryUtil.serialize(providerTypeMetadataMap));
 		powwowMeeting.setLanguageId(languageId);
@@ -266,8 +264,7 @@ public class PowwowMeetingLocalServiceImpl
 	@Override
 	public PowwowMeeting updatePowwowMeeting(
 			long powwowMeetingId, long powwowServerId, String name,
-			String description, String providerType,
-			Map<String, Serializable> providerTypeMetadataMap,
+			String description, Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,
 			ServiceContext serviceContext)
@@ -286,7 +283,6 @@ public class PowwowMeetingLocalServiceImpl
 
 		powwowMeeting.setName(name);
 		powwowMeeting.setDescription(description);
-		powwowMeeting.setProviderType(providerType);
 		powwowMeeting.setProviderTypeMetadata(
 			JSONFactoryUtil.serialize(providerTypeMetadataMap));
 		powwowMeeting.setLanguageId(languageId);

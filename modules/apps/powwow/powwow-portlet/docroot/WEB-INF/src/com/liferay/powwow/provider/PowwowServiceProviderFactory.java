@@ -14,46 +14,18 @@
 
 package com.liferay.powwow.provider;
 
-import com.liferay.powwow.provider.bbb.BBBPowwowServiceProvider;
 import com.liferay.powwow.provider.zoom.ZoomPowwowServiceProvider;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Marco Calderon
  */
 public class PowwowServiceProviderFactory {
 
-	public static PowwowServiceProvider getPowwowServiceProvider(
-		String providerType) {
+	public static PowwowServiceProvider getPowwowServiceProvider() {
 
-		if (!_powwowServiceProviders.containsKey(providerType)) {
-			throw new IllegalArgumentException("Invalid provider type");
-		}
-
-		return _powwowServiceProviders.get(providerType);
+		return zoomPowwowServiceProvider;
 	}
 
-	private static final Map<String, PowwowServiceProvider>
-		_powwowServiceProviders;
-
-	static {
-		_powwowServiceProviders = new HashMap<>();
-
-		PowwowServiceProvider bbbPowwowServiceProvider =
-			new BBBPowwowServiceProvider();
-
-		_powwowServiceProviders.put(
-			bbbPowwowServiceProvider.getPowwowServiceProviderKey(),
-			bbbPowwowServiceProvider);
-
-		PowwowServiceProvider zoomPowwowServiceProvider =
-			new ZoomPowwowServiceProvider();
-
-		_powwowServiceProviders.put(
-			zoomPowwowServiceProvider.getPowwowServiceProviderKey(),
-			zoomPowwowServiceProvider);
-	}
-
+	private static final PowwowServiceProvider zoomPowwowServiceProvider =
+		new ZoomPowwowServiceProvider();
 }

@@ -37,8 +37,7 @@ public class PowwowMeetingServiceImpl extends PowwowMeetingServiceBaseImpl {
 	@Override
 	public PowwowMeeting addPowwowMeeting(
 			long groupId, String portletId, long powwowServerId, String name,
-			String description, String providerType,
-			Map<String, Serializable> providerTypeMetadataMap,
+			String description, Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,
 			ServiceContext serviceContext)
@@ -49,7 +48,7 @@ public class PowwowMeetingServiceImpl extends PowwowMeetingServiceBaseImpl {
 
 		return powwowMeetingLocalService.addPowwowMeeting(
 			getUserId(), groupId, powwowServerId, name, description,
-			providerType, providerTypeMetadataMap, languageId,
+			providerTypeMetadataMap, languageId,
 			calendarBookingId, status, powwowParticipants, serviceContext);
 	}
 
@@ -89,8 +88,7 @@ public class PowwowMeetingServiceImpl extends PowwowMeetingServiceBaseImpl {
 	@Override
 	public PowwowMeeting updatePowwowMeeting(
 			long powwowMeetingId, long powwowServerId, String name,
-			String description, String providerType,
-			Map<String, Serializable> providerTypeMetadataMap,
+			String description, Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,
 			ServiceContext serviceContext)
@@ -100,7 +98,7 @@ public class PowwowMeetingServiceImpl extends PowwowMeetingServiceBaseImpl {
 			getPermissionChecker(), powwowMeetingId, ActionKeys.UPDATE);
 
 		return powwowMeetingLocalService.updatePowwowMeeting(
-			powwowMeetingId, powwowServerId, name, description, providerType,
+			powwowMeetingId, powwowServerId, name, description,
 			providerTypeMetadataMap, languageId, calendarBookingId, status,
 			powwowParticipants, serviceContext);
 	}

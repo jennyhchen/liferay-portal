@@ -52,9 +52,6 @@ public class AdminPortlet extends MVCPortlet {
 			actionRequest, "powwowServerId");
 
 		String name = ParamUtil.getString(actionRequest, "name");
-		String providerType = ParamUtil.getString(
-			actionRequest, "providerType");
-		String url = ParamUtil.getString(actionRequest, "url");
 		String apiKey = ParamUtil.getString(actionRequest, "apiKey");
 		String secret = ParamUtil.getString(actionRequest, "secret");
 
@@ -63,12 +60,12 @@ public class AdminPortlet extends MVCPortlet {
 
 		if (powwowServerId <= 0) {
 			PowwowServerLocalServiceUtil.addPowwowServer(
-				themeDisplay.getUserId(), name, providerType, url, apiKey,
+				themeDisplay.getUserId(), name, apiKey,
 				secret, serviceContext);
 		}
 		else {
 			PowwowServerLocalServiceUtil.updatePowwowServer(
-				powwowServerId, name, providerType, url, apiKey, secret,
+				powwowServerId, name, apiKey, secret,
 				serviceContext);
 		}
 	}

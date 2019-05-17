@@ -69,7 +69,7 @@ public interface PowwowServiceProvider {
 	public String getOptionPassword(long powwowMeetingId)
 		throws PortalException;
 
-	public long getPowwowServerId(String providerType);
+	public long getPowwowServerId();
 
 	public String getPowwowServiceProviderKey();
 

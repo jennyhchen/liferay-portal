@@ -55,9 +55,6 @@ public class PortletPropsValues {
 			PortletProps.get(
 				PortletPropsKeys.POWWOW_PROVIDER_API_TOKEN_TIME_TO_LIVE));
 
-	public static final String[] POWWOW_PROVIDER_TYPES = PortletProps.getArray(
-		PortletPropsKeys.POWWOW_PROVIDER_TYPES);
-
 	public static final String ZOOM_API_CALLBACK_LOGIN = PortletProps.get(
 		PortletPropsKeys.ZOOM_API_CALLBACK_LOGIN);
 

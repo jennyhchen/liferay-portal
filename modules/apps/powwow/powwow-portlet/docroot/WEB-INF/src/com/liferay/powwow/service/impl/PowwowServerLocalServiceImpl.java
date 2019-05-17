@@ -34,8 +34,8 @@ public class PowwowServerLocalServiceImpl
 
 	@Override
 	public PowwowServer addPowwowServer(
-			long userId, String name, String providerType, String url,
-			String apiKey, String secret, ServiceContext serviceContext)
+			long userId, String name, String apiKey,
+			String secret, ServiceContext serviceContext)
 		throws PortalException {
 
 		User user = userLocalService.getUser(userId);
@@ -52,8 +52,6 @@ public class PowwowServerLocalServiceImpl
 		powwowServer.setCreateDate(serviceContext.getCreateDate(now));
 		powwowServer.setModifiedDate(serviceContext.getModifiedDate(now));
 		powwowServer.setName(name);
-		powwowServer.setProviderType(providerType);
-		powwowServer.setUrl(formatURL(url));
 		powwowServer.setApiKey(apiKey);
 		powwowServer.setSecret(secret);
 		powwowServer.setActive(
@@ -101,10 +99,9 @@ public class PowwowServerLocalServiceImpl
 	}
 
 	@Override
-	public List<PowwowServer> getPowwowServers(
-		String providerType, boolean active) {
+	public List<PowwowServer> getPowwowServers(boolean active) {
 
-		return powwowServerPersistence.findByPT_A(providerType, active);
+		return powwowServerPersistence.findByPT_A(active);
 	}
 
 	@Override
@@ -113,14 +110,14 @@ public class PowwowServerLocalServiceImpl
 	}
 
 	@Override
-	public int getPowwowServersCount(String providerType, boolean active) {
-		return powwowServerPersistence.countByPT_A(providerType, active);
+	public int getPowwowServersCount(boolean active) {
+		return powwowServerPersistence.countByPT_A(active);
 	}
 
 	@Override
 	public PowwowServer updatePowwowServer(
-			long powwowServerId, String name, String providerType, String url,
-			String apiKey, String secret, ServiceContext serviceContext)
+			long powwowServerId, String name, String apiKey,
+			String secret, ServiceContext serviceContext)
 		throws PortalException {
 
 		PowwowServer powwowServer = powwowServerPersistence.findByPrimaryKey(
@@ -128,8 +125,6 @@ public class PowwowServerLocalServiceImpl
 
 		powwowServer.setModifiedDate(serviceContext.getModifiedDate(null));
 		powwowServer.setName(name);
-		powwowServer.setProviderType(providerType);
-		powwowServer.setUrl(formatURL(url));
 		powwowServer.setApiKey(apiKey);
 		powwowServer.setSecret(secret);
 		powwowServer.setActive(
