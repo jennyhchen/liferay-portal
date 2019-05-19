@@ -53,12 +53,6 @@
 
 		<liferay-ui:search-container-column-text
 			href="<%= rowURL %>"
-			name="branding-name"
-			value="<%= LanguageUtil.get(request, PowwowServiceProviderUtil.getBrandingLabel()) %>"
-		/>
-
-		<liferay-ui:search-container-column-text
-			href="<%= rowURL %>"
 			name="active"
 			property="active"
 		/>
