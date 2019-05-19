@@ -101,7 +101,7 @@ public class PowwowServerLocalServiceImpl
 	@Override
 	public List<PowwowServer> getPowwowServers(boolean active) {
 
-		return powwowServerPersistence.findByPT_A(active);
+		return powwowServerPersistence.findByActive(active);
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class PowwowServerLocalServiceImpl
 
 	@Override
 	public int getPowwowServersCount(boolean active) {
-		return powwowServerPersistence.countByPT_A(active);
+		return powwowServerPersistence.countByActive(active);
 	}
 
 	@Override

@@ -132,7 +132,7 @@
 
 		<!-- Finder methods -->
 
-		<finder name="PT_A" return-type="Collection">
+		<finder name="Active" return-type="Collection">
 			<finder-column name="active" />
 		</finder>
 
