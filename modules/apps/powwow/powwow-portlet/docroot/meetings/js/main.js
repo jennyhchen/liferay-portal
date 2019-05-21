@@ -881,9 +881,9 @@
 	);
 
 	AUI.add(
-		'liferay-calendar-recurrence-util',
+		'liferay-meeting-calendar-recurrence-util',
 		function(A) {
-			Liferay.RecurrenceUtil = {
+			Liferay.MeetingRecurrenceUtil = {
 				FREQUENCY: {
 					DAILY: 'DAILY',
 					MONTHLY: 'MONTHLY',
@@ -1072,7 +1072,7 @@
 	);
 
 	AUI.add(
-		'liferay-calendar-recurrence-dialog',
+		'liferay-meeting-calendar-recurrence-dialog',
 		function(A) {
 			var DAYS_OF_WEEK = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 
@@ -1090,7 +1090,7 @@
 
 			var WEEK_LENGTH = A.DataType.DateMath.WEEK_LENGTH;
 
-			var RecurrenceDialogController = A.Component.create(
+			var MeetingRecurrenceDialogController = A.Component.create(
 				{
 
 					ATTRS: {
@@ -1433,7 +1433,7 @@
 
 							var recurrence = instance.get('recurrence');
 
-							return Liferay.RecurrenceUtil.getSummary(recurrence);
+							return Liferay.MeetingRecurrenceUtil.getSummary(recurrence);
 						},
 
 						_isLastDayOfWeekInMonth: function() {
@@ -1557,11 +1557,11 @@
 				}
 			);
 
-			Liferay.RecurrenceDialogController = RecurrenceDialogController;
+			Liferay.MeetingRecurrenceDialogController = MeetingRecurrenceDialogController;
 		},
 		'',
 		{
-			requires: ['aui-base', 'aui-datatype', 'liferay-calendar-recurrence-util']
+			requires: ['aui-base', 'aui-datatype', 'liferay-meeting-calendar-recurrence-util']
 		}
 	);
 }());

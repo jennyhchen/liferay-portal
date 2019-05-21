@@ -14,24 +14,7 @@
  */
 --%>
 
-<%@page import="java.util.Collections"%>
-<%@page import="java.util.Arrays"%>
-<%@page import="com.liferay.portal.kernel.util.ListUtil"%>
-<%@page import="com.liferay.portal.kernel.language.LanguageUtil"%>
-<%@page import="com.liferay.portal.kernel.util.StringUtil"%>
-<%@page import="java.util.Iterator"%>
-<%@page import="com.liferay.portal.kernel.util.CalendarFactoryUtil"%>
-<%@page import="com.liferay.portal.kernel.bean.BeanPropertiesUtil"%>
-<%@page import="java.util.TimeZone"%>
-<%@page import="com.liferay.calendar.recurrence.Recurrence"%>
-<%@page import="com.liferay.calendar.util.JCalendarUtil"%>
-<%@page import="java.util.ArrayList"%>
-<%@page import="java.util.List"%>
-<%@page import="com.liferay.calendar.recurrence.Frequency"%>
-<%@page import="com.liferay.calendar.recurrence.Weekday"%>
-<%@page import="com.liferay.calendar.recurrence.PositionalWeekday"%>
 <%
-
 int weekStartsOn = GetterUtil.getInteger(portletPreferences.getValue("weekStartsOn", null), 0);
 Recurrence recurrence = null;
 TimeZone userTimeZone = TimeZone.getTimeZone(user.getTimeZoneId());
@@ -259,12 +242,12 @@ if (recurrence != null) {
 	</table>
 </div>
 
-<aui:script use="liferay-util-window,liferay-calendar-recurrence-dialog">
-	var recurrenceContainerNode = A.one('#<portlet:namespace />recurrenceContainer');
-	var repeatCheckboxNode = A.one('#<portlet:namespace />repeat');
-	var summaryNode = A.one('#<portlet:namespace />summary');
+<aui:script use="liferay-util-window,liferay-meeting-calendar-recurrence-dialog">
+	var meetingRecurrenceContainerNode = A.one('#<portlet:namespace />recurrenceContainer');
+	var meetingRepeatCheckboxNode = A.one('#<portlet:namespace />repeat');
+	var meetingSummaryNode = A.one('#<portlet:namespace />summary');
 
-	var recurrenceDialogController = new Liferay.RecurrenceDialogController(
+	var meetingRecurrenceDialogController = new Liferay.MeetingRecurrenceDialogController(
 		{
 			container: '#<portlet:namespace />recurrenceContainer',
 			dayOfWeekInput: '#<portlet:namespace />weekday',
@@ -288,31 +271,31 @@ if (recurrence != null) {
 		}
 	);
 
-	var getRecurrenceDialogTitle = function() {
-		var summary = recurrenceDialogController.get('summary');
+	var getMeetingRecurrenceDialogTitle = function() {
+		var summary = meetingRecurrenceDialogController.get('summary');
 
 		return '<liferay-ui:message key="repeat" /> ' + (summary.charAt(0).toLowerCase() + summary.slice(1));
 	};
 
-	window.<portlet:namespace />recurrenceDialog;
+	window.<portlet:namespace />meetingRecurrenceDialog;
 
-	window.<portlet:namespace />openRecurrenceDialog = function(visible) {
-		recurrenceContainerNode.toggle(visible);
+	window.<portlet:namespace />openMeetingRecurrenceDialog = function(visible) {
+		meetingRecurrenceContainerNode.toggle(visible);
 
-		window.<portlet:namespace />recurrenceDialog = Liferay.Util.Window.getWindow(
+		window.<portlet:namespace />meetingRecurrenceDialog = Liferay.Util.Window.getWindow(
 			{
 				dialog: {
 					after:{
 						visibleChange: function(event) {
-							recurrenceContainerNode.toggle(event.newVal);
+							meetingRecurrenceContainerNode.toggle(event.newVal);
 
 							window.<portlet:namespace />updateSummaries();
 						}
 					},
-					bodyContent: recurrenceContainerNode,
+					bodyContent: meetingRecurrenceContainerNode,
 					centered: true,
 					height: 600,
-					id: '<portlet:namespace />recurrenceDialog',
+					id: '<portlet:namespace />meetingRecurrenceDialog',
 					modal: true,
 					render: '#<portlet:namespace />fm',
 					toolbars: {
@@ -321,7 +304,7 @@ if (recurrence != null) {
 								label: '<liferay-ui:message key="done" />',
 								on: {
 									click: function() {
-										window.<portlet:namespace />recurrenceDialog.hide();
+										window.<portlet:namespace />meetingRecurrenceDialog.hide();
 									}
 								}
 							}
@@ -330,37 +313,37 @@ if (recurrence != null) {
 					visible: visible,
 					width: 600
 				},
-				title: getRecurrenceDialogTitle()
+				title: getMeetingRecurrenceDialogTitle()
 			}
 		);
 	};
 
-	repeatCheckboxNode.on(
+	meetingRepeatCheckboxNode.on(
 		'change',
 		function(event) {
 			var checked = event.currentTarget.get('checked');
 
 			if (!checked) {
-				summaryNode.empty();
+				meetingSummaryNode.empty();
 			}
 			else {
 				window.<portlet:namespace />updateSummaries();
 			}
 
-			<portlet:namespace />openRecurrenceDialog(checked);
+			<portlet:namespace />openMeetingRecurrenceDialog(checked);
 		}
 	);
 
-	summaryNode.on(
+	meetingSummaryNode.on(
 		'click',
 		function(event) {
-			<portlet:namespace />openRecurrenceDialog(true);
+			<portlet:namespace />openMeetingRecurrenceDialog(true);
 
 			event.halt();
 		}
 	);
 
-	recurrenceDialogController.on(
+	meetingRecurrenceDialogController.on(
 		'recurrenceChange',
 		function(event) {
 			window.<portlet:namespace />updateSummaries();
@@ -371,18 +354,18 @@ if (recurrence != null) {
 		var previewNode = A.one(element);
 
 		if (previewNode) {
-			previewNode.html(recurrenceDialogController.get('summary'));
+			previewNode.html(meetingRecurrenceDialogController.get('summary'));
 		}
 	};
 
 	window.<portlet:namespace />updateSummaries = function() {
-		window.<portlet:namespace />updateSummary(summaryNode);
+		window.<portlet:namespace />updateSummary(meetingSummaryNode);
 		window.<portlet:namespace />updateSummary('#<portlet:namespace />summaryPreview');
 
-		if (window.<portlet:namespace />recurrenceDialog) {
-			window.<portlet:namespace />recurrenceDialog.titleNode.html(getRecurrenceDialogTitle());
+		if (window.<portlet:namespace />meetingRecurrenceDialog) {
+			window.<portlet:namespace />meetingRecurrenceDialog.titleNode.html(getMeetingRecurrenceDialogTitle());
 
-			window.<portlet:namespace />recurrenceDialog.fillHeight(window.<portlet:namespace />recurrenceDialog.bodyNode);
+			window.<portlet:namespace />meetingRecurrenceDialog.fillHeight(window.<portlet:namespace />meetingRecurrenceDialog.bodyNode);
 		}
 	}
 
