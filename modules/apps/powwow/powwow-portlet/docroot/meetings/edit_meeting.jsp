@@ -35,6 +35,16 @@ if (powwowMeeting != null) {
 	powwowParticipants = PowwowParticipantLocalServiceUtil.getPowwowParticipants(powwowMeetingId);
 	status = powwowMeeting.getStatus();
 }
+
+CalendarBooking calendarBooking = null;
+boolean recurring = false;
+if (calendarBookingId > 0) {
+	calendarBooking = CalendarBookingServiceUtil.fetchCalendarBooking(calendarBookingId);
+
+	if (calendarBooking != null && calendarBooking.isRecurring()) {
+		recurring = true;
+	}
+}
 %>
 
 <liferay-ui:header
@@ -58,7 +68,6 @@ if (powwowMeeting != null) {
 	<div class="control-group meeting-event-date" id="<portlet:namespace />meetingEventDate">
 
 		<%
-		CalendarBooking calendarBooking = CalendarBookingServiceUtil.fetchCalendarBooking(calendarBookingId);
 
 		Calendar startCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 		Calendar endCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
@@ -150,6 +159,12 @@ if (powwowMeeting != null) {
 			/>
 		</span>
 	</div>
+
+	<aui:field-wrapper cssClass="calendar-portlet-recurrence-container" inlineField="<%= true %>" label="">
+		<aui:input checked="<%= recurring %>" name="repeat" type="checkbox" />
+
+		<a class="calendar-portlet-recurrence-summary" href="javascript:;" id="<portlet:namespace />summary"></a>
+	</aui:field-wrapper>
 
 	<aui:input cssClass="meeting-description" name="description" />
 
@@ -243,6 +258,8 @@ if (powwowMeeting != null) {
 		<div class="participant-list" id="<portlet:namespace />powwowParticipantList">
 		</div>
 	</aui:fieldset>
+
+	<%@ include file="/meetings/calendar_booking_recurrence_container.jspf" %>
 
 	<aui:button-row>
 		<aui:button name="submit" type="submit" />

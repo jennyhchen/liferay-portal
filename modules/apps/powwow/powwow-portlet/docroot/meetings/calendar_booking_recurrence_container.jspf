@@ -14,12 +14,38 @@
  */
 --%>
 
+<%@page import="java.util.Collections"%>
+<%@page import="java.util.Arrays"%>
+<%@page import="com.liferay.portal.kernel.util.ListUtil"%>
+<%@page import="com.liferay.portal.kernel.language.LanguageUtil"%>
+<%@page import="com.liferay.portal.kernel.util.StringUtil"%>
+<%@page import="java.util.Iterator"%>
+<%@page import="com.liferay.portal.kernel.util.CalendarFactoryUtil"%>
+<%@page import="com.liferay.portal.kernel.bean.BeanPropertiesUtil"%>
+<%@page import="java.util.TimeZone"%>
+<%@page import="com.liferay.calendar.recurrence.Recurrence"%>
+<%@page import="com.liferay.calendar.util.JCalendarUtil"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="java.util.List"%>
+<%@page import="com.liferay.calendar.recurrence.Frequency"%>
+<%@page import="com.liferay.calendar.recurrence.Weekday"%>
+<%@page import="com.liferay.calendar.recurrence.PositionalWeekday"%>
 <%
+
+int weekStartsOn = GetterUtil.getInteger(portletPreferences.getValue("weekStartsOn", null), 0);
+Recurrence recurrence = null;
+TimeZone userTimeZone = TimeZone.getTimeZone(user.getTimeZoneId());
+TimeZone calendarBookingTimeZone = userTimeZone;
+java.util.Calendar nowJCalendar = CalendarFactoryUtil.getCalendar(calendarBookingTimeZone);
+
+long startTime = BeanPropertiesUtil.getLong(calendarBooking, "startTime", nowJCalendar.getTimeInMillis());
+java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(startTime, calendarBookingTimeZone);
+
 int count = 0;
 String exceptionDatesString = StringPool.BLANK;
 Frequency frequency = null;
 int interval = 0;
-PositionalWeekday positionalWeekday = new PositionalWeekday(Weekday.getWeekday(startTimeJCalendar), JCalendarUtil.getWeekdayPosition(startTimeJCalendar));
+PositionalWeekday positionalWeekday = new PositionalWeekday(startTimeJCalendar);
 Weekday startTimeWeekday = Weekday.getWeekday(startTimeJCalendar);
 java.util.Calendar untilJCalendar = startTimeJCalendar;
 List<Weekday> weekdays = new ArrayList<Weekday>();
@@ -86,7 +112,7 @@ if (recurrence != null) {
 						for (Frequency curFrequency : Frequency.values()) {
 						%>
 
-							<aui:option selected="<%= (frequency == curFrequency) %>" value="<%= curFrequency.getValue() %>"><%= LanguageUtil.get(pageContext, StringUtil.toLowerCase(curFrequency.getValue())) %></aui:option>
+							<aui:option selected="<%= (frequency == curFrequency) %>" value="<%= curFrequency.getValue() %>"><%= LanguageUtil.get(request.getLocale(), StringUtil.toLowerCase(curFrequency.getValue())) %></aui:option>
 
 						<%
 						}
@@ -235,7 +261,7 @@ if (recurrence != null) {
 
 <aui:script use="liferay-util-window,liferay-calendar-recurrence-dialog">
 	var recurrenceContainerNode = A.one('#<portlet:namespace />recurrenceContainer');
-	var repeatCheckboxNode = A.one('#<portlet:namespace />repeatCheckbox');
+	var repeatCheckboxNode = A.one('#<portlet:namespace />repeat');
 	var summaryNode = A.one('#<portlet:namespace />summary');
 
 	var recurrenceDialogController = new Liferay.RecurrenceDialogController(
@@ -253,10 +279,10 @@ if (recurrence != null) {
 			noLimitRadioButton: '[name=<portlet:namespace />ends][value=never]',
 			positionalDayOfWeekOptions: '#<portlet:namespace />viewPositionalWeekday',
 			positionInput: '#<portlet:namespace />position',
-			repeatCheckbox: '#<portlet:namespace />repeatCheckbox',
+			repeatCheckbox: '#<portlet:namespace />repeat',
 			repeatOnDayOfMonthRadioButton: '[name=<portlet:namespace />repeatOnWeekday][value=false]',
 			repeatOnDayOfWeekRadioButton: '[name=<portlet:namespace />repeatOnWeekday][value=true]',
-			startDateDatePicker: Liferay.component('<portlet:namespace />startTimeDatePicker'),
+			startDateDatePicker: Liferay.component('<portlet:namespace />startDateDatePicker'),
 			startTimeDayOfWeekInput: '#<portlet:namespace />weekdaysCheckbox',
 			weeklyRecurrenceOptions: '#<portlet:namespace />view<%= Frequency.WEEKLY %>'
 		}
