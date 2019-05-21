@@ -941,7 +941,7 @@
 					var weekDays = null;
 
 					if (recurrence.interval == 1) {
-						template.push(recurrence.frequency);
+						template.push(A.Lang.String.capitalize(recurrence.frequency));
 					}
 					else {
 						template.push(Liferay.Language.get('every'), ' {interval} {intervalLabel}');
@@ -1005,7 +1005,7 @@
 						}
 					);
 
-					return A.Lang.String.capitalize(summary);
+					return summary;
 				},
 
 				openConfirmationPanel: function(actionName, onlyThisInstanceFn, allFollowingFn, allEventsInFn, cancelFn) {
