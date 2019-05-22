@@ -15,6 +15,7 @@
 		<preferences-unique-per-layout>false</preferences-unique-per-layout>
 		<header-portlet-css>/meetings/css/main.css</header-portlet-css>
 		<footer-portlet-javascript>/meetings/js/main.js</footer-portlet-javascript>
+		<footer-portlet-javascript>/meetings/js/recurrence.js</footer-portlet-javascript>
 		<css-class-wrapper>powwow-portlet</css-class-wrapper>
 		<add-default-resource>true</add-default-resource>
 	</portlet>
