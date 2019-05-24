@@ -14,13 +14,18 @@
 
 package com.liferay.powwow.provider;
 
+import com.liferay.calendar.util.JCalendarUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowServer;
 import java.io.Serializable;
-
+import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Shinn Lok
@@ -206,6 +211,15 @@ public class PowwowServiceProviderUtil {
 		return powwowServiceProvider.isSupportsPresettingParticipantName();
 	}
 
+	public static final String toZoomDateTimeUTC(Calendar calendar) {
+
+		TimeZone utcTimeZone = TimeZone.getTimeZone(StringPool.UTC);
+
+		DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(_ZOOM_UTC_DATETIME_PATTERN, utcTimeZone);
+
+		return dateFormat.format(JCalendarUtil.getJCalendar(calendar, utcTimeZone).getTime());
+	}
+
 	public static Map<String, Serializable> updatePowwowMeeting(
 			long powwowMeetingId, String name, long userId,
 			Map<String, String> options)
@@ -221,4 +235,6 @@ public class PowwowServiceProviderUtil {
 
 		return PowwowServiceProviderFactory.getPowwowServiceProvider();
 	}
+
+	private static String _ZOOM_UTC_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 }

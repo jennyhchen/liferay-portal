@@ -19,6 +19,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
@@ -196,7 +197,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		String password = options.get(PowwowMeetingConstants.OPTION_PASSWORD);
 		String optionAutoStartVideo = options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO);
 
-		JSONObject meetingJSONObject = _createMeetingJSON(name, password, optionAutoStartVideo);
+		JSONObject meetingJSONObject = _createMeetingJSON(name, password, optionAutoStartVideo, options);
 
 		JSONObject responseJSONObject = execute(powwowServer, resourceParams, Http.Method.POST, meetingJSONObject);
 
@@ -648,7 +649,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		String password = options.get(PowwowMeetingConstants.OPTION_PASSWORD);
 		String optionAutoStartVideo = options.get(PowwowMeetingConstants.OPTION_AUTO_START_VIDEO);
 
-		JSONObject meetingJSONObject = _createMeetingJSON(name, password, optionAutoStartVideo);
+		JSONObject meetingJSONObject = _createMeetingJSON(name, password, optionAutoStartVideo, options);
 
 		execute(powwowServer, resourceParams, Http.Method.PATCH, meetingJSONObject);
 
@@ -665,12 +666,12 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		return providerTypeMetadataMap;
 	}
 
-	private JSONObject _createMeetingJSON(String name, String password, String optionAutoStartVideo) {
+	private JSONObject _createMeetingJSON(
+		String name, String password, String optionAutoStartVideo, Map<String, String> options) {
 
 		JSONObject meetingJSONObject = JSONFactoryUtil.createJSONObject();
 
 		meetingJSONObject.put("topic", name);
-		meetingJSONObject.put("type", _MEETING_TYPE_RECURRING);
 
 		if (Validator.isNotNull(password)) {
 			meetingJSONObject.put("password", password);
@@ -682,6 +683,30 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		meetingSettingsJSONObject.put("participants_video", optionAutoStartVideo);
 
 		meetingJSONObject.put("settings", meetingSettingsJSONObject);
+
+		String meetingType = _MEETING_TYPE_RECURRING_NO_TIME;
+
+		String recurrenceData = options.get(PowwowMeetingConstants.OPTION_RECURRENCE);
+
+		if (!Validator.isBlank(recurrenceData)) {
+			meetingType = _MEETING_TYPE_RECURRING;
+
+			try {
+				meetingJSONObject.put(PowwowMeetingConstants.OPTION_RECURRENCE,
+					JSONFactoryUtil.createJSONObject(recurrenceData));
+			}
+			catch (JSONException e) {
+				_log.error("Error while creating JSONObject of recurrence", e);
+			}
+
+			meetingJSONObject.put(PowwowMeetingConstants.OPTION_START_TIME,
+				options.get(PowwowMeetingConstants.OPTION_START_TIME));
+			meetingJSONObject.put(PowwowMeetingConstants.OPTION_DURATION,
+				options.get(PowwowMeetingConstants.OPTION_DURATION));
+		}
+
+		meetingJSONObject.put("type", meetingType);
+
 		return meetingJSONObject;
 	}
 
@@ -709,7 +734,9 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 
 	private static final String _MEETING_STATUS_IN_PROGRESS = "started";
 
-	private static final String _MEETING_TYPE_RECURRING = "3";
+	private static final String _MEETING_TYPE_RECURRING = "8";
+
+	private static final String _MEETING_TYPE_RECURRING_NO_TIME = "3";
 
 	private static final int _USER_TYPE_PRO = 2;
 

@@ -49,6 +49,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.powwow.model.PowwowMeeting;
@@ -57,6 +58,7 @@ import com.liferay.powwow.model.PowwowParticipant;
 import com.liferay.powwow.model.PowwowParticipantConstants;
 import com.liferay.powwow.provider.PowwowServiceProvider;
 import com.liferay.powwow.provider.PowwowServiceProviderUtil;
+import com.liferay.powwow.provider.zoom.ZoomRecurrenceSerializer;
 import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
 import com.liferay.powwow.service.PowwowMeetingServiceUtil;
 import com.liferay.powwow.service.PowwowParticipantLocalServiceUtil;
@@ -68,6 +70,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -324,6 +327,8 @@ public class MeetingsPortlet extends MVCPortlet {
 		if (requirePassword && !password.equals(StringPool.BLANK)) {
 			options.put(PowwowMeetingConstants.OPTION_PASSWORD, password);
 		}
+
+		_addRecurrenceOptions(calendarBooking, options);
 
 		Map<String, Serializable> providerTypeMetadataMap = new HashMap<>();
 
@@ -644,12 +649,12 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		recurrence.setTimeZone(timeZone);
 
+		Calendar startTimeJCalendar = getJCalendar(
+			actionRequest, "startTime", timeZone);
+
 		if (ends.equals("on")) {
 			Calendar untilJCalendar = getJCalendar(
 				actionRequest, "untilDate", timeZone);
-
-			Calendar startTimeJCalendar = getJCalendar(
-				actionRequest, "startTime", timeZone);
 
 			untilJCalendar = JCalendarUtil.mergeJCalendar(
 				untilJCalendar, startTimeJCalendar, timeZone);
@@ -663,11 +668,14 @@ public class MeetingsPortlet extends MVCPortlet {
 			String[] weekdayValues = ParamUtil.getParameterValues(
 				actionRequest, "weekdays");
 
+			String weekdaysCheckbox =
+				ParamUtil.getString(actionRequest, "weekdaysCheckbox");
+			weekdayValues = ArrayUtil.append(weekdayValues, new String[] {
+				weekdaysCheckbox
+			});
+
 			for (String weekdayValue : weekdayValues) {
 				Weekday weekday = Weekday.parse(weekdayValue);
-
-				Calendar startTimeJCalendar =
-					getJCalendar(actionRequest, "startTime", timeZone);
 
 				Calendar weekdayJCalendar =
 					JCalendarUtil.getJCalendar(
@@ -837,4 +845,37 @@ public class MeetingsPortlet extends MVCPortlet {
 		return calendarBooking;
 	}
 
+	private void _addRecurrenceOptions(
+		CalendarBooking calendarBooking, Map<String, String> options) {
+
+		Recurrence recurrence = calendarBooking.getRecurrenceObj();
+		String recurrenceJson = ZoomRecurrenceSerializer.toJSONString(recurrence);
+
+		if (!Validator.isBlank(recurrenceJson)) {
+			options.put(PowwowMeetingConstants.OPTION_RECURRENCE,
+				recurrenceJson);
+
+			Calendar startTimeJCalendar =
+				JCalendarUtil.getJCalendar(calendarBooking.getStartTime(),
+					calendarBooking.getTimeZone());
+
+			String zoomStartTimeUTC =
+				PowwowServiceProviderUtil
+					.toZoomDateTimeUTC(startTimeJCalendar);
+			options.put(PowwowMeetingConstants.OPTION_START_TIME,
+				zoomStartTimeUTC);
+
+			long minutes = _getDurationInMinutes(calendarBooking);
+
+			options.put(PowwowMeetingConstants.OPTION_DURATION,
+				String.valueOf(minutes));
+		}
+	}
+
+	private long _getDurationInMinutes(CalendarBooking calendarBooking) {
+
+		Duration duration = Duration.ofMillis(
+			Math.abs(calendarBooking.getEndTime() - calendarBooking.getStartTime()));
+		return duration.abs().toMinutes();
+	}
 }
