@@ -32,6 +32,7 @@ page import="com.liferay.calendar.recurrence.Weekday" %><%@
 page import="com.liferay.calendar.recurrence.PositionalWeekday" %><%@
 page import="com.liferay.calendar.service.CalendarBookingServiceUtil" %><%@
 page import="com.liferay.calendar.util.JCalendarUtil" %><%@
+page import="com.liferay.calendar.util.RecurrenceUtil" %><%@
 page import="com.liferay.petra.content.ContentUtil" %><%@
 page import="com.liferay.portal.kernel.bean.BeanPropertiesUtil" %><%@
 page import="com.liferay.portal.kernel.dao.search.ResultRow" %><%@

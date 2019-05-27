@@ -699,4 +699,4 @@
 			requires: ['aui-base', 'aui-datatype', 'liferay-meeting-calendar-recurrence-util']
 		}
 	);
-}());	
+}());
