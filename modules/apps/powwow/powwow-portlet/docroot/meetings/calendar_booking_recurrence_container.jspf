@@ -36,6 +36,10 @@ List<Weekday> weekdays = new ArrayList<Weekday>();
 boolean afterChecked = false;
 boolean onChecked = false;
 
+if (calendarBooking != null) {
+	recurrence = RecurrenceUtil.inTimeZone(calendarBooking.getRecurrenceObj(), startTimeJCalendar, calendarBookingTimeZone);
+}
+
 if (recurrence != null) {
 	count = recurrence.getCount();
 	frequency = recurrence.getFrequency();
@@ -254,7 +258,7 @@ if (recurrence != null) {
 			dayOfWeekInput: '#<portlet:namespace />weekday',
 			frequencySelect: '#<portlet:namespace />frequency',
 			intervalSelect: '#<portlet:namespace />interval',
-			lastPositionCheckbox: '#<portlet:namespace />lastPositionCheckbox',
+			lastPositionCheckbox: '#<portlet:namespace />lastPosition',
 			limitCountInput: '#<portlet:namespace />count',
 			limitCountRadioButton: '[name=<portlet:namespace />ends][value=after]',
 			limitDateDatePicker: Liferay.component('<%= renderResponse.getNamespace() + HtmlUtil.getAUICompatibleId("untilDateDatePicker") %>'),
