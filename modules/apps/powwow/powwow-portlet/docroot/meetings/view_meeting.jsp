@@ -18,10 +18,13 @@
 
 <%
 String backURL = ParamUtil.getString(request, "backURL");
-
 long powwowMeetingId = ParamUtil.getLong(request, "powwowMeetingId");
 
 PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
+
+portletURL.setParameter("jspPage", "/meetings/view_meeting.jsp");
+portletURL.setParameter("powwowMeetingId", String.valueOf(powwowMeetingId));
+portletURL.setParameter("backURL", backURL);
 %>
 
 <liferay-util:html-bottom>
@@ -122,13 +125,15 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 			<liferay-ui:message key="participants" />
 		</dt>
 		<dd>
-			<liferay-ui:search-container
+			<liferay-ui:search-container 
 				total="<%= PowwowParticipantLocalServiceUtil.getPowwowParticipantsCount(powwowMeetingId) %>"
+				iteratorURL="<%= portletURL %>"
 			>
 				<liferay-ui:search-container-results>
 
 					<%
-					searchContainer.setResults(PowwowParticipantLocalServiceUtil.getPowwowParticipants(powwowMeetingId));
+						List<PowwowParticipant> powwowParticipants = PowwowParticipantLocalServiceUtil.getPowwowParticipants(powwowMeetingId);
+						searchContainer.setResults(ListUtil.subList(powwowParticipants, searchContainer.getStart(), searchContainer.getEnd()));
 					%>
 
 				</liferay-ui:search-container-results>

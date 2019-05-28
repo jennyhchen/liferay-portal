@@ -26,6 +26,8 @@ if (tabs1.equals("completed")) {
 int delta = ParamUtil.getInteger(request, "delta", 10);
 String orderByCol = ParamUtil.getString(request, "orderByCol", "date");
 String orderByType = ParamUtil.getString(request, "orderByType", "desc");
+
+portletURL.setParameter("tabs1", tabs1);
 %>
 
 <div class="view-meetings">
@@ -106,6 +108,7 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 				<portlet:param name="mvcPath" value="/meetings/view_meeting.jsp" />
 				<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
 				<portlet:param name="powwowMeetingId" value="<%= String.valueOf(powwowMeeting.getPowwowMeetingId()) %>" />
+				<portlet:param name="backURL" value="<%= currentURL %>"></portlet:param>
 			</portlet:renderURL>
 
 			<%
