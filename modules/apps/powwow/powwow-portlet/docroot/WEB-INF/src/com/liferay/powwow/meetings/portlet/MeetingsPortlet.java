@@ -49,8 +49,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.TimeZoneUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.powwow.model.PowwowMeeting;
@@ -73,7 +71,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -84,7 +81,6 @@ import java.util.TimeZone;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
-import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
@@ -587,7 +583,7 @@ public class MeetingsPortlet extends MVCPortlet {
 		return sb.toString();
 	}
 
-	protected java.util.Calendar getJCalendar(PortletRequest portletRequest, String name) {
+	protected Calendar getJCalendar(PortletRequest portletRequest, String name, TimeZone timeZone) {
 
 		int month = ParamUtil.getInteger(portletRequest, name + "Month");
 		int day = ParamUtil.getInteger(portletRequest, name + "Day");
@@ -597,11 +593,11 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		int amPm = ParamUtil.getInteger(portletRequest, name + "AmPm");
 
-		if (amPm == java.util.Calendar.PM) {
+		if (amPm == Calendar.PM) {
 			hour += 12;
 		}
 
-		return JCalendarUtil.getJCalendar(year, month, day, hour, minute, 0, 0, getTimeZone(portletRequest));
+		return JCalendarUtil.getJCalendar(year, month, day, hour, minute, 0, 0, timeZone);
 	}
 
 	protected Map<Locale, String> getLocalizationMap(String key) {
@@ -649,11 +645,11 @@ public class MeetingsPortlet extends MVCPortlet {
 		recurrence.setTimeZone(timeZone);
 
 		if (ends.equals("on")) {
-			java.util.Calendar untilJCalendar = getJCalendar(
-				actionRequest, "untilDate");
+			Calendar untilJCalendar = getJCalendar(
+				actionRequest, "untilDate", timeZone);
 
-			java.util.Calendar startTimeJCalendar = getJCalendar(
-				actionRequest, "startTime");
+			Calendar startTimeJCalendar = getJCalendar(
+				actionRequest, "startTime", timeZone);
 
 			untilJCalendar = JCalendarUtil.mergeJCalendar(
 				untilJCalendar, startTimeJCalendar, timeZone);
@@ -670,15 +666,15 @@ public class MeetingsPortlet extends MVCPortlet {
 			for (String weekdayValue : weekdayValues) {
 				Weekday weekday = Weekday.parse(weekdayValue);
 
-				java.util.Calendar startTimeJCalendar = getJCalendar(
-					actionRequest, "startTime");
+				Calendar startTimeJCalendar =
+					getJCalendar(actionRequest, "startTime", timeZone);
 
-				java.util.Calendar weekdayJCalendar =
+				Calendar weekdayJCalendar =
 					JCalendarUtil.getJCalendar(
 						startTimeJCalendar.getTimeInMillis(), timeZone);
 
 				weekdayJCalendar.set(
-					java.util.Calendar.DAY_OF_WEEK,
+					Calendar.DAY_OF_WEEK,
 					weekday.getCalendarWeekday());
 
 				weekday = Weekday.getWeekday(weekdayJCalendar);
@@ -687,7 +683,7 @@ public class MeetingsPortlet extends MVCPortlet {
 			}
 		}
 		else if ((frequency == Frequency.MONTHLY) ||
-				 (frequency == Frequency.YEARLY)) {
+			(frequency == Frequency.YEARLY)) {
 
 			boolean repeatOnWeekday = ParamUtil.getBoolean(
 				actionRequest, "repeatOnWeekday");
@@ -724,25 +720,9 @@ public class MeetingsPortlet extends MVCPortlet {
 	}
 
 	protected long getTime(
-			PortletRequest portletRequest, String name, TimeZone timeZone)
-		throws Exception {
+		PortletRequest portletRequest, String name, TimeZone timeZone) {
 
-		int month = ParamUtil.getInteger(portletRequest, name + "Month");
-		int day = ParamUtil.getInteger(portletRequest, name + "Day");
-		int year = ParamUtil.getInteger(portletRequest, name + "Year");
-		int hour = ParamUtil.getInteger(portletRequest, name + "Hour");
-		int minute = ParamUtil.getInteger(portletRequest, name + "Minute");
-
-		int amPm = ParamUtil.getInteger(portletRequest, name + "AmPm");
-
-		if (amPm == Calendar.PM) {
-			hour += 12;
-		}
-
-		Date date = PortalUtil.getDate(
-			month, day, year, hour, minute, timeZone, PortalException.class);
-
-		return date.getTime();
+		return getJCalendar(portletRequest, name, timeZone).getTimeInMillis();
 	}
 
 	protected TimeZone getTimeZone(PortletRequest portletRequest) {
@@ -820,11 +800,12 @@ public class MeetingsPortlet extends MVCPortlet {
 				actionRequest, powwowMeeting, serviceContext));
 
 		long startTime = getTime(
-			actionRequest, "startTime", themeDisplay.getTimeZone());
+			actionRequest, "startTime", getTimeZone(actionRequest));
 		long endTime = getTime(
-			actionRequest, "endTime", themeDisplay.getTimeZone());
+			actionRequest, "endTime", getTimeZone(actionRequest));
 
 		Recurrence recurrence = getRecurrence(actionRequest);
+		String recurrenceSerializedData = RecurrenceSerializer.serialize(recurrence);
 
 		serviceContext.setAttribute("sendNotification", Boolean.FALSE);
 
@@ -841,7 +822,7 @@ public class MeetingsPortlet extends MVCPortlet {
 					calendarBooking.getCalendarBookingId(),
 					calendarBooking.getCalendarId(), childCalendarIds, titleMap,
 					descriptionMap, StringPool.BLANK, startTime, endTime, false,
-					RecurrenceSerializer.serialize(recurrence), 0, "email", 0, "email", serviceContext);
+					recurrenceSerializedData, 0, "email", 0, "email", serviceContext);
 		}
 		else {
 			calendarBooking =
@@ -849,7 +830,7 @@ public class MeetingsPortlet extends MVCPortlet {
 					themeDisplay.getUserId(), calendarId, childCalendarIds,
 					CalendarBookingConstants.PARENT_CALENDAR_BOOKING_ID_DEFAULT,
 					titleMap, descriptionMap, StringPool.BLANK, startTime,
-					endTime, false, RecurrenceSerializer.serialize(recurrence), 0, "email", 0, "email",
+					endTime, false, recurrenceSerializedData, 0, "email", 0, "email",
 					serviceContext);
 
 			calendarBooking.setStatus(WorkflowConstants.STATUS_INACTIVE);
