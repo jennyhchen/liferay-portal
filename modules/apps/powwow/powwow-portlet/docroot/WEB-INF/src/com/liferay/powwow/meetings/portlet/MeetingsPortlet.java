@@ -832,11 +832,6 @@ public class MeetingsPortlet extends MVCPortlet {
 					titleMap, descriptionMap, StringPool.BLANK, startTime,
 					endTime, false, recurrenceSerializedData, 0, "email", 0, "email",
 					serviceContext);
-
-			calendarBooking.setStatus(WorkflowConstants.STATUS_INACTIVE);
-
-			CalendarBookingLocalServiceUtil.updateCalendarBooking(
-				calendarBooking);
 		}
 
 		return calendarBooking;
