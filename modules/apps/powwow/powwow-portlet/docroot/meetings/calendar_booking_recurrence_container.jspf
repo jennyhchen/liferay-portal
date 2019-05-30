@@ -33,7 +33,7 @@ Weekday startTimeWeekday = Weekday.getWeekday(startTimeJCalendar);
 java.util.Calendar untilJCalendar = startTimeJCalendar;
 List<Weekday> weekdays = new ArrayList<Weekday>();
 
-boolean afterChecked = false;
+boolean afterChecked = true;
 boolean onChecked = false;
 
 if (calendarBooking != null) {
@@ -86,6 +86,7 @@ if (recurrence != null) {
 <div class="calendar-portlet-recurrence-container hide" id="<portlet:namespace />recurrenceContainer">
 	<table>
 		<aui:input name="exceptionDates" type="hidden" value="<%= exceptionDatesString %>" />
+		<aui:input name="recurrenceInterval" type="hidden" value="<%= interval %>" />
 
 		<tbody>
 			<tr>
@@ -96,7 +97,10 @@ if (recurrence != null) {
 					<aui:select label="" name="frequency">
 
 						<%
+						String yearly = Frequency.YEARLY.getValue();
+
 						for (Frequency curFrequency : Frequency.values()) {
+							if(curFrequency.getValue().equals(yearly)) continue;
 						%>
 
 							<aui:option selected="<%= (frequency == curFrequency) %>" value="<%= curFrequency.getValue() %>"><%= LanguageUtil.get(request.getLocale(), StringUtil.toLowerCase(curFrequency.getValue())) %></aui:option>
@@ -116,17 +120,6 @@ if (recurrence != null) {
 				</th>
 				<td class="calendar-portlet-recurrence-content">
 					<aui:select label="" name="interval">
-
-						<%
-						for (int i = 1; i <= 30; i++) {
-						%>
-
-							<aui:option selected="<%= (interval == i) %>" value="<%= i %>"><%= i %></aui:option>
-
-						<%
-						}
-						%>
-
 					</aui:select>
 
 					<span id="<portlet:namespace />intervalLabel"></span>
@@ -196,17 +189,14 @@ if (recurrence != null) {
 				</th>
 				<td class="calendar-portlet-recurrence-content">
 					<aui:field-wrapper cssClass="calendar-portlet-recurrence-limit" label="">
-						<aui:input checked="<%= !afterChecked && !onChecked %>" label="<%= StringPool.BLANK %>" name="ends" type="radio" value="never" />
-
-						<label><liferay-ui:message key="never" /></label>
-					</aui:field-wrapper>
-
-					<aui:field-wrapper cssClass="calendar-portlet-recurrence-limit" label="">
 						<aui:input checked="<%= afterChecked %>" label="<%= StringPool.BLANK %>" name="ends" type="radio" value="after" />
 
 						<label><liferay-ui:message key="after" /></label>
 
-						<aui:input disabled="<%= !afterChecked %>" label="<%= StringPool.BLANK %>"  name="count" size="5" type="text" value="<%= afterChecked ? count : StringPool.BLANK %>" />
+						<aui:input autoFocus="false" disabled="<%= !afterChecked %>" label="<%= StringPool.BLANK %>" name="count" type="number" min="2" max="50" value="<%= afterChecked ? count : StringPool.BLANK %>">
+							<aui:validator name="max">50</aui:validator>
+							<aui:validator name="min">2</aui:validator>
+						</aui:input>
 
 						<label><liferay-ui:message key="occurrences" /></label>
 					</aui:field-wrapper>
@@ -257,6 +247,7 @@ if (recurrence != null) {
 			container: '#<portlet:namespace />recurrenceContainer',
 			dayOfWeekInput: '#<portlet:namespace />weekday',
 			frequencySelect: '#<portlet:namespace />frequency',
+			recurrenceInterval: '#<portlet:namespace />recurrenceInterval',
 			intervalSelect: '#<portlet:namespace />interval',
 			lastPositionCheckbox: '#<portlet:namespace />lastPosition',
 			limitCountInput: '#<portlet:namespace />count',
@@ -264,7 +255,6 @@ if (recurrence != null) {
 			limitDateDatePicker: Liferay.component('<%= renderResponse.getNamespace() + HtmlUtil.getAUICompatibleId("untilDateDatePicker") %>'),
 			limitDateRadioButton: '[name=<portlet:namespace />ends][value=on]',
 			monthlyRecurrenceOptions: '#<portlet:namespace />viewPositionInMonth',
-			noLimitRadioButton: '[name=<portlet:namespace />ends][value=never]',
 			positionalDayOfWeekOptions: '#<portlet:namespace />viewPositionalWeekday',
 			positionInput: '#<portlet:namespace />position',
 			repeatCheckbox: '#<portlet:namespace />repeat',
@@ -309,7 +299,11 @@ if (recurrence != null) {
 								label: '<liferay-ui:message key="done" />',
 								on: {
 									click: function() {
-										window.<portlet:namespace />meetingRecurrenceDialog.hide();
+										var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
+
+										if (limitCountInputValue >= 2 && limitCountInputValue <= 50) {
+											window.<portlet:namespace />meetingRecurrenceDialog.hide();
+										}
 									}
 								}
 							}
@@ -322,6 +316,20 @@ if (recurrence != null) {
 			}
 		);
 	};
+
+	A.one('body').on('key', function(event) {
+		if (window.<portlet:namespace />meetingRecurrenceDialog) {
+			window.<portlet:namespace />meetingRecurrenceDialog.once('visibleChange', function(event) {
+				var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
+
+				if (limitCountInputValue < 2 || limitCountInputValue > 50) {
+					if (event.prevVal === true) {
+						event.newVal = true;
+					}
+				}
+			});
+		};
+	}, 'esc');
 
 	meetingRepeatCheckboxNode.on(
 		'change',

@@ -22,15 +22,13 @@
 				FREQUENCY: {
 					DAILY: 'DAILY',
 					MONTHLY: 'MONTHLY',
-					WEEKLY: 'WEEKLY',
-					YEARLY: 'YEARLY'
+					WEEKLY: 'WEEKLY'
 				},
 
 				INTERVAL_LABELS: {
 					DAILY: Liferay.Language.get('days'),
 					MONTHLY: Liferay.Language.get('months'),
-					WEEKLY: Liferay.Language.get('weeks'),
-					YEARLY: Liferay.Language.get('years')
+					WEEKLY: Liferay.Language.get('weeks')
 				},
 
 				MONTH_LABELS: [
@@ -209,19 +207,23 @@
 	AUI.add(
 		'liferay-meeting-calendar-recurrence-dialog',
 		function(A) {
+			var Lang = A.Lang;
+
 			var DAYS_OF_WEEK = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+
+			var FREQUENCY_DAILY = 'DAILY';
 
 			var FREQUENCY_MONTHLY = 'MONTHLY';
 
 			var FREQUENCY_WEEKLY = 'WEEKLY';
-
-			var FREQUENCY_YEARLY = 'YEARLY';
 
 			var LIMIT_COUNT = 'after';
 
 			var LIMIT_DATE = 'on';
 
 			var LIMIT_UNLIMITED = 'never';
+
+			var TPL_INTERVAL_OPTION = '<option class="" value="{value}">{value}</option>';
 
 			var WEEK_LENGTH = A.DataType.DateMath.WEEK_LENGTH;
 
@@ -252,6 +254,11 @@
 						},
 
 						frequencySelect: {
+							setter: A.one,
+							value: null
+						},
+
+						recurrenceInterval: {
 							setter: A.one,
 							value: null
 						},
@@ -306,11 +313,6 @@
 						},
 
 						monthlyRecurrenceOptions: {
-							setter: A.one,
-							value: null
-						},
-
-						noLimitRadioButton: {
 							setter: A.one,
 							value: null
 						},
@@ -391,6 +393,7 @@
 							var instance = this;
 
 							instance.bindUI();
+							instance._bindIntervalSelection();
 						},
 
 						bindUI: function() {
@@ -408,6 +411,48 @@
 							limitDateDatePicker.after('selectionChange', A.bind(instance._onInputChange, instance));
 
 							startDateDatePicker.after('selectionChange', A.bind(instance._onStartDateDatePickerChange, instance));
+						},
+
+						_bindIntervalSelection: function() {
+							var instance = this;
+
+							var selectedFrequency = instance._getFrequency();
+
+							var intervalSelect = instance.get('intervalSelect');
+							intervalSelect.all('option').remove();
+
+							var maxInterval = 0;
+
+							if (selectedFrequency == FREQUENCY_DAILY) {
+								maxInterval = 15;
+							}
+							else if (selectedFrequency == FREQUENCY_WEEKLY) {
+								maxInterval = 12;
+							}
+							else if (selectedFrequency == FREQUENCY_MONTHLY) {
+								maxInterval = 3;
+							}
+
+							if (intervalSelect) {
+								for(var i = 1; i <= maxInterval; i ++) {
+									var data = {
+										value: i
+									};
+									intervalSelect.append(Lang.sub(TPL_INTERVAL_OPTION, data));
+								}
+							}
+
+							instance._updateIntervalSelection(maxInterval);
+						},
+
+						_updateIntervalSelection: function(maxInterval) {
+							var instance = this;
+							var intervalSelect = instance.get('intervalSelect');
+							var recurrenceInterval = instance.get("recurrenceInterval").val();
+
+							if (recurrenceInterval > 0 && recurrenceInterval < maxInterval) {
+								intervalSelect.val(recurrenceInterval);
+							}
 						},
 
 						_calculatePosition: function() {
@@ -485,7 +530,7 @@
 						_getLimitRadioButtons: function() {
 							var instance = this;
 
-							return [instance.get('limitCountRadioButton'), instance.get('limitDateRadioButton'), instance.get('noLimitRadioButton')];
+							return [instance.get('limitCountRadioButton'), instance.get('limitDateRadioButton')];
 						},
 
 						_getLimitType: function() {
@@ -586,7 +631,7 @@
 
 							var frequency = instance.get('frequency');
 
-							return (frequency === FREQUENCY_MONTHLY) || (frequency === FREQUENCY_YEARLY);
+							return frequency === FREQUENCY_MONTHLY;
 						},
 
 						_onInputChange: function(event) {
@@ -601,6 +646,8 @@
 							if (currentTarget === instance.get('frequencySelect')) {
 								instance._toggleView('weeklyRecurrenceOptions', instance.get('frequency') === FREQUENCY_WEEKLY);
 								instance._toggleView('monthlyRecurrenceOptions', instance._isPositionalFrequency());
+
+								instance._bindIntervalSelection();
 							}
 
 							if (currentTarget === instance.get('repeatOnDayOfMonthRadioButton')) {

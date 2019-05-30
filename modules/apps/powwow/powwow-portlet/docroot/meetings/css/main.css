@@ -1,6 +1,10 @@
 @import "compass";
 @import "mixins";
 
+.help-block {
+	color: red !important;
+}
+
 .powwow-portlet {
 
 	/* ---------- Edit meeting ---------- */
