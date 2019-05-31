@@ -52,6 +52,9 @@ if (calendarBookingId > 0) {
 	title='<%= (powwowMeeting != null) ? "edit-meeting" : "new-meeting" %>'
 />
 
+<div class="message-container-editing" id="<portlet:namespace />messageContainerEditing">
+</div>
+
 <liferay-portlet:actionURL name="updatePowwowMeeting" var="editPowwowMeetingURL" />
 
 <portlet:resourceURL var="checkMaxOccurrenceURL" id="checkMaxOccurrence"/>
@@ -400,7 +403,8 @@ if (calendarBookingId > 0) {
 			prefixParticipantParticipantUserId: 'powwowParticipantParticipantUserId',
 			prefixParticipantType: 'powwowParticipantType',
 			redirect: '<%= HtmlUtil.escapeJS(redirect) %>',
-			rowFieldsSelector: '#<portlet:namespace />participants .row-fields'
+			rowFieldsSelector: '#<portlet:namespace />participants .row-fields',
+			messageContainerSelector: '#<portlet:namespace />messageContainerEditing'
 		}
 	);
 
