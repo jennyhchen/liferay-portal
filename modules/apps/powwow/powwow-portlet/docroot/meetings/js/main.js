@@ -349,6 +349,7 @@
 							instance._prefixParticipantType = config.prefixParticipantType;
 							instance._redirect = config.redirect;
 							instance._rowFieldsSelector = config.rowFieldsSelector;
+							instance._messageContainerSelector = config.messageContainerSelector;
 
 							instance._form = instance.byId(formName);
 							instance._participantKeywordsInput = instance.byId(participantKeywords);
@@ -846,7 +847,21 @@
 									},
 									on: {
 										success: function(event, id, obj) {
-											window.location.href = instance._redirect;
+
+											var responseText = obj.responseText;
+
+											var responseData = A.JSON.parse(responseText);
+
+											if (responseData.success) {
+												window.location.href = instance._redirect;
+											}
+											else {
+												var messageContainer = instance.one(instance._messageContainerSelector);
+
+												if (messageContainer) {
+													messageContainer.html('<span class="alert alert-error">' + responseData.message + '</span>');
+												}
+											}
 										}
 									}
 								}

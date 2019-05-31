@@ -98,7 +98,6 @@ import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
-
 /**
  * @author Shinn Lok
  * @author Marco Calderon
@@ -295,102 +294,118 @@ public class MeetingsPortlet extends MVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-		long powwowMeetingId = ParamUtil.getLong(
-			actionRequest, "powwowMeetingId");
+		try {
+			_validateRecurrence(actionRequest);
 
-		String name = ParamUtil.getString(actionRequest, "name");
-		String description = ParamUtil.getString(actionRequest, "description");
-		String languageId = ParamUtil.getString(actionRequest, "languageId");
+			ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
 
-		PowwowMeeting powwowMeeting = null;
+			long powwowMeetingId = ParamUtil.getLong(
+				actionRequest, "powwowMeetingId");
 
-		if (powwowMeetingId > 0) {
-			powwowMeeting = PowwowMeetingServiceUtil.getPowwowMeeting(
-				powwowMeetingId);
-		}
+			String name = ParamUtil.getString(actionRequest, "name");
+			String description = ParamUtil.getString(actionRequest, "description");
+			String languageId = ParamUtil.getString(actionRequest, "languageId");
 
-		List<PowwowParticipant> powwowParticipants =
-			PowwowUtil.getPowwowParticipants(actionRequest);
+			PowwowMeeting powwowMeeting = null;
 
-		long hostUserId = getHostUserId(
-			themeDisplay.getCompanyId(), powwowParticipants);
-
-		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			PowwowMeeting.class.getName(), actionRequest);
-
-		CalendarBooking calendarBooking = updateCalendarBooking(
-			actionRequest, powwowMeeting, powwowParticipants, serviceContext);
-
-		Map<String, String> options = new HashMap<>();
-
-		boolean autoStartVideo = ParamUtil.getBoolean(
-			actionRequest, "autoStartVideo");
-
-		options.put(
-			PowwowMeetingConstants.OPTION_AUTO_START_VIDEO,
-			Boolean.toString(autoStartVideo));
-
-		boolean requirePassword = ParamUtil.getBoolean(
-			actionRequest, "requirePassword");
-
-		String password = ParamUtil.getString(actionRequest, "password");
-
-		if (requirePassword && !password.equals(StringPool.BLANK)) {
-			options.put(PowwowMeetingConstants.OPTION_PASSWORD, password);
-		}
-
-		_addRecurrenceOptions(calendarBooking, options);
-
-		Map<String, Serializable> providerTypeMetadataMap = new HashMap<>();
-
-		if (powwowMeetingId <= 0) {
-			long powwowServerId =
-				PowwowMeetingConstants.POWWOW_SERVER_ID_DEFAULT;
-
-			int addPowwowMeetingStrategy =
-				PowwowServiceProviderUtil.getAddPowwowMeetingStrategy();
-
-			if (addPowwowMeetingStrategy ==
-					PowwowServiceProvider.ADD_POWWOW_MEETING_STRATEGY_EAGER) {
-
-				powwowServerId = PowwowServiceProviderUtil.getPowwowServerId();
-
-				providerTypeMetadataMap =
-					PowwowServiceProviderUtil.addPowwowMeeting(
-						hostUserId, powwowServerId, powwowMeetingId, name, options);
+			if (powwowMeetingId > 0) {
+				powwowMeeting = PowwowMeetingServiceUtil.getPowwowMeeting(
+					powwowMeetingId);
 			}
 
-			String portletId = PortalUtil.getPortletId(actionRequest);
+			List<PowwowParticipant> powwowParticipants =
+				PowwowUtil.getPowwowParticipants(actionRequest);
 
-			PowwowMeetingServiceUtil.addPowwowMeeting(
-				themeDisplay.getScopeGroupId(), portletId, powwowServerId, name,
-				description, providerTypeMetadataMap, languageId,
-				calendarBooking.getCalendarBookingId(),
-				PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
-				serviceContext);
-		}
-		else {
-			int addPowwowMeetingStrategy =
-				PowwowServiceProviderUtil.getAddPowwowMeetingStrategy();
+			long hostUserId = getHostUserId(
+				themeDisplay.getCompanyId(), powwowParticipants);
 
-			if (addPowwowMeetingStrategy ==
-					PowwowServiceProvider.ADD_POWWOW_MEETING_STRATEGY_EAGER) {
+			ServiceContext serviceContext = ServiceContextFactory.getInstance(
+				PowwowMeeting.class.getName(), actionRequest);
 
-				providerTypeMetadataMap =
-					PowwowServiceProviderUtil.updatePowwowMeeting(
-						powwowMeetingId, name, hostUserId, options);
+			CalendarBooking calendarBooking = updateCalendarBooking(
+				actionRequest, powwowMeeting, powwowParticipants, serviceContext);
+
+			Map<String, String> options = new HashMap<>();
+
+			boolean autoStartVideo = ParamUtil.getBoolean(
+				actionRequest, "autoStartVideo");
+
+			options.put(
+				PowwowMeetingConstants.OPTION_AUTO_START_VIDEO,
+				Boolean.toString(autoStartVideo));
+
+			boolean requirePassword = ParamUtil.getBoolean(
+				actionRequest, "requirePassword");
+
+			String password = ParamUtil.getString(actionRequest, "password");
+
+			if (requirePassword && !password.equals(StringPool.BLANK)) {
+				options.put(PowwowMeetingConstants.OPTION_PASSWORD, password);
 			}
 
-			PowwowMeetingServiceUtil.updatePowwowMeeting(
-				powwowMeetingId, powwowMeeting.getPowwowServerId(), name,
-				description, providerTypeMetadataMap, languageId,
-				calendarBooking.getCalendarBookingId(),
-				PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
-				serviceContext);
+			_addRecurrenceOptions(calendarBooking, options);
+
+			Map<String, Serializable> providerTypeMetadataMap = new HashMap<>();
+
+			if (powwowMeetingId <= 0) {
+				long powwowServerId =
+					PowwowMeetingConstants.POWWOW_SERVER_ID_DEFAULT;
+
+				int addPowwowMeetingStrategy =
+					PowwowServiceProviderUtil.getAddPowwowMeetingStrategy();
+
+				if (addPowwowMeetingStrategy ==
+						PowwowServiceProvider.ADD_POWWOW_MEETING_STRATEGY_EAGER) {
+
+					powwowServerId = PowwowServiceProviderUtil.getPowwowServerId();
+
+					providerTypeMetadataMap =
+						PowwowServiceProviderUtil.addPowwowMeeting(
+							hostUserId, powwowServerId, powwowMeetingId, name, options);
+				}
+
+				String portletId = PortalUtil.getPortletId(actionRequest);
+
+				PowwowMeetingServiceUtil.addPowwowMeeting(
+					themeDisplay.getScopeGroupId(), portletId, powwowServerId, name,
+					description, providerTypeMetadataMap, languageId,
+					calendarBooking.getCalendarBookingId(),
+					PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
+					serviceContext);
+			}
+			else {
+				int addPowwowMeetingStrategy =
+					PowwowServiceProviderUtil.getAddPowwowMeetingStrategy();
+
+				if (addPowwowMeetingStrategy ==
+						PowwowServiceProvider.ADD_POWWOW_MEETING_STRATEGY_EAGER) {
+
+					providerTypeMetadataMap =
+						PowwowServiceProviderUtil.updatePowwowMeeting(
+							powwowMeetingId, name, hostUserId, options);
+				}
+
+				PowwowMeetingServiceUtil.updatePowwowMeeting(
+					powwowMeetingId, powwowMeeting.getPowwowServerId(), name,
+					description, providerTypeMetadataMap, languageId,
+					calendarBooking.getCalendarBookingId(),
+					PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
+					serviceContext);
+			}
+
+			jsonObject.put("success", true);
 		}
+		catch (Exception e) {
+			jsonObject.put(
+				"message",
+				translate(actionRequest, e.getMessage()));
+			jsonObject.put("success", false);
+		}
+
+		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
 
 	protected void checkMaxOccurrenceDate(
@@ -979,6 +994,57 @@ public class MeetingsPortlet extends MVCPortlet {
 		Duration duration = Duration.ofMillis(
 			Math.abs(calendarBooking.getEndTime() - calendarBooking.getStartTime()));
 		return duration.abs().toMinutes();
+	}
+
+	private void _validateRecurrence(ActionRequest actionRequest)
+		throws PortalException {
+
+		Recurrence recurrence = getRecurrence(actionRequest);
+
+		if (Validator.isNull(recurrence)) {
+			return;
+		}
+
+		if (Frequency.YEARLY.equals(recurrence.getFrequency())) {
+			throw new PortalException("invalid-frequency");
+		}
+
+		boolean isValidDailyInterval =
+			Frequency.DAILY.equals(recurrence.getFrequency()) &&
+				recurrence.getInterval() <= 30;
+
+		boolean isValidWeeklyInterval =
+			Frequency.WEEKLY.equals(recurrence.getFrequency()) &&
+				recurrence.getInterval() <= 12;
+
+		boolean isValidMonthlyInterval =
+			Frequency.MONTHLY.equals(recurrence.getFrequency()) &&
+				recurrence.getInterval() <= 3;
+
+		if (!(isValidDailyInterval || isValidWeeklyInterval ||
+			isValidMonthlyInterval)) {
+			throw new PortalException("invalid-interval");
+		}
+
+		boolean hasStopRepeating =
+			Validator.isNotNull(recurrence.getUntilJCalendar()) ||
+				recurrence.getCount() > 0;
+
+		if (!hasStopRepeating) {
+			throw new PortalException("recurrence-must-have-stop-repeating-choice");
+		}
+
+		boolean isValidNumberOfOccurrence =
+			recurrence.getCount() >= 2 && recurrence.getCount() <= 50;
+
+		if (!isValidNumberOfOccurrence) {
+			throw new PortalException("invalid-number-of-occurrence");
+		}
+
+		if (Validator.isNotNull(recurrence.getUntilJCalendar()) &&
+			recurrence.getCount() <= 0) {
+			// TODO count occurrences from untilJCalendar
+		}
 	}
 
 	private DateValue _toDateValue(Calendar calendar) {
