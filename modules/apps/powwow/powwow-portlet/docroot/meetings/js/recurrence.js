@@ -221,7 +221,7 @@
 
 			var LIMIT_DATE = 'on';
 
-			var LIMIT_UNLIMITED = 'never';
+			var TPL_INTERVAL_OPTION = '<option class="" value="{value}">{value}</option>';
 
 			var TPL_INTERVAL_OPTION = '<option class="" value="{value}">{value}</option>';
 
@@ -663,13 +663,13 @@
 								positionInput.val(instance._calculatePosition());
 							}
 
-							var disableLimitCountInput = (limitType === LIMIT_UNLIMITED) || (limitType === LIMIT_DATE);
+							var disableLimitCountInput = limitType === LIMIT_DATE;
 
 							Liferay.Util.toggleDisabled(limitCountInput, disableLimitCountInput);
 
 							limitCountInput.selectText();
 
-							var disableLimitDateDatePicker = (limitType === LIMIT_UNLIMITED) || (limitType === LIMIT_COUNT);
+							var disableLimitDateDatePicker = limitType === LIMIT_COUNT;
 
 							limitDateDatePicker.set('disabled', disableLimitDateDatePicker);
 

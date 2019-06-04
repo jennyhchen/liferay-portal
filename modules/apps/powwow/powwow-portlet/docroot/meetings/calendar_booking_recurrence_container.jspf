@@ -24,7 +24,7 @@ java.util.Calendar nowJCalendar = CalendarFactoryUtil.getCalendar(calendarBookin
 long startTime = BeanPropertiesUtil.getLong(calendarBooking, "startTime", nowJCalendar.getTimeInMillis());
 java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(startTime, calendarBookingTimeZone);
 
-int count = 0;
+int count = 5;
 String exceptionDatesString = StringPool.BLANK;
 Frequency frequency = null;
 int interval = 0;
@@ -182,7 +182,7 @@ if (recurrence != null) {
 				</td>
 			</tr>
 		</tbody>
-		<tbody class="calendar-portlet-interval-view">
+		<tbody class="calendar-portlet-interval-view" id="<portlet:namespace />viewStopRepeating">
 			<tr>
 				<th class="calendar-portlet-recurrence-title">
 					<liferay-ui:message key="stop-repeating" />:
@@ -217,6 +217,10 @@ if (recurrence != null) {
 								yearParam="untilDateYear"
 								yearValue="<%= untilJCalendar.get(java.util.Calendar.YEAR) %>"
 							/>
+							<div class="form-validator-stack help-block"
+								id="<portlet:namespace />utilDateError">
+								<div role="alert" class="required"></div>
+							</div>
 						</div>
 					</aui:field-wrapper>
 				</td>
@@ -237,10 +241,13 @@ if (recurrence != null) {
 	</table>
 </div>
 
-<aui:script use="liferay-util-window,liferay-meeting-calendar-recurrence-dialog">
+<aui:script use="liferay-util-window,liferay-meeting-calendar-recurrence-dialog,aui-io-request,aui-base">
 	var meetingRecurrenceContainerNode = A.one('#<portlet:namespace />recurrenceContainer');
 	var meetingRepeatCheckboxNode = A.one('#<portlet:namespace />repeat');
 	var meetingSummaryNode = A.one('#<portlet:namespace />summary');
+	var untilDateDatePicker = Liferay.component('<%= renderResponse.getNamespace() + HtmlUtil.getAUICompatibleId("untilDateDatePicker") %>');
+	var utilDateError = A.one('#<portlet:namespace />utilDateError');
+	var isUntilDateExceeded = 'false';
 
 	var meetingRecurrenceDialogController = new Liferay.MeetingRecurrenceDialogController(
 		{
@@ -263,6 +270,7 @@ if (recurrence != null) {
 			startDateDatePicker: Liferay.component('<portlet:namespace />startDateDatePicker'),
 			startTimeDayOfWeekInput: '#<portlet:namespace />weekdaysCheckbox',
 			weeklyRecurrenceOptions: '#<portlet:namespace />view<%= Frequency.WEEKLY %>'
+			
 		}
 	);
 
@@ -299,11 +307,7 @@ if (recurrence != null) {
 								label: '<liferay-ui:message key="done" />',
 								on: {
 									click: function() {
-										var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
-
-										if (limitCountInputValue >= 2 && limitCountInputValue <= 50) {
-											window.<portlet:namespace />meetingRecurrenceDialog.hide();
-										}
+										window.<portlet:namespace />closeDialogButton();
 									}
 								}
 							}
@@ -360,6 +364,7 @@ if (recurrence != null) {
 		'recurrenceChange',
 		function(event) {
 			window.<portlet:namespace />updateSummaries();
+			window.<portlet:namespace />resetRecurrenceDialog();
 		}
 	);
 
@@ -385,4 +390,96 @@ if (recurrence != null) {
 	<c:if test="<%= recurring %>">
 		window.<portlet:namespace />updateSummaries();
 	</c:if>
+
+	A.one('body').on('key', function(event) {
+		window.<portlet:namespace />closeDialogKey();
+	}, 'esc');
+
+	untilDateDatePicker.after('selectionChange', function(event){
+		window.<portlet:namespace />validateUtilDate();
+	});	
+
+	window.<portlet:namespace />validateUtilDate = function() {
+		A.io.request(
+			'<%=checkMaxOccurrenceURL.toString()%>',
+			{
+				method : 'GET',
+				dataType: 'json',
+				form : {
+					id: '<portlet:namespace />fm'
+				},
+				on: {
+					success: function() {
+						var response = this.get('responseData');
+
+						if(response.valid == 'false'){
+							utilDateError.show();
+							var errorText = response.errorMessage
+							A.one('#<portlet:namespace />utilDateError div').setHTML(errorText);
+							isUntilDateExceeded = 'true';
+						}
+						else {
+							A.one('#<portlet:namespace />utilDateError div').setHTML('');
+							utilDateError.hide();
+							isUntilDateExceeded = 'false';
+						}
+					}
+				}
+			}
+		);
+	}
+
+	window.<portlet:namespace />closeDialogButton = function() {
+		var limitType = meetingRecurrenceDialogController.get('limitType');
+		if(limitType === 'after'){
+			var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
+			if (limitCountInputValue >= 2 && limitCountInputValue <= 50) {
+				window.<portlet:namespace />meetingRecurrenceDialog.hide();
+			}
+		}
+		else {
+			if (isUntilDateExceeded === 'false') {
+				window.<portlet:namespace />meetingRecurrenceDialog.hide();
+			}
+		}
+	}
+
+	window.<portlet:namespace />closeDialogKey = function() {
+		if (window.<portlet:namespace />meetingRecurrenceDialog) {
+			window.<portlet:namespace />meetingRecurrenceDialog.once('visibleChange', function(event) {
+				var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
+				var limitType = meetingRecurrenceDialogController.get('limitType');
+
+				if(limitType === 'after'){
+					if (limitCountInputValue < 2 || limitCountInputValue > 50) {
+						if (event.prevVal === true) {
+							event.newVal = true;
+						}
+					}
+				}
+				else {
+					if (isUntilDateExceeded === 'true') {
+						if (event.prevVal === true) {
+							event.newVal = true;
+						}
+					}
+				}
+
+			});
+		};
+	}
+
+	window.<portlet:namespace />resetRecurrenceDialog = function() {
+		var limitType = meetingRecurrenceDialogController.get('limitType');
+
+		if(limitType == 'on'){
+			if(A.one('#<portlet:namespace />countHelper')){
+				A.one('#<portlet:namespace />countHelper div').setHTML('');
+			}
+			A.one('#<portlet:namespace />count').val(<%= count %>);
+		}
+
+		window.<portlet:namespace />validateUtilDate();
+		isUntilDateExceeded = 'false';
+	}
 </aui:script>
