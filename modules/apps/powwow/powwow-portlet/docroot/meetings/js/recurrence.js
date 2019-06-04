@@ -424,7 +424,7 @@
 							var maxInterval = 0;
 
 							if (selectedFrequency == FREQUENCY_DAILY) {
-								maxInterval = 15;
+								maxInterval = 30;
 							}
 							else if (selectedFrequency == FREQUENCY_WEEKLY) {
 								maxInterval = 12;
