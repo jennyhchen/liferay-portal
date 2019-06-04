@@ -54,6 +54,8 @@ if (calendarBookingId > 0) {
 
 <liferay-portlet:actionURL name="updatePowwowMeeting" var="editPowwowMeetingURL" />
 
+<portlet:resourceURL var="checkMaxOccurrenceURL" id="checkMaxOccurrence"/>
+
 <aui:form action="<%= editPowwowMeetingURL %>" cssClass="edit-meeting" id="fm" method="post" name="fm" onSubmit="event.preventDefault();">
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 	<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
