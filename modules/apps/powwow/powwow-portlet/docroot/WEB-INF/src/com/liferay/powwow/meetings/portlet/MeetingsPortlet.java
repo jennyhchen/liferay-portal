@@ -14,6 +14,8 @@
 
 package com.liferay.powwow.meetings.portlet;
 
+import com.google.ical.compat.jodatime.LocalDateIterable;
+import com.google.ical.compat.jodatime.LocalDateIteratorFactory;
 import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.model.CalendarBookingConstants;
 import com.liferay.calendar.model.CalendarResource;
@@ -31,6 +33,8 @@ import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.User;
@@ -70,11 +74,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.text.ParseException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -87,6 +93,12 @@ import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 
 /**
  * @author Shinn Lok
@@ -272,6 +284,15 @@ public class MeetingsPortlet extends MVCPortlet {
 		else if (resourceID.equals("getUsers")) {
 			getUsers(resourceRequest, resourceResponse);
 		}
+		else if (resourceID.equals("checkMaxOccurrence")) {
+			try {
+				checkMaxOccurrenceDate(resourceRequest, resourceResponse);
+			} catch (InvalidRecurrenceRuleException e) {
+				_log.error("Error while check max occurrence date", e);
+			} catch (PortalException e) {
+				_log.error("Error while check max occurrence date", e);
+			}
+		}
 		else {
 			super.serveResource(resourceRequest, resourceResponse);
 		}
@@ -377,6 +398,61 @@ public class MeetingsPortlet extends MVCPortlet {
 				PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
 				serviceContext);
 		}
+	}
+
+	protected void checkMaxOccurrenceDate(ResourceRequest resourceRequest, ResourceResponse resourceResponse)
+		throws IOException, InvalidRecurrenceRuleException, PortalException {
+
+		ServiceContext serviceContext = ServiceContextFactory.getInstance(PowwowMeeting.class.getName(),
+			resourceRequest);
+
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/yyyy");
+		JSONObject jsonResponse = JSONFactoryUtil.createJSONObject();
+		LocalDate maxDateOccurrence = null;
+
+		TimeZone getTimeZone = getTimeZone(resourceRequest);
+		Calendar startTimeCalendar = getJCalendar(resourceRequest, "startTime", getTimeZone);
+		LocalDate startDate = LocalDate.fromCalendarFields(startTimeCalendar);
+
+		Recurrence recurrence = getRecurrence(resourceRequest);
+
+		String rRule = RecurrenceSerializer.serialize(recurrence);
+
+		try {
+			LocalDateIterable iterator = LocalDateIteratorFactory.createLocalDateIterable(rRule, startDate, true);
+			Iterator<LocalDate> it = iterator.iterator();
+			int i = 50;
+
+			while (i-- > 0 && it.hasNext()) {
+				if (i == 0) {
+					maxDateOccurrence = it.next();
+				}
+				else {
+					it.next();
+				}
+			}
+		}
+		catch (ParseException e) {
+			_log.error("Error while get max occurrence date", e);
+		}
+
+		Calendar untilJCalendar = getJCalendar(resourceRequest, "untilDate", getTimeZone);
+		LocalDate untilDayPick = LocalDate.fromCalendarFields(untilJCalendar);
+
+		if (Validator.isNotNull(maxDateOccurrence)) {
+			if (untilDayPick.isAfter(maxDateOccurrence)) {
+				String maxDate = maxDateOccurrence.toString(formatter);
+
+				jsonResponse.put("valid", "false");
+				jsonResponse.put("errorMessage", LanguageUtil.format(serviceContext.getLocale(),
+					"occurrences-exceeded-50-times-please-choose-a-date-that-not-after-x", maxDate));
+			}
+			else {
+				jsonResponse.put("valid", "true");
+			}
+		}
+
+		writeJSON(resourceRequest, resourceResponse, jsonResponse);
 	}
 
 	protected void exportPowwowMeetingCalendar(
@@ -727,6 +803,105 @@ public class MeetingsPortlet extends MVCPortlet {
 		return recurrence;
 	}
 
+	protected Recurrence getRecurrence(ResourceRequest resourceRequest) {
+		boolean repeat = ParamUtil.getBoolean(resourceRequest, "repeat");
+
+		if (!repeat) {
+			return null;
+		}
+
+		Recurrence recurrence = new Recurrence();
+
+		int count = 0;
+
+		String ends = ParamUtil.getString(resourceRequest, "ends");
+
+		if (ends.equals("after")) {
+			count = ParamUtil.getInteger(resourceRequest, "count");
+		}
+
+		recurrence.setCount(count);
+
+		Frequency frequency = Frequency.parse(
+			ParamUtil.getString(resourceRequest, "frequency"));
+
+		recurrence.setFrequency(frequency);
+
+		int interval = ParamUtil.getInteger(resourceRequest, "interval");
+
+		recurrence.setInterval(interval);
+
+		TimeZone timeZone = getTimeZone(resourceRequest);
+
+		recurrence.setTimeZone(timeZone);
+
+		Calendar startTimeJCalendar = getJCalendar(
+				resourceRequest, "startTime", timeZone);
+
+		List<PositionalWeekday> positionalWeekdays = new ArrayList<>();
+
+		if (frequency == Frequency.WEEKLY) {
+			String[] weekdayValues = ParamUtil.getParameterValues(
+					resourceRequest, "weekdays");
+
+			String weekdaysCheckbox =
+				ParamUtil.getString(resourceRequest, "weekdaysCheckbox");
+			if(weekdayValues[0].equals("false")) {
+				weekdayValues = new String[] { weekdaysCheckbox };
+			}else {
+				weekdayValues = ArrayUtil.append(weekdayValues, new String[] {
+						weekdaysCheckbox
+					});
+			}
+
+			for (String weekdayValue : weekdayValues) {
+				Weekday weekday = Weekday.parse(weekdayValue);
+				Calendar weekdayJCalendar =
+					JCalendarUtil.getJCalendar(
+						startTimeJCalendar.getTimeInMillis(), timeZone);
+				weekdayJCalendar.set(
+					Calendar.DAY_OF_WEEK,
+					weekday.getCalendarWeekday());
+
+				weekday = Weekday.getWeekday(weekdayJCalendar);
+				positionalWeekdays.add(new PositionalWeekday(weekday, 0));
+			}
+		}
+		else if (frequency == Frequency.MONTHLY) {
+
+			boolean repeatOnWeekday = ParamUtil.getBoolean(
+					resourceRequest, "repeatOnWeekday");
+
+			if (repeatOnWeekday) {
+				int position = ParamUtil.getInteger(resourceRequest, "position");
+
+				Weekday weekday = Weekday.parse(
+					ParamUtil.getString(resourceRequest, "weekday"));
+
+				positionalWeekdays.add(
+					new PositionalWeekday(weekday, position));
+
+				if (frequency == Frequency.YEARLY) {
+					List<Integer> months = Arrays.asList(
+						ParamUtil.getInteger(resourceRequest, "startTimeMonth"));
+
+					recurrence.setMonths(months);
+				}
+			}
+		}
+
+		recurrence.setPositionalWeekdays(positionalWeekdays);
+
+		String[] exceptionDates = StringUtil.split(
+			ParamUtil.getString(resourceRequest, "exceptionDates"));
+
+		for (String exceptionDate : exceptionDates) {
+			recurrence.addExceptionDate(
+				JCalendarUtil.getJCalendar(Long.valueOf(exceptionDate)));
+		}
+		return recurrence;
+	}
+
 	protected long getTime(
 		PortletRequest portletRequest, String name, TimeZone timeZone) {
 
@@ -878,4 +1053,6 @@ public class MeetingsPortlet extends MVCPortlet {
 			Math.abs(calendarBooking.getEndTime() - calendarBooking.getStartTime()));
 		return duration.abs().toMinutes();
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(MeetingsPortlet.class);
 }
