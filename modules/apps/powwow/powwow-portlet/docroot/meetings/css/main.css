@@ -1,8 +1,11 @@
 @import "compass";
 @import "mixins";
 
-.powwow-portlet {
+.lfr-search-container {
+	margin-top: 0px !important;
+}
 
+.powwow-portlet {
 	/* ---------- Edit meeting ---------- */
 
 	.edit-meeting {
