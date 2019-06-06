@@ -15,6 +15,10 @@
 package com.liferay.powwow.util;
 
 import com.liferay.calendar.model.CalendarBooking;
+import com.liferay.calendar.recurrence.Frequency;
+import com.liferay.calendar.recurrence.PositionalWeekday;
+import com.liferay.calendar.recurrence.Recurrence;
+import com.liferay.calendar.recurrence.Weekday;
 import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.petra.content.ContentUtil;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -62,15 +66,21 @@ import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
 import com.liferay.powwow.service.PowwowParticipantLocalServiceUtil;
 
 import java.text.Format;
-
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletPreferences;
-
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrSubstitutor;
 
 /**
  * @author Shinn Lok
@@ -261,6 +271,7 @@ public class PowwowUtil {
 		String startDateString = StringPool.BLANK;
 		String startTimeString = StringPool.BLANK;
 		String timeZoneDisplayName = StringPool.BLANK;
+		String recurrenceSumary = StringPool.BLANK;
 
 		if (powwowMeeting.getCalendarBookingId() > 0) {
 			CalendarBooking calendarBooking =
@@ -283,6 +294,10 @@ public class PowwowUtil {
 			TimeZone timeZone = user.getTimeZone();
 
 			timeZoneDisplayName = timeZone.getDisplayName();
+
+			if (calendarBooking.isRecurring()) {
+				recurrenceSumary = getRecurrenceSummary(calendarBooking.getRecurrenceObj(), serviceContext);
+			}
 		}
 
 		powwowSubscriptionSender.setContextAttributes(
@@ -296,6 +311,7 @@ public class PowwowUtil {
 			"[$MEETING_NAME$]", powwowMeeting.getName(), "[$MEETING_PASSWORD$]",
 			PowwowServiceProviderUtil.getOptionPassword(
 				powwowMeeting.getPowwowMeetingId()),
+			"[$RECURRENCE_SUMMARY$]", recurrenceSumary,
 			"[$MEETING_TIME$]", startTimeString, "[$MEETING_TIME_ZONE$]",
 			timeZoneDisplayName, "[$MEETING_URL$]",
 			getInvitationURL(
@@ -334,6 +350,90 @@ public class PowwowUtil {
 		powwowSubscriptionSender.setUserId(powwowMeeting.getUserId());
 
 		return powwowSubscriptionSender;
+	}
+
+	public static String getRecurrenceSummary(Recurrence recurrence, ServiceContext serviceContext) {
+
+		String recurrenceSummary = StringPool.BLANK;
+
+		Locale locale = serviceContext.getLocale();
+
+		StringBuilder sb = new StringBuilder();
+
+		Map<String, Object> valuesMap = new HashMap<>();
+
+		String position = StringPool.BLANK;
+		String weekDay = StringPool.BLANK;
+		String weekDays = StringPool.BLANK;
+
+		if (recurrence.getInterval() == 1) {
+			String recurrenceLabel = StringUtils.capitalize(
+				StringUtils.lowerCase(recurrence.getFrequency().getValue()));
+
+			sb.append(recurrenceLabel);
+		}
+		else {
+			sb.append(LanguageUtil.get(locale, "every") + " ${interval} ${frequencyLabel}");
+
+			String frequencyLabel = LanguageUtil.get(locale, _frequencyMapLabel.get(recurrence.getFrequency()));
+
+			valuesMap.put("interval", recurrence.getInterval());
+			valuesMap.put("frequencyLabel", frequencyLabel);
+		}
+
+		if (Validator.isNotNull(recurrence.getPositionalWeekday()) && recurrence.getFrequency() == Frequency.MONTHLY) {
+			PositionalWeekday positionalWeekday = recurrence.getPositionalWeekday();
+
+			sb.append(STR_SPACE + LanguageUtil.get(locale, "on") + " ${position} ${weekDay}");
+
+			position = LanguageUtil.get(locale, _positionMapLabel.get(positionalWeekday.getPosition()));
+			weekDay = LanguageUtil.get(locale, _weekDayMapLabel.get(positionalWeekday.getWeekday()));
+
+			valuesMap.put("position", position);
+			valuesMap.put("weekDay", weekDay);
+		}
+		else if (recurrence.getFrequency() == Frequency.WEEKLY && recurrence.getWeekdays().size() > 0) {
+			sb.append(STR_SPACE + LanguageUtil.get(locale, "on") + " ${weekDays}");
+
+			List<String> weekdayList = new ArrayList<>();
+
+			for (Weekday day : recurrence.getWeekdays()) {
+				weekdayList.add(LanguageUtil.get(locale, _weekDayMapLabel.get(day)));
+			}
+
+			weekDays = weekdayList.stream().collect(Collectors.joining(","));
+
+			valuesMap.put("weekDays", weekDays);
+		}
+
+		if (recurrence.getCount() > 0) {
+			sb.append(", ${count} " + LanguageUtil.get(locale, "times"));
+
+			valuesMap.put("count", recurrence.getCount());
+		}
+		else if (Validator.isNotNull(recurrence.getUntilJCalendar())) {
+			Calendar untilDateJCalendar = recurrence.getUntilJCalendar();
+
+			sb.append(", ");
+			sb.append(LanguageUtil.get(locale, "until"));
+			sb.append(STR_SPACE);
+			sb.append("${untilMonthLabel}");
+			sb.append(STR_SPACE);
+			sb.append("${untilDay}");
+			sb.append(STR_SPACE + ", ");
+			sb.append("${untilYear}");
+
+			String untilMonthLabel = _monthMapLabel.get(untilDateJCalendar.get(Calendar.MONTH));
+
+			valuesMap.put("untilMonthLabel", LanguageUtil.get(locale, untilMonthLabel));
+			valuesMap.put("untilDay", untilDateJCalendar.get(Calendar.DAY_OF_MONTH));
+			valuesMap.put("untilYear", untilDateJCalendar.get(Calendar.YEAR));
+		}
+
+		StrSubstitutor sub = new StrSubstitutor(valuesMap);
+		recurrenceSummary = sub.replace(sb.toString());
+
+		return recurrenceSummary;
 	}
 
 	public static void sendNotifications(
@@ -436,4 +536,46 @@ public class PowwowUtil {
 			powwowParticipant.getParticipantUserId(), notificationEvent);
 	}
 
+	private static final String STR_SPACE = StringPool.SPACE;
+
+	private static final Map<Frequency, String> _frequencyMapLabel = new HashMap<>();
+
+	private static final Map<Integer, String> _monthMapLabel = new HashMap<>();
+
+	private static final Map<Integer, String> _positionMapLabel = new HashMap<>();
+
+	private static final Map<Weekday, String> _weekDayMapLabel = new HashMap<>();
+
+	static {
+		_frequencyMapLabel.put(Frequency.DAILY, "days");
+		_frequencyMapLabel.put(Frequency.WEEKLY, "weeks");
+		_frequencyMapLabel.put(Frequency.MONTHLY, "months");
+
+		_monthMapLabel.put(0, "january");
+		_monthMapLabel.put(1, "february");
+		_monthMapLabel.put(2, "march");
+		_monthMapLabel.put(3, "april");
+		_monthMapLabel.put(4, "may");
+		_monthMapLabel.put(5, "june");
+		_monthMapLabel.put(6, "july");
+		_monthMapLabel.put(7, "august");
+		_monthMapLabel.put(8, "september");
+		_monthMapLabel.put(9, "october");
+		_monthMapLabel.put(10, "november");
+		_monthMapLabel.put(11, "december");
+
+		_positionMapLabel.put(-1, "last");
+		_positionMapLabel.put(1, "first");
+		_positionMapLabel.put(2, "second");
+		_positionMapLabel.put(3, "third");
+		_positionMapLabel.put(3, "fourth");
+
+		_weekDayMapLabel.put(Weekday.SUNDAY, "weekday.SU");
+		_weekDayMapLabel.put(Weekday.MONDAY, "weekday.MO");
+		_weekDayMapLabel.put(Weekday.TUESDAY, "weekday.TU");
+		_weekDayMapLabel.put(Weekday.WEDNESDAY, "weekday.WE");
+		_weekDayMapLabel.put(Weekday.THURSDAY, "weekday.TH");
+		_weekDayMapLabel.put(Weekday.FRIDAY, "weekday.FR");
+		_weekDayMapLabel.put(Weekday.SATURDAY, "weekday.SA");
+	}
 }
