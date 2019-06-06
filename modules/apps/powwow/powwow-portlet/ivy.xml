@@ -17,8 +17,6 @@
 		<dependency name="com.liferay.portal.dao.orm.custom.sql" org="com.liferay" rev="1.0.0" />
 		<dependency name="java-jwt" org="com.auth0" rev="3.8.0" />
 		<dependency name="jericho-html" org="net.htmlparser.jericho" rev="3.1" />
-		<dependency name="google-rfc-2445" org="org.scala-saddle" rev="20110304"/>
-		<dependency org="joda-time" name="joda-time" rev="2.10.2"/>
-		<dependency org="org.scala-lang" name="scala-library" rev="2.13.0-RC1"/>
+		<dependency name="com.google.ical" org="com.liferay" rev="20110304"/>
 	</dependencies>
 </ivy-module>
