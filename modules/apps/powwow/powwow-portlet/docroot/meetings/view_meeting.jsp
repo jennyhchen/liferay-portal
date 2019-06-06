@@ -23,10 +23,6 @@ TimeZone userTimeZone = TimeZone.getTimeZone(user.getTimeZoneId());
 
 PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
 
-CalendarBooking booking = CalendarBookingServiceUtil.fetchCalendarBooking(powwowMeeting.getCalendarBookingId());
-long startTime = booking.getStartTime();
-java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(startTime, userTimeZone);
-
 portletURL.setParameter("jspPage", "/meetings/view_meeting.jsp");
 portletURL.setParameter("powwowMeetingId", String.valueOf(powwowMeetingId));
 portletURL.setParameter("backURL", backURL);
@@ -50,7 +46,6 @@ portletURL.setParameter("backURL", backURL);
 
 	<%@ include file="/meetings/meeting_body.jspf" %>
 
-	<br>
 	<div class="meeting-url">
 		<dt>
 			<liferay-ui:message key="meeting-url" />
@@ -79,7 +74,6 @@ portletURL.setParameter("backURL", backURL);
 	</c:if>
 
 	<c:if test="<%= PowwowServiceProviderUtil.isSupportsJoinByPhone() %>">
-		<br>
 		<div class="join-by-phone">
 			<dt>
 				<liferay-ui:message key="join-by-phone" />
@@ -119,8 +113,7 @@ portletURL.setParameter("backURL", backURL);
 		</div>
 	</c:if>
 
-	<c:if test="<%= booking.isRecurring() %>">
-		<br>
+	<c:if test="<%= calendarBooking.isRecurring() %>">
 		<div class="recurrence">
 			<dt>
 				<liferay-ui:message key="repeat" />
@@ -131,7 +124,6 @@ portletURL.setParameter("backURL", backURL);
 		</div>
 	</c:if>
 
-	<br>
 	<div class="participants">
 		<dt>
 			<liferay-ui:message key="participants" />
@@ -182,7 +174,7 @@ portletURL.setParameter("backURL", backURL);
 	</div>
 </div>
 
-<c:if test="<%= booking.isRecurring() %>">
+<c:if test="<%= calendarBooking.isRecurring() %>">
 
 	<aui:script use="liferay-meeting-calendar-recurrence-util">
 		var summaryNode = A.one('#<portlet:namespace />recurrenceSummary');
@@ -191,7 +183,9 @@ portletURL.setParameter("backURL", backURL);
 		var untilDate = null;
 
 		<%
-		Recurrence recurrence = booking.getRecurrenceObj();
+		java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(calendarBooking.getStartTime(), userTimeZone);
+
+		Recurrence recurrence = calendarBooking.getRecurrenceObj();
 
 		java.util.Calendar untilJCalendar = recurrence.getUntilJCalendar();
 		%>

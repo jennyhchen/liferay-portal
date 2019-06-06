@@ -1,11 +1,16 @@
 @import "compass";
 @import "mixins";
 
-.lfr-search-container {
+#portlet_1_WAR_powwowportlet .lfr-search-container {
 	margin-top: 0px !important;
 }
 
+#portlet_1_WAR_powwowportlet .meeting-body, .meeting-url, .meeting-password, .join-by-phone, .recurrence {
+	padding-bottom: 15px ;
+}
+
 .powwow-portlet {
+
 	/* ---------- Edit meeting ---------- */
 
 	.edit-meeting {
