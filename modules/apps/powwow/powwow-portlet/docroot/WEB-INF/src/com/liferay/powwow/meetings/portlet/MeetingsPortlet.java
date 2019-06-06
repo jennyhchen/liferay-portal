@@ -14,8 +14,10 @@
 
 package com.liferay.powwow.meetings.portlet;
 
-import com.google.ical.compat.jodatime.LocalDateIterable;
-import com.google.ical.compat.jodatime.LocalDateIteratorFactory;
+import com.google.ical.iter.RecurrenceIterator;
+import com.google.ical.iter.RecurrenceIteratorFactory;
+import com.google.ical.values.DateValue;
+import com.google.ical.values.DateValueImpl;
 import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.model.CalendarBookingConstants;
 import com.liferay.calendar.model.CalendarResource;
@@ -77,12 +79,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -95,8 +97,6 @@ import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
-
-import org.joda.time.LocalDate;
 
 
 /**
@@ -399,48 +399,29 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		try {
 			JSONObject jsonResponse = JSONFactoryUtil.createJSONObject();
-			LocalDate maxDateOccurrence = null;
-
-			TimeZone getTimeZone = getTimeZone(resourceRequest);
-			Calendar startTimeCalendar =
-				getJCalendar(resourceRequest, "startTime", getTimeZone);
-			LocalDate startDate =
-				LocalDate.fromCalendarFields(startTimeCalendar);
-
-			Recurrence recurrence = getRecurrence(resourceRequest);
-
-			String rRule = RecurrenceSerializer.serialize(recurrence);
-
-			LocalDateIterable localDateIterable =
-				LocalDateIteratorFactory.createLocalDateIterable(
-					rRule, startDate, true);
-
-			Iterator<LocalDate> iterator = localDateIterable.iterator();
-
-			for (int i = 1; i <= 50 && iterator.hasNext(); i++) {
-
-				if (i == 50) {
-					maxDateOccurrence = iterator.next();
-					break;
-				}
-
-				iterator.next();
-			}
-
-			Calendar untilJCalendar =
-				getJCalendar(resourceRequest, "untilDate", getTimeZone);
-
-			LocalDate untilLocalDate =
-				LocalDate.fromCalendarFields(untilJCalendar);
-
 			boolean isValid = true;
 
-			if (Validator.isNotNull(maxDateOccurrence) &&
-				untilLocalDate.isAfter(maxDateOccurrence)) {
+			TimeZone timeZone = getTimeZone(resourceRequest);
+			Recurrence recurrence = getRecurrence(resourceRequest);
+
+			Calendar startTimeCalendar =
+				getJCalendar(resourceRequest, "startTime", timeZone);
+			Calendar untilJCalendar =
+				getJCalendar(resourceRequest, "untilDate", timeZone);
+
+			Calendar limitDateJCalendar =
+				_findLimitDate(recurrence, startTimeCalendar);
+
+			boolean isUntilDateExceededLimitDate =
+				Validator.isNotNull(limitDateJCalendar) &&
+				Validator.isNotNull(untilJCalendar) &&
+					untilJCalendar.after(limitDateJCalendar);
+
+			if (isUntilDateExceededLimitDate) {
 
 				DateFormat dateFormat = DateFormatFactoryUtil.getDate(resourceRequest.getLocale());
 
-				String maxDateFormatted = dateFormat.format(maxDateOccurrence.toDate());
+				String maxDateFormatted = dateFormat.format(limitDateJCalendar.getTime());
 
 				String errorMessage = LanguageUtil.format(
 					resourceRequest.getLocale(),
@@ -956,11 +937,61 @@ public class MeetingsPortlet extends MVCPortlet {
 		}
 	}
 
+	private Calendar _findLimitDate(
+		Recurrence recurrence, Calendar startTimeCalendar)
+		throws ParseException {
+
+		if (recurrence.getCount() > 0 ||
+			Validator.isNull(recurrence.getUntilJCalendar())) {
+
+			// Only find limit date if using untilDate
+
+			return null;
+		}
+
+		String rRule = RecurrenceSerializer.serialize(recurrence);
+
+		DateValue startDateValue = _toDateValue(startTimeCalendar);
+
+		TimeZone timeZone = startTimeCalendar.getTimeZone();
+
+		RecurrenceIterator recurrenceIterator =
+			RecurrenceIteratorFactory.createRecurrenceIterator(
+				rRule, startDateValue, timeZone);
+
+		DateValue maxDateOccurrence = null;
+
+		for (int i = 1; i <= 50 && recurrenceIterator.hasNext(); i++) {
+
+			if (i == 50) {
+				maxDateOccurrence = recurrenceIterator.next();
+				break;
+			}
+
+			recurrenceIterator.next();
+		}
+
+		return Validator.isNotNull(maxDateOccurrence) ? _toJCalendar(maxDateOccurrence, timeZone) : null;
+	}
+
 	private long _getDurationInMinutes(CalendarBooking calendarBooking) {
 
 		Duration duration = Duration.ofMillis(
 			Math.abs(calendarBooking.getEndTime() - calendarBooking.getStartTime()));
 		return duration.abs().toMinutes();
+	}
+
+	private DateValue _toDateValue(Calendar calendar) {
+
+		return new DateValueImpl(calendar.get(Calendar.YEAR),
+			calendar.get(Calendar.MONTH) + 1,
+			calendar.get(Calendar.DAY_OF_MONTH));
+	}
+
+	private Calendar _toJCalendar(DateValue dateValue, TimeZone timeZone) {
+
+		return JCalendarUtil.getJCalendar(dateValue.year(),
+			dateValue.month() - 1, dateValue.day(), 23, 59, 59, 990, timeZone);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(MeetingsPortlet.class);
