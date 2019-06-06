@@ -24,7 +24,7 @@ java.util.Calendar nowJCalendar = CalendarFactoryUtil.getCalendar(calendarBookin
 long startTime = BeanPropertiesUtil.getLong(calendarBooking, "startTime", nowJCalendar.getTimeInMillis());
 java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(startTime, calendarBookingTimeZone);
 
-int count = 5;
+int count = 7;
 String exceptionDatesString = StringPool.BLANK;
 Frequency frequency = null;
 int interval = 0;
@@ -218,7 +218,7 @@ if (recurrence != null) {
 								yearValue="<%= untilJCalendar.get(java.util.Calendar.YEAR) %>"
 							/>
 							<div class="form-validator-stack help-block"
-								id="<portlet:namespace />utilDateError">
+								id="<portlet:namespace />untilDateError">
 								<div role="alert" class="required"></div>
 							</div>
 						</div>
@@ -246,8 +246,8 @@ if (recurrence != null) {
 	var meetingRepeatCheckboxNode = A.one('#<portlet:namespace />repeat');
 	var meetingSummaryNode = A.one('#<portlet:namespace />summary');
 	var untilDateDatePicker = Liferay.component('<%= renderResponse.getNamespace() + HtmlUtil.getAUICompatibleId("untilDateDatePicker") %>');
-	var utilDateError = A.one('#<portlet:namespace />utilDateError');
-	var isUntilDateExceeded = 'false';
+	var untilDateError = A.one('#<portlet:namespace />untilDateError');
+	var untilDateExceededMaxOccurrences = false;
 
 	var meetingRecurrenceDialogController = new Liferay.MeetingRecurrenceDialogController(
 		{
@@ -270,7 +270,7 @@ if (recurrence != null) {
 			startDateDatePicker: Liferay.component('<portlet:namespace />startDateDatePicker'),
 			startTimeDayOfWeekInput: '#<portlet:namespace />weekdaysCheckbox',
 			weeklyRecurrenceOptions: '#<portlet:namespace />view<%= Frequency.WEEKLY %>'
-			
+
 		}
 	);
 
@@ -396,10 +396,10 @@ if (recurrence != null) {
 	}, 'esc');
 
 	untilDateDatePicker.after('selectionChange', function(event){
-		window.<portlet:namespace />validateUtilDate();
-	});	
+		window.<portlet:namespace />validateUntilDate();
+	});
 
-	window.<portlet:namespace />validateUtilDate = function() {
+	window.<portlet:namespace />validateUntilDate = function() {
 		A.io.request(
 			'<%=checkMaxOccurrenceURL.toString()%>',
 			{
@@ -411,17 +411,18 @@ if (recurrence != null) {
 				on: {
 					success: function() {
 						var response = this.get('responseData');
+						var untilDateErrorDiv = A.one('#<portlet:namespace />untilDateError div');
 
-						if(response.valid == 'false'){
-							utilDateError.show();
+						if(!response.valid){
+							untilDateError.show();
 							var errorText = response.errorMessage
-							A.one('#<portlet:namespace />utilDateError div').setHTML(errorText);
-							isUntilDateExceeded = 'true';
+							untilDateErrorDiv.setHTML(errorText);
+							untilDateExceededMaxOccurrences = true;
 						}
 						else {
-							A.one('#<portlet:namespace />utilDateError div').setHTML('');
-							utilDateError.hide();
-							isUntilDateExceeded = 'false';
+							untilDateErrorDiv.setHTML('');
+							untilDateError.hide();
+							untilDateExceededMaxOccurrences = false;
 						}
 					}
 				}
@@ -438,7 +439,7 @@ if (recurrence != null) {
 			}
 		}
 		else {
-			if (isUntilDateExceeded === 'false') {
+			if (!untilDateExceededMaxOccurrences) {
 				window.<portlet:namespace />meetingRecurrenceDialog.hide();
 			}
 		}
@@ -457,11 +458,9 @@ if (recurrence != null) {
 						}
 					}
 				}
-				else {
-					if (isUntilDateExceeded === 'true') {
-						if (event.prevVal === true) {
-							event.newVal = true;
-						}
+				else if (untilDateExceededMaxOccurrences) {
+					if (event.prevVal === true) {
+						event.newVal = true;
 					}
 				}
 
@@ -479,7 +478,7 @@ if (recurrence != null) {
 			A.one('#<portlet:namespace />count').val(<%= count %>);
 		}
 
-		window.<portlet:namespace />validateUtilDate();
-		isUntilDateExceeded = 'false';
+		window.<portlet:namespace />validateUntilDate();
+		untilDateExceededMaxOccurrences = false;
 	}
 </aui:script>
