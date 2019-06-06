@@ -1045,7 +1045,30 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		if (Validator.isNotNull(recurrence.getUntilJCalendar()) &&
 			recurrence.getCount() <= 0) {
-			// TODO count occurrences from untilJCalendar
+
+			TimeZone timeZone = getTimeZone(actionRequest);
+
+			Calendar startTimeCalendar =
+				getJCalendar(actionRequest, "startTime", timeZone);
+			Calendar untilJCalendar =
+				getJCalendar(actionRequest, "untilDate", timeZone);
+
+			try {
+				Calendar limitDateJCalendar = _findLimitDate(recurrence, startTimeCalendar);
+
+				boolean isUntilDateExceededLimitDate =
+					Validator.isNotNull(limitDateJCalendar) &&
+						Validator.isNotNull(untilJCalendar) &&
+						untilJCalendar.after(limitDateJCalendar);
+
+				if (isUntilDateExceededLimitDate) {
+					throw new PortalException(
+						"occurrences-exceeded-50-times-please-choose-an-earlier-date");
+				}
+			}
+			catch (ParseException e) {
+				_log.warn("Error while parsing recurrence rule.", e);
+			}
 		}
 	}
 
