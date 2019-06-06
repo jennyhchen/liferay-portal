@@ -46,6 +46,7 @@ import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -71,10 +72,11 @@ import com.liferay.powwow.util.PowwowUtil;
 import com.liferay.util.bridges.mvc.MVCPortlet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOError;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.text.ParseException;
+import java.text.DateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,10 +96,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 
 /**
@@ -285,13 +284,7 @@ public class MeetingsPortlet extends MVCPortlet {
 			getUsers(resourceRequest, resourceResponse);
 		}
 		else if (resourceID.equals("checkMaxOccurrence")) {
-			try {
-				checkMaxOccurrenceDate(resourceRequest, resourceResponse);
-			} catch (InvalidRecurrenceRuleException e) {
-				_log.error("Error while check max occurrence date", e);
-			} catch (PortalException e) {
-				_log.error("Error while check max occurrence date", e);
-			}
+			checkMaxOccurrenceDate(resourceRequest, resourceResponse);
 		}
 		else {
 			super.serveResource(resourceRequest, resourceResponse);
@@ -400,59 +393,74 @@ public class MeetingsPortlet extends MVCPortlet {
 		}
 	}
 
-	protected void checkMaxOccurrenceDate(ResourceRequest resourceRequest, ResourceResponse resourceResponse)
-		throws IOException, InvalidRecurrenceRuleException, PortalException {
-
-		ServiceContext serviceContext = ServiceContextFactory.getInstance(PowwowMeeting.class.getName(),
-			resourceRequest);
-
-		DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/yyyy");
-		JSONObject jsonResponse = JSONFactoryUtil.createJSONObject();
-		LocalDate maxDateOccurrence = null;
-
-		TimeZone getTimeZone = getTimeZone(resourceRequest);
-		Calendar startTimeCalendar = getJCalendar(resourceRequest, "startTime", getTimeZone);
-		LocalDate startDate = LocalDate.fromCalendarFields(startTimeCalendar);
-
-		Recurrence recurrence = getRecurrence(resourceRequest);
-
-		String rRule = RecurrenceSerializer.serialize(recurrence);
+	protected void checkMaxOccurrenceDate(
+			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
+		throws IOException {
 
 		try {
-			LocalDateIterable iterator = LocalDateIteratorFactory.createLocalDateIterable(rRule, startDate, true);
-			Iterator<LocalDate> it = iterator.iterator();
-			int i = 50;
+			JSONObject jsonResponse = JSONFactoryUtil.createJSONObject();
+			LocalDate maxDateOccurrence = null;
 
-			while (i-- > 0 && it.hasNext()) {
-				if (i == 0) {
-					maxDateOccurrence = it.next();
+			TimeZone getTimeZone = getTimeZone(resourceRequest);
+			Calendar startTimeCalendar =
+				getJCalendar(resourceRequest, "startTime", getTimeZone);
+			LocalDate startDate =
+				LocalDate.fromCalendarFields(startTimeCalendar);
+
+			Recurrence recurrence = getRecurrence(resourceRequest);
+
+			String rRule = RecurrenceSerializer.serialize(recurrence);
+
+			LocalDateIterable localDateIterable =
+				LocalDateIteratorFactory.createLocalDateIterable(
+					rRule, startDate, true);
+
+			Iterator<LocalDate> iterator = localDateIterable.iterator();
+
+			for (int i = 1; i <= 50 && iterator.hasNext(); i++) {
+
+				if (i == 50) {
+					maxDateOccurrence = iterator.next();
+					break;
 				}
-				else {
-					it.next();
-				}
+
+				iterator.next();
 			}
+
+			Calendar untilJCalendar =
+				getJCalendar(resourceRequest, "untilDate", getTimeZone);
+
+			LocalDate untilLocalDate =
+				LocalDate.fromCalendarFields(untilJCalendar);
+
+			boolean isValid = true;
+
+			if (Validator.isNotNull(maxDateOccurrence) &&
+				untilLocalDate.isAfter(maxDateOccurrence)) {
+
+				DateFormat dateFormat = DateFormatFactoryUtil.getDate(resourceRequest.getLocale());
+
+				String maxDateFormatted = dateFormat.format(maxDateOccurrence.toDate());
+
+				String errorMessage = LanguageUtil.format(
+					resourceRequest.getLocale(),
+					"occurrences-exceeded-50-times-please-choose-a-date-that-not-after-x",
+					maxDateFormatted);
+
+				jsonResponse.put("errorMessage", errorMessage);
+
+				isValid = false;
+			}
+
+			jsonResponse.put("valid", isValid);
+
+			writeJSON(resourceRequest, resourceResponse, jsonResponse);
 		}
-		catch (ParseException e) {
+		catch (Exception e) {
 			_log.error("Error while get max occurrence date", e);
+
+			throw new IOError(e);
 		}
-
-		Calendar untilJCalendar = getJCalendar(resourceRequest, "untilDate", getTimeZone);
-		LocalDate untilDayPick = LocalDate.fromCalendarFields(untilJCalendar);
-
-		if (Validator.isNotNull(maxDateOccurrence)) {
-			if (untilDayPick.isAfter(maxDateOccurrence)) {
-				String maxDate = maxDateOccurrence.toString(formatter);
-
-				jsonResponse.put("valid", "false");
-				jsonResponse.put("errorMessage", LanguageUtil.format(serviceContext.getLocale(),
-					"occurrences-exceeded-50-times-please-choose-a-date-that-not-after-x", maxDate));
-			}
-			else {
-				jsonResponse.put("valid", "true");
-			}
-		}
-
-		writeJSON(resourceRequest, resourceResponse, jsonResponse);
 	}
 
 	protected void exportPowwowMeetingCalendar(
@@ -693,8 +701,8 @@ public class MeetingsPortlet extends MVCPortlet {
 		return map;
 	}
 
-	protected Recurrence getRecurrence(ActionRequest actionRequest) {
-		boolean repeat = ParamUtil.getBoolean(actionRequest, "repeat");
+	protected Recurrence getRecurrence(PortletRequest portletRequest) {
+		boolean repeat = ParamUtil.getBoolean(portletRequest, "repeat");
 
 		if (!repeat) {
 			return null;
@@ -704,33 +712,33 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		int count = 0;
 
-		String ends = ParamUtil.getString(actionRequest, "ends");
+		String ends = ParamUtil.getString(portletRequest, "ends");
 
 		if (ends.equals("after")) {
-			count = ParamUtil.getInteger(actionRequest, "count");
+			count = ParamUtil.getInteger(portletRequest, "count");
 		}
 
 		recurrence.setCount(count);
 
 		Frequency frequency = Frequency.parse(
-			ParamUtil.getString(actionRequest, "frequency"));
+			ParamUtil.getString(portletRequest, "frequency"));
 
 		recurrence.setFrequency(frequency);
 
-		int interval = ParamUtil.getInteger(actionRequest, "interval");
+		int interval = ParamUtil.getInteger(portletRequest, "interval");
 
 		recurrence.setInterval(interval);
 
-		TimeZone timeZone = getTimeZone(actionRequest);
+		TimeZone timeZone = getTimeZone(portletRequest);
 
 		recurrence.setTimeZone(timeZone);
 
 		Calendar startTimeJCalendar = getJCalendar(
-			actionRequest, "startTime", timeZone);
+			portletRequest, "startTime", timeZone);
 
 		if (ends.equals("on")) {
 			Calendar untilJCalendar = getJCalendar(
-				actionRequest, "untilDate", timeZone);
+				portletRequest, "untilDate", timeZone);
 
 			untilJCalendar = JCalendarUtil.mergeJCalendar(
 				untilJCalendar, startTimeJCalendar, timeZone);
@@ -742,10 +750,10 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		if (frequency == Frequency.WEEKLY) {
 			String[] weekdayValues = ParamUtil.getParameterValues(
-				actionRequest, "weekdays");
+				portletRequest, "weekdays");
 
 			String weekdaysCheckbox =
-				ParamUtil.getString(actionRequest, "weekdaysCheckbox");
+				ParamUtil.getString(portletRequest, "weekdaysCheckbox");
 			weekdayValues = ArrayUtil.append(weekdayValues, new String[] {
 				weekdaysCheckbox
 			});
@@ -770,20 +778,20 @@ public class MeetingsPortlet extends MVCPortlet {
 			(frequency == Frequency.YEARLY)) {
 
 			boolean repeatOnWeekday = ParamUtil.getBoolean(
-				actionRequest, "repeatOnWeekday");
+				portletRequest, "repeatOnWeekday");
 
 			if (repeatOnWeekday) {
-				int position = ParamUtil.getInteger(actionRequest, "position");
+				int position = ParamUtil.getInteger(portletRequest, "position");
 
 				Weekday weekday = Weekday.parse(
-					ParamUtil.getString(actionRequest, "weekday"));
+					ParamUtil.getString(portletRequest, "weekday"));
 
 				positionalWeekdays.add(
 					new PositionalWeekday(weekday, position));
 
 				if (frequency == Frequency.YEARLY) {
 					List<Integer> months = Arrays.asList(
-						ParamUtil.getInteger(actionRequest, "startTimeMonth"));
+						ParamUtil.getInteger(portletRequest, "startTimeMonth"));
 
 					recurrence.setMonths(months);
 				}
@@ -793,112 +801,13 @@ public class MeetingsPortlet extends MVCPortlet {
 		recurrence.setPositionalWeekdays(positionalWeekdays);
 
 		String[] exceptionDates = StringUtil.split(
-			ParamUtil.getString(actionRequest, "exceptionDates"));
+			ParamUtil.getString(portletRequest, "exceptionDates"));
 
 		for (String exceptionDate : exceptionDates) {
 			recurrence.addExceptionDate(
 				JCalendarUtil.getJCalendar(Long.valueOf(exceptionDate)));
 		}
 
-		return recurrence;
-	}
-
-	protected Recurrence getRecurrence(ResourceRequest resourceRequest) {
-		boolean repeat = ParamUtil.getBoolean(resourceRequest, "repeat");
-
-		if (!repeat) {
-			return null;
-		}
-
-		Recurrence recurrence = new Recurrence();
-
-		int count = 0;
-
-		String ends = ParamUtil.getString(resourceRequest, "ends");
-
-		if (ends.equals("after")) {
-			count = ParamUtil.getInteger(resourceRequest, "count");
-		}
-
-		recurrence.setCount(count);
-
-		Frequency frequency = Frequency.parse(
-			ParamUtil.getString(resourceRequest, "frequency"));
-
-		recurrence.setFrequency(frequency);
-
-		int interval = ParamUtil.getInteger(resourceRequest, "interval");
-
-		recurrence.setInterval(interval);
-
-		TimeZone timeZone = getTimeZone(resourceRequest);
-
-		recurrence.setTimeZone(timeZone);
-
-		Calendar startTimeJCalendar = getJCalendar(
-				resourceRequest, "startTime", timeZone);
-
-		List<PositionalWeekday> positionalWeekdays = new ArrayList<>();
-
-		if (frequency == Frequency.WEEKLY) {
-			String[] weekdayValues = ParamUtil.getParameterValues(
-					resourceRequest, "weekdays");
-
-			String weekdaysCheckbox =
-				ParamUtil.getString(resourceRequest, "weekdaysCheckbox");
-			if(weekdayValues[0].equals("false")) {
-				weekdayValues = new String[] { weekdaysCheckbox };
-			}else {
-				weekdayValues = ArrayUtil.append(weekdayValues, new String[] {
-						weekdaysCheckbox
-					});
-			}
-
-			for (String weekdayValue : weekdayValues) {
-				Weekday weekday = Weekday.parse(weekdayValue);
-				Calendar weekdayJCalendar =
-					JCalendarUtil.getJCalendar(
-						startTimeJCalendar.getTimeInMillis(), timeZone);
-				weekdayJCalendar.set(
-					Calendar.DAY_OF_WEEK,
-					weekday.getCalendarWeekday());
-
-				weekday = Weekday.getWeekday(weekdayJCalendar);
-				positionalWeekdays.add(new PositionalWeekday(weekday, 0));
-			}
-		}
-		else if (frequency == Frequency.MONTHLY) {
-
-			boolean repeatOnWeekday = ParamUtil.getBoolean(
-					resourceRequest, "repeatOnWeekday");
-
-			if (repeatOnWeekday) {
-				int position = ParamUtil.getInteger(resourceRequest, "position");
-
-				Weekday weekday = Weekday.parse(
-					ParamUtil.getString(resourceRequest, "weekday"));
-
-				positionalWeekdays.add(
-					new PositionalWeekday(weekday, position));
-
-				if (frequency == Frequency.YEARLY) {
-					List<Integer> months = Arrays.asList(
-						ParamUtil.getInteger(resourceRequest, "startTimeMonth"));
-
-					recurrence.setMonths(months);
-				}
-			}
-		}
-
-		recurrence.setPositionalWeekdays(positionalWeekdays);
-
-		String[] exceptionDates = StringUtil.split(
-			ParamUtil.getString(resourceRequest, "exceptionDates"));
-
-		for (String exceptionDate : exceptionDates) {
-			recurrence.addExceptionDate(
-				JCalendarUtil.getJCalendar(Long.valueOf(exceptionDate)));
-		}
 		return recurrence;
 	}
 
