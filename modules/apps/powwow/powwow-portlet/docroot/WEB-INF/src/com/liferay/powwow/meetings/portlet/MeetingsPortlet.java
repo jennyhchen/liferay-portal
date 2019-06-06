@@ -1035,7 +1035,9 @@ public class MeetingsPortlet extends MVCPortlet {
 		}
 
 		boolean isValidNumberOfOccurrence =
-			recurrence.getCount() >= 2 && recurrence.getCount() <= 50;
+			(Validator.isNotNull(recurrence.getUntilJCalendar()) &&
+				recurrence.getCount() <= 0) ||
+				(recurrence.getCount() >= 2 && recurrence.getCount() <= 50);
 
 		if (!isValidNumberOfOccurrence) {
 			throw new PortalException("invalid-number-of-occurrence");
