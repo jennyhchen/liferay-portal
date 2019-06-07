@@ -41,7 +41,10 @@ if (calendarBooking != null) {
 }
 
 if (recurrence != null) {
-	count = recurrence.getCount();
+	if (recurrence.getCount() > 1) {
+		count = recurrence.getCount();
+	}
+
 	frequency = recurrence.getFrequency();
 	interval = recurrence.getInterval();
 

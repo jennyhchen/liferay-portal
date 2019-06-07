@@ -745,14 +745,22 @@ public class MeetingsPortlet extends MVCPortlet {
 		List<PositionalWeekday> positionalWeekdays = new ArrayList<>();
 
 		if (frequency == Frequency.WEEKLY) {
-			String[] weekdayValues = ParamUtil.getParameterValues(
+			String[] weekdayValues = ParamUtil.getStringValues(
 				portletRequest, "weekdays");
 
 			String weekdaysCheckbox =
 				ParamUtil.getString(portletRequest, "weekdaysCheckbox");
-			weekdayValues = ArrayUtil.append(weekdayValues, new String[] {
-				weekdaysCheckbox
-			});
+
+			if (weekdayValues.length == 1 && weekdayValues[0].equals("false")) {
+				weekdayValues = new String[] {
+					weekdaysCheckbox
+				};
+			}
+			else {
+				weekdayValues = ArrayUtil.append(weekdayValues, new String[] {
+					weekdaysCheckbox
+				});
+			}
 
 			for (String weekdayValue : weekdayValues) {
 				Weekday weekday = Weekday.parse(weekdayValue);
