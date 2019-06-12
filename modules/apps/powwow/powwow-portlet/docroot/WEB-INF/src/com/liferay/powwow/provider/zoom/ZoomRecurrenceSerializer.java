@@ -103,12 +103,13 @@ public class ZoomRecurrenceSerializer {
 		jsonRecurrence.put("repeat_interval", recurrence.getInterval());
 
 		Calendar untilJCalendar = recurrence.getUntilJCalendar();
-		untilJCalendar.set(Calendar.HOUR, 23);
-		untilJCalendar.set(Calendar.MINUTE, 59);
-		untilJCalendar.set(Calendar.SECOND, 59);
-		untilJCalendar.set(Calendar.MILLISECOND, 990);
 
 		if (Validator.isNotNull(untilJCalendar) && recurrence.getCount() < 1) {
+
+			untilJCalendar.set(Calendar.HOUR, 23);
+			untilJCalendar.set(Calendar.MINUTE, 59);
+			untilJCalendar.set(Calendar.SECOND, 59);
+			untilJCalendar.set(Calendar.MILLISECOND, 990);
 
 			String zoomDateTimeUTC = PowwowServiceProviderUtil.toZoomDateTimeUTC(untilJCalendar);
 			jsonRecurrence.put("end_date_time", zoomDateTimeUTC);
