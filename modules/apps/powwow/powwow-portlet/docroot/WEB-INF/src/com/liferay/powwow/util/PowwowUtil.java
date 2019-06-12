@@ -296,7 +296,7 @@ public class PowwowUtil {
 			timeZoneDisplayName = timeZone.getDisplayName();
 
 			if (calendarBooking.isRecurring()) {
-				recurrenceSumary = getRecurrenceSummary(calendarBooking.getRecurrenceObj(), serviceContext);
+				recurrenceSumary = "Repeat: "+ getRecurrenceSummary(calendarBooking.getRecurrenceObj(), serviceContext);
 			}
 		}
 

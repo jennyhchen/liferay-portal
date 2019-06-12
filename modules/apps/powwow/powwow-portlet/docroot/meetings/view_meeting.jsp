@@ -51,8 +51,8 @@ portletURL.setParameter("backURL", backURL);
 			<liferay-ui:message key="meeting-url" />
 		</dt>
 		<dd>
-			<input id="<portlet:namespace />meetingURL" readonly="readonly" type="text" 
-				value="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, request) %>" style="width: 760px;" />
+			<input id="<portlet:namespace />meetingURL" readonly="readonly" type="text"
+				value="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, request) %>"/>
 
 			<button class="zeroclipboard-button" data-clipboard-text="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, request) %>" data-copied="<liferay-ui:message key="copied" />" data-hover="<liferay-ui:message key="copy-to-clipboard" />" id="<portlet:namespace />copyButton">
 				<i class="icon-copy"></i>
@@ -129,7 +129,7 @@ portletURL.setParameter("backURL", backURL);
 			<liferay-ui:message key="participants" />
 		</dt>
 		<dd>
-			<liferay-ui:search-container 
+			<liferay-ui:search-container
 				total="<%= PowwowParticipantLocalServiceUtil.getPowwowParticipantsCount(powwowMeetingId) %>"
 				iteratorURL="<%= portletURL %>"
 			>

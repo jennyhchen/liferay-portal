@@ -1,13 +1,21 @@
 @import "compass";
 @import "mixins";
 
-#portlet_1_WAR_powwowportlet .lfr-search-container {
+.powwow-portlet .lfr-search-container {
 	margin-top: 0px !important;
 }
 
-#portlet_1_WAR_powwowportlet .meeting-body, .meeting-url, .meeting-password, .join-by-phone, .recurrence {
+.powwow-portlet .meeting-container .meeting-body,
+.powwow-portlet .meeting-container .meeting-url,
+.powwow-portlet .meeting-container .meeting-password,
+.powwow-portlet .meeting-container .join-by-phone,
+.powwow-portlet .recurrence {
 	padding-bottom: 15px ;
 }
+
+ .powwow-portlet .meeting-container .meeting-url input.only {
+	width: 80%;
+ }
 
 .powwow-portlet {
 
