@@ -41,10 +41,6 @@ if (calendarBooking != null) {
 }
 
 if (recurrence != null) {
-	if (recurrence.getCount() > 1) {
-		count = recurrence.getCount();
-	}
-
 	frequency = recurrence.getFrequency();
 	interval = recurrence.getInterval();
 
@@ -52,18 +48,17 @@ if (recurrence != null) {
 		positionalWeekday = recurrence.getPositionalWeekday();
 	}
 
-	if (recurrence.getUntilJCalendar() != null) {
-		untilJCalendar = recurrence.getUntilJCalendar();
-	}
-
 	weekdays = recurrence.getWeekdays();
 
-	if (count > 0) {
+	if (recurrence.getCount() > 1) {
+		count = recurrence.getCount();
 		afterChecked = true;
+		onChecked = false;
 	}
-
-	if (recurrence.getUntilJCalendar() != null) {
+	else if (recurrence.getUntilJCalendar() != null) {
+		untilJCalendar = recurrence.getUntilJCalendar();
 		onChecked = true;
+		afterChecked = false;
 	}
 
 	StringBundler sb = new StringBundler();
