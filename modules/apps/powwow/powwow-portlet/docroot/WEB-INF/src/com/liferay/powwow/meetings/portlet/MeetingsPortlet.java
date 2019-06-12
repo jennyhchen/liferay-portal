@@ -399,6 +399,9 @@ public class MeetingsPortlet extends MVCPortlet {
 			jsonObject.put("success", true);
 		}
 		catch (Exception e) {
+
+			_log.error("Error while updating meeting.", e);
+
 			jsonObject.put(
 				"message",
 				translate(actionRequest, e.getMessage()));
