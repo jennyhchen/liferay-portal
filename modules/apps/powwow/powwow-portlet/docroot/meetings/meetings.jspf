@@ -28,6 +28,9 @@ String orderByCol = ParamUtil.getString(request, "orderByCol", "date");
 String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 
 portletURL.setParameter("tabs1", tabs1);
+
+Format recurringDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat(
+	"MM/dd/yyyy", locale, timeZone);
 %>
 
 <div class="view-meetings">
@@ -133,6 +136,40 @@ portletURL.setParameter("tabs1", tabs1);
 					timeZone="<%= timeZone.getDisplayName(false, 0) %>"
 					value="<%= startCalendar.getTime() %>"
 				/>
+
+				<%
+				String recurrenceLabel = StringPool.BLANK;
+
+				if(calendarBooking != null && calendarBooking.isRecurring()){
+					Recurrence recurrence = calendarBooking.getRecurrenceObj();
+
+					StringBuilder sb = new StringBuilder();
+					sb.append(LanguageUtil.get(locale, "recurring"));
+					sb.append(StringPool.COMMA_AND_SPACE);
+
+					if(recurrence.getCount() > 1){
+						int count = recurrence.getCount();
+
+						sb.append(count);
+						sb.append(StringPool.SPACE);
+						sb.append(LanguageUtil.get(locale, "times"));
+					}
+					else if(Validator.isNotNull(recurrence.getUntilJCalendar())){
+						Calendar untilCalendar = recurrence.getUntilJCalendar();
+
+						sb.append(LanguageUtil.get(locale, "until"));
+						sb.append(StringPool.SPACE);
+						sb.append(recurringDateFormat.format(untilCalendar.getTime()));
+					}
+
+					recurrenceLabel = sb.toString();
+				}
+				%>
+
+				<c:if test="<%= recurrenceLabel.length() > 0 %>">
+					<br/>
+					(<%= recurrenceLabel %>)
+				</c:if>
 			</liferay-ui:search-container-column-text>
 
 			<liferay-ui:search-container-column-text
