@@ -83,9 +83,9 @@ page import="com.liferay.powwow.util.ActionKeys" %><%@
 page import="com.liferay.powwow.util.PortletPropsValues" %><%@
 page import="com.liferay.powwow.util.PowwowUtil" %>
 
-<%@ page import="java.text.Format" %>
-
-<%@ page import="java.util.ArrayList" %><%@
+<%@ page import="java.lang.StringBuilder" %><%@
+page import="java.text.Format" %><%@
+page import="java.util.ArrayList" %><%@
 page import="java.util.Arrays" %><%@
 page import="java.util.Calendar" %><%@
 page import="java.util.Collections" %><%@
