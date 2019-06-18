@@ -14,7 +14,10 @@
 
 package com.liferay.powwow.model.impl;
 
+import com.liferay.calendar.model.CalendarBooking;
+import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
 
@@ -41,6 +44,15 @@ public class PowwowMeetingImpl extends PowwowMeetingBaseImpl {
 				providerTypeMetadata);
 
 		return _providerTypeMetadataMap;
+	}
+
+	public boolean isRecurring() {
+
+		CalendarBooking calendarBooking = CalendarBookingLocalServiceUtil
+			.fetchCalendarBooking(getCalendarBookingId());
+
+		return Validator.isNotNull(calendarBooking) &&
+			calendarBooking.isRecurring();
 	}
 
 	private Map<String, Serializable> _providerTypeMetadataMap;

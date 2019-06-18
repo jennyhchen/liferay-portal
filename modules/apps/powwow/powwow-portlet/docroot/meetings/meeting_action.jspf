@@ -16,9 +16,11 @@
 
 <%
 PowwowParticipant userPowwowParticipant = PowwowParticipantLocalServiceUtil.fetchPowwowParticipant(powwowMeeting.getPowwowMeetingId(), user.getEmailAddress());
+boolean isEditable = PowwowMeetingPermission.contains(permissionChecker, powwowMeeting, userPowwowParticipant, ActionKeys.UPDATE)
+						&& (powwowMeeting.getStatus() != PowwowMeetingConstants.STATUS_IN_PROGRESS);
 %>
 
-<c:if test="<%= PowwowMeetingPermission.contains(permissionChecker, powwowMeeting, userPowwowParticipant, ActionKeys.UPDATE) && (powwowMeeting.getStatus() != PowwowMeetingConstants.STATUS_IN_PROGRESS) %>">
+<c:if test="<%= isEditable %>">
 	<portlet:renderURL var="editURL">
 		<portlet:param name="mvcPath" value="/meetings/edit_meeting.jsp" />
 		<portlet:param name="redirect" value="<%= currentURL %>" />
@@ -30,6 +32,21 @@ PowwowParticipant userPowwowParticipant = PowwowParticipantLocalServiceUtil.fetc
 		label="<%= true %>"
 		message='<%= (powwowMeeting.getStatus() == PowwowMeetingConstants.STATUS_SCHEDULED) ? "edit" : "reschedule" %>'
 		url="<%= editURL %>"
+	/>
+</c:if>
+
+<c:if test="<%= isEditable && powwowMeeting.isRecurring() %>">
+	<portlet:renderURL var="viewOccurrencesURL">
+		<portlet:param name="mvcPath" value="/meetings/view_occurrences.jsp" />
+		<portlet:param name="redirect" value="<%= currentURL %>" />
+		<portlet:param name="powwowMeetingId" value="<%= String.valueOf(powwowMeeting.getPowwowMeetingId()) %>" />
+	</portlet:renderURL>
+
+	<liferay-ui:icon
+		iconCssClass="icon-edit"
+		label="<%= true %>"
+		message='edit-occurrence'
+		url="<%= viewOccurrencesURL %>"
 	/>
 </c:if>
 
