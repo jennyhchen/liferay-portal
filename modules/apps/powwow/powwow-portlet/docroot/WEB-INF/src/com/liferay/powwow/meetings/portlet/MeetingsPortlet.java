@@ -47,6 +47,7 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -63,10 +64,12 @@ import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowMeetingConstants;
 import com.liferay.powwow.model.PowwowParticipant;
 import com.liferay.powwow.model.PowwowParticipantConstants;
+import com.liferay.powwow.occurrence.OccurrenceStatus;
 import com.liferay.powwow.provider.PowwowServiceProvider;
 import com.liferay.powwow.provider.PowwowServiceProviderUtil;
 import com.liferay.powwow.provider.zoom.ZoomRecurrenceSerializer;
 import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
+import com.liferay.powwow.service.PowwowMeetingOccurrenceLocalServiceUtil;
 import com.liferay.powwow.service.PowwowMeetingServiceUtil;
 import com.liferay.powwow.service.PowwowParticipantLocalServiceUtil;
 import com.liferay.powwow.util.PowwowSubscriptionSender;
@@ -126,6 +129,8 @@ public class MeetingsPortlet extends MVCPortlet {
 
 				PowwowServiceProviderUtil.deletePowwowMeeting(powwowMeetingId);
 			}
+
+			_deletePowwowMeetingOccurrence(powwowMeetingId);
 
 			PowwowMeetingServiceUtil.deletePowwowMeeting(powwowMeetingId);
 
@@ -369,7 +374,7 @@ public class MeetingsPortlet extends MVCPortlet {
 
 				String portletId = PortalUtil.getPortletId(actionRequest);
 
-				PowwowMeetingServiceUtil.addPowwowMeeting(
+				powwowMeeting = PowwowMeetingServiceUtil.addPowwowMeeting(
 					themeDisplay.getScopeGroupId(), portletId, powwowServerId, name,
 					description, providerTypeMetadataMap, languageId,
 					calendarBooking.getCalendarBookingId(),
@@ -388,12 +393,17 @@ public class MeetingsPortlet extends MVCPortlet {
 							powwowMeetingId, name, hostUserId, options);
 				}
 
-				PowwowMeetingServiceUtil.updatePowwowMeeting(
+				powwowMeeting = PowwowMeetingServiceUtil.updatePowwowMeeting(
 					powwowMeetingId, powwowMeeting.getPowwowServerId(), name,
 					description, providerTypeMetadataMap, languageId,
 					calendarBooking.getCalendarBookingId(),
 					PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
 					serviceContext);
+			}
+
+			if (calendarBooking.isRecurring()) {
+				addPowwowMeetingOccurrences(
+					powwowMeeting.getPowwowMeetingId(), powwowMeeting.getCalendarBookingId());
 			}
 
 			jsonObject.put("success", true);
@@ -409,6 +419,22 @@ public class MeetingsPortlet extends MVCPortlet {
 		}
 
 		writeJSON(actionRequest, actionResponse, jsonObject);
+	}
+
+	protected void addPowwowMeetingOccurrences(long powwowMeetingId, long calendarBookingId) throws Exception {
+
+		_deletePowwowMeetingOccurrence(powwowMeetingId);
+
+		JSONObject meetingJSONObject =
+			PowwowServiceProviderUtil.getMeetingJSONObject(powwowMeetingId);
+
+		JSONArray occurrencesJsonArray = meetingJSONObject.getJSONArray("occurrences");
+
+		for (int i = 0; i < occurrencesJsonArray.length(); i++) {
+			JSONObject occurrenceJSONObject = occurrencesJsonArray.getJSONObject(i);
+
+			_addPowwowMeetingOccurrence(occurrenceJSONObject, powwowMeetingId, calendarBookingId);
+		}
 	}
 
 	protected void checkMaxOccurrenceDate(
@@ -700,6 +726,24 @@ public class MeetingsPortlet extends MVCPortlet {
 		return map;
 	}
 
+	protected long getOccurenceEndTime(long startTime, int amount) {
+
+		Calendar endTimeCalendar = CalendarFactoryUtil.getCalendar();
+		endTimeCalendar.setTimeInMillis(startTime);
+
+		endTimeCalendar.add(Calendar.MINUTE, amount);
+
+		return endTimeCalendar.getTimeInMillis();
+	}
+
+	protected long getOccurenceStartTime(String startTimeJSONString, TimeZone timeZone) throws Exception {
+
+		Calendar startTimeCalendar = CalendarFactoryUtil.getCalendar(timeZone);
+		startTimeCalendar.setTime(occurrenceTimeFormat.parse(startTimeJSONString));
+
+		return startTimeCalendar.getTimeInMillis();
+	}
+
 	protected Recurrence getRecurrence(PortletRequest portletRequest) {
 		boolean repeat = ParamUtil.getBoolean(portletRequest, "repeat");
 
@@ -936,6 +980,26 @@ public class MeetingsPortlet extends MVCPortlet {
 		return calendarBooking;
 	}
 
+	private void _addPowwowMeetingOccurrence(
+		JSONObject occurrenceJSONObject, long powwowMeetingId, long calendarBookingId) throws Exception {
+
+		CalendarBooking calendarBooking = CalendarBookingLocalServiceUtil.fetchCalendarBooking(calendarBookingId);
+
+		TimeZone calendarBookingTimeZone = calendarBooking.getTimeZone();
+
+		String occurrenceId = occurrenceJSONObject.getString("occurrence_id");
+		String occurrenceStatus = OccurrenceStatus.parse(occurrenceJSONObject.getString("status")).getValue();
+		String zoomOriginalData = occurrenceJSONObject.toString();
+		String startTimeJSONString = occurrenceJSONObject.getString("start_time");
+		int duration = occurrenceJSONObject.getInt("duration", 0);
+
+		long startTime = getOccurenceStartTime(startTimeJSONString, calendarBookingTimeZone);
+		long endTime = getOccurenceEndTime(startTime, duration);
+
+		PowwowMeetingOccurrenceLocalServiceUtil.addPowwowMeetingOccurrence(powwowMeetingId, occurrenceId,
+			occurrenceStatus, zoomOriginalData, startTime, endTime, 0);
+	}
+
 	private void _addRecurrenceOptions(
 		CalendarBooking calendarBooking, Map<String, String> options) {
 
@@ -961,6 +1025,10 @@ public class MeetingsPortlet extends MVCPortlet {
 			options.put(PowwowMeetingConstants.OPTION_DURATION,
 				String.valueOf(minutes));
 		}
+	}
+
+	private void _deletePowwowMeetingOccurrence(long powwowMeetingId) {
+		PowwowMeetingOccurrenceLocalServiceUtil.deleteByPowwowMeetingId(powwowMeetingId);
 	}
 
 	private Calendar _findLimitDate(
@@ -1095,6 +1163,9 @@ public class MeetingsPortlet extends MVCPortlet {
 		return JCalendarUtil.getJCalendar(dateValue.year(),
 			dateValue.month() - 1, dateValue.day(), 23, 59, 59, 990, timeZone);
 	}
+
+	private static final DateFormat occurrenceTimeFormat = DateFormatFactoryUtil.getSimpleDateFormat(
+		"yyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone(StringPool.UTC));
 
 	private static final Log _log = LogFactoryUtil.getLog(MeetingsPortlet.class);
 }

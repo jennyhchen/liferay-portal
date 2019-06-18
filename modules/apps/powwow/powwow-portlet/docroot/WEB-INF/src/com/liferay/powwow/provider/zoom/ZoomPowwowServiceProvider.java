@@ -562,6 +562,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 		return responseJSONObject.getJSONArray("users");
 	}
 
+	@Override
 	protected JSONObject getZoomMeetingJSONObject(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting) {
 

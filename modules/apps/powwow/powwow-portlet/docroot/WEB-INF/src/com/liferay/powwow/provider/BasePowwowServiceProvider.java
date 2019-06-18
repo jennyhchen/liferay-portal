@@ -16,6 +16,7 @@ package com.liferay.powwow.provider;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.Http;
@@ -202,6 +203,18 @@ public abstract class BasePowwowServiceProvider
 	}
 
 	@Override
+	public JSONObject getMeetingJSONObject(long powwowMeetingId) {
+
+		PowwowMeeting powwowMeeting =
+			PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
+
+		PowwowServer powwowServer =
+			PowwowServerLocalServiceUtil.fetchPowwowServer(powwowMeeting.getPowwowServerId());
+
+		return getZoomMeetingJSONObject(powwowServer, powwowMeeting);
+	}
+
+	@Override
 	public boolean isFieldAPIKeyRequired() {
 		return false;
 	}
@@ -335,6 +348,8 @@ public abstract class BasePowwowServiceProvider
 	protected abstract String getJoinPowwowMeetingURL(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting, String name,
 		int type);
+
+	protected abstract JSONObject getZoomMeetingJSONObject(PowwowServer powwowServer, PowwowMeeting powwowMeeting);
 
 	protected abstract boolean getOptionAutoStartVideo(
 		PowwowMeeting powwowMeeting);
