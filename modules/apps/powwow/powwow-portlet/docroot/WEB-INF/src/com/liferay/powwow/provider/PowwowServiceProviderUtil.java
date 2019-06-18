@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowServer;
+
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -222,7 +223,7 @@ public class PowwowServiceProviderUtil {
 
 		TimeZone utcTimeZone = TimeZone.getTimeZone(StringPool.UTC);
 
-		DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(_ZOOM_UTC_DATETIME_PATTERN, utcTimeZone);
+		DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(ZOOM_UTC_DATETIME_PATTERN, utcTimeZone);
 
 		return dateFormat.format(JCalendarUtil.getJCalendar(calendar, utcTimeZone).getTime());
 	}
@@ -243,5 +244,6 @@ public class PowwowServiceProviderUtil {
 		return PowwowServiceProviderFactory.getPowwowServiceProvider();
 	}
 
-	private static String _ZOOM_UTC_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	public static final String ZOOM_UTC_DATETIME_PATTERN =
+		"yyyy-MM-dd'T'HH:mm:ss'Z'";
 }
