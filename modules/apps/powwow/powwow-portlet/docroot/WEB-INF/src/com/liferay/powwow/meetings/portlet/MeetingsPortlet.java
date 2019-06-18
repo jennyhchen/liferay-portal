@@ -399,11 +399,19 @@ public class MeetingsPortlet extends MVCPortlet {
 					calendarBooking.getCalendarBookingId(),
 					PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
 					serviceContext);
+
+				// update the whole series, so always delete occurrences
+				// TODO consider to check if recurring data has not changed?
+
+				_deletePowwowMeetingOccurrence(powwowMeetingId);
 			}
 
 			if (calendarBooking.isRecurring()) {
-				addPowwowMeetingOccurrences(
-					powwowMeeting.getPowwowMeetingId(), powwowMeeting.getCalendarBookingId());
+
+				//TODO: consider to check if recurring data has not changed?
+
+				addPowwowMeetingOccurrences(themeDisplay.getUserId(),
+					powwowMeeting, calendarBooking);
 			}
 
 			jsonObject.put("success", true);
@@ -421,19 +429,26 @@ public class MeetingsPortlet extends MVCPortlet {
 		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
 
-	protected void addPowwowMeetingOccurrences(long powwowMeetingId, long calendarBookingId) throws Exception {
+	protected void addPowwowMeetingOccurrences(
+			long userId, PowwowMeeting powwowMeeting, CalendarBooking calendarBooking)
+		throws Exception {
 
-		_deletePowwowMeetingOccurrence(powwowMeetingId);
+		long powwowMeetingId = powwowMeeting.getPowwowMeetingId();
 
 		JSONObject meetingJSONObject =
 			PowwowServiceProviderUtil.getMeetingJSONObject(powwowMeetingId);
 
-		JSONArray occurrencesJsonArray = meetingJSONObject.getJSONArray("occurrences");
+		JSONArray occurrencesJsonArray =
+			meetingJSONObject.getJSONArray("occurrences");
 
 		for (int i = 0; i < occurrencesJsonArray.length(); i++) {
-			JSONObject occurrenceJSONObject = occurrencesJsonArray.getJSONObject(i);
+			JSONObject occurrenceJSONObject =
+				occurrencesJsonArray.getJSONObject(i);
 
-			_addPowwowMeetingOccurrence(occurrenceJSONObject, powwowMeetingId, calendarBookingId);
+			TimeZone calendarBookingTimeZone = calendarBooking.getTimeZone();
+
+			_addPowwowMeetingOccurrence(occurrenceJSONObject, userId, powwowMeetingId,
+				calendarBookingTimeZone);
 		}
 	}
 
@@ -726,24 +741,6 @@ public class MeetingsPortlet extends MVCPortlet {
 		return map;
 	}
 
-	protected long getOccurenceEndTime(long startTime, int amount) {
-
-		Calendar endTimeCalendar = CalendarFactoryUtil.getCalendar();
-		endTimeCalendar.setTimeInMillis(startTime);
-
-		endTimeCalendar.add(Calendar.MINUTE, amount);
-
-		return endTimeCalendar.getTimeInMillis();
-	}
-
-	protected long getOccurenceStartTime(String startTimeJSONString, TimeZone timeZone) throws Exception {
-
-		Calendar startTimeCalendar = CalendarFactoryUtil.getCalendar(timeZone);
-		startTimeCalendar.setTime(occurrenceTimeFormat.parse(startTimeJSONString));
-
-		return startTimeCalendar.getTimeInMillis();
-	}
-
 	protected Recurrence getRecurrence(PortletRequest portletRequest) {
 		boolean repeat = ParamUtil.getBoolean(portletRequest, "repeat");
 
@@ -981,23 +978,28 @@ public class MeetingsPortlet extends MVCPortlet {
 	}
 
 	private void _addPowwowMeetingOccurrence(
-		JSONObject occurrenceJSONObject, long powwowMeetingId, long calendarBookingId) throws Exception {
+			JSONObject zoomOccurrenceJSONObject, long userId, long powwowMeetingId,
+			TimeZone calendarBookingTimeZone)
+		throws Exception {
 
-		CalendarBooking calendarBooking = CalendarBookingLocalServiceUtil.fetchCalendarBooking(calendarBookingId);
+		String occurrenceId = zoomOccurrenceJSONObject.getString("occurrence_id");
+		OccurrenceStatus occurrenceStatus = OccurrenceStatus.parse(zoomOccurrenceJSONObject.getString("status"));
+		String zoomOriginalData = zoomOccurrenceJSONObject.toString();
+		String startTimeJSONString = zoomOccurrenceJSONObject.getString("start_time");
+		int duration = zoomOccurrenceJSONObject.getInt("duration", 0);
 
-		TimeZone calendarBookingTimeZone = calendarBooking.getTimeZone();
+		Calendar calendar =
+			_parseZoomUtcTime(startTimeJSONString, calendarBookingTimeZone);
 
-		String occurrenceId = occurrenceJSONObject.getString("occurrence_id");
-		String occurrenceStatus = OccurrenceStatus.parse(occurrenceJSONObject.getString("status")).getValue();
-		String zoomOriginalData = occurrenceJSONObject.toString();
-		String startTimeJSONString = occurrenceJSONObject.getString("start_time");
-		int duration = occurrenceJSONObject.getInt("duration", 0);
+		long startTime = calendar.getTimeInMillis();
 
-		long startTime = getOccurenceStartTime(startTimeJSONString, calendarBookingTimeZone);
-		long endTime = getOccurenceEndTime(startTime, duration);
+		calendar.add(Calendar.MINUTE, duration);
 
-		PowwowMeetingOccurrenceLocalServiceUtil.addPowwowMeetingOccurrence(powwowMeetingId, occurrenceId,
-			occurrenceStatus, zoomOriginalData, startTime, endTime, 0);
+		long endTime = calendar.getTimeInMillis();
+
+		PowwowMeetingOccurrenceLocalServiceUtil.addPowwowMeetingOccurrence(
+			userId, occurrenceId, powwowMeetingId, occurrenceStatus,
+			zoomOriginalData, startTime, endTime, 0);
 	}
 
 	private void _addRecurrenceOptions(
@@ -1073,6 +1075,51 @@ public class MeetingsPortlet extends MVCPortlet {
 		Duration duration = Duration.ofMillis(
 			Math.abs(calendarBooking.getEndTime() - calendarBooking.getStartTime()));
 		return duration.abs().toMinutes();
+	}
+
+	private Calendar _getUtcCalendar() {
+
+		if (Validator.isNotNull(_utcCalendar)) {
+			return _utcCalendar;
+		}
+
+		_utcCalendar = CalendarFactoryUtil.getCalendar(_getUtcTimeZone());
+		return _utcCalendar;
+	}
+
+	private TimeZone _getUtcTimeZone() {
+
+		if (Validator.isNotNull(_utcTimeZone)) {
+			return _utcTimeZone;
+		}
+
+		_utcTimeZone = TimeZone.getTimeZone(StringPool.UTC);
+
+		return _utcTimeZone;
+	}
+
+	private DateFormat _getZoomUtcDateFormat() {
+
+		if (Validator.isNotNull(_zoomUtcDateFormat)) {
+			return _zoomUtcDateFormat;
+		}
+
+		_zoomUtcDateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
+			PowwowServiceProviderUtil.ZOOM_UTC_DATETIME_PATTERN,
+			_getUtcTimeZone());
+
+		return _zoomUtcDateFormat;
+	}
+
+	private Calendar _parseZoomUtcTime(String zoomUtcTimeString, TimeZone timeZone) throws Exception {
+
+		Calendar utcCalendar = _getUtcCalendar();
+
+		DateFormat zoomUtcDateFormat = _getZoomUtcDateFormat();
+
+		utcCalendar.setTime(zoomUtcDateFormat.parse(zoomUtcTimeString));
+
+		return JCalendarUtil.getJCalendar(utcCalendar, timeZone);
 	}
 
 	private void _validateRecurrence(ActionRequest actionRequest)
@@ -1164,8 +1211,9 @@ public class MeetingsPortlet extends MVCPortlet {
 			dateValue.month() - 1, dateValue.day(), 23, 59, 59, 990, timeZone);
 	}
 
-	private static final DateFormat occurrenceTimeFormat = DateFormatFactoryUtil.getSimpleDateFormat(
-		"yyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone(StringPool.UTC));
+	private Calendar _utcCalendar;
+	private TimeZone _utcTimeZone;
+	private DateFormat _zoomUtcDateFormat;
 
 	private static final Log _log = LogFactoryUtil.getLog(MeetingsPortlet.class);
 }
