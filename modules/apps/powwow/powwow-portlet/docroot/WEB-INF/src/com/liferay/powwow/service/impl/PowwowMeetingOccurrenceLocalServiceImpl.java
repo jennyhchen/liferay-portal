@@ -15,10 +15,14 @@
 package com.liferay.powwow.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.powwow.model.PowwowMeetingOccurrence;
+import com.liferay.powwow.occurrence.OccurrenceStatus;
 import com.liferay.powwow.service.base.PowwowMeetingOccurrenceLocalServiceBaseImpl;
+
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,21 +41,28 @@ import java.util.List;
 public class PowwowMeetingOccurrenceLocalServiceImpl
 	extends PowwowMeetingOccurrenceLocalServiceBaseImpl {
 
-	/*
-	 * NOTE FOR DEVELOPERS:
-	 *
-	 * Never reference this class directly. Use <code>com.liferay.powwow.service.PowwowMeetingOccurrenceLocalService</code> via injection or a <code>org.osgi.util.tracker.ServiceTracker</code> or use <code>com.liferay.powwow.service.PowwowMeetingOccurrenceLocalServiceUtil</code>.
-	 */
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public PowwowMeetingOccurrence addPowwowMeetingOccurrence(
-		long powwowMeetingId, String occurrenceId, String occurrenceStatus, String zoomOriginalData, long startTime,
-		long endTime, long calendarBookingId) throws PortalException {
+			long userId, String occurrenceId, long powwowMeetingId,
+			OccurrenceStatus occurrenceStatus, String zoomOriginalData, long startTime,
+			long endTime, long calendarBookingId)
+		throws PortalException {
 
-		PowwowMeetingOccurrence powwowMeetingOccurrence = powwowMeetingOccurrencePersistence.create(occurrenceId);
+		User user = userLocalService.getUser(userId);
+		Date now = new Date();
+
+		PowwowMeetingOccurrence powwowMeetingOccurrence =
+			powwowMeetingOccurrencePersistence.create(occurrenceId);
+
+		powwowMeetingOccurrence.setCompanyId(user.getCompanyId());
+		powwowMeetingOccurrence.setUserId(user.getUserId());
+		powwowMeetingOccurrence.setUserName(user.getFullName());
+		powwowMeetingOccurrence.setCreateDate(now);
+		powwowMeetingOccurrence.setModifiedDate(now);
 
 		powwowMeetingOccurrence.setPowwowMeetingId(powwowMeetingId);
-		powwowMeetingOccurrence.setOccurrenceStatus(occurrenceStatus);
+		powwowMeetingOccurrence.setOccurrenceStatus(occurrenceStatus.getValue());
 		powwowMeetingOccurrence.setZoomOriginalData(zoomOriginalData);
 		powwowMeetingOccurrence.setCalendarBookingId(calendarBookingId);
 		powwowMeetingOccurrence.setStartTime(startTime);
@@ -62,17 +73,22 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 		return powwowMeetingOccurrence;
 	}
 
-	@Indexable(type = IndexableType.DELETE)
-	public void deleteByPowwowMeetingId (long powwowMeetingId) {
-		List<PowwowMeetingOccurrence> meetingOccurrences =
-			powwowMeetingOccurrencePersistence.findByPowwowMeetingId(powwowMeetingId);
+	public void deleteByPowwowMeetingId(long powwowMeetingId) {
 
-		for(PowwowMeetingOccurrence meetingOccurrence: meetingOccurrences) {
-			powwowMeetingOccurrencePersistence.remove(meetingOccurrence);
+		List<PowwowMeetingOccurrence> meetingOccurrences =
+			powwowMeetingOccurrencePersistence
+				.findByPowwowMeetingId(powwowMeetingId);
+
+		for (PowwowMeetingOccurrence meetingOccurrence : meetingOccurrences) {
+			powwowMeetingOccurrenceLocalService
+				.deletePowwowMeetingOccurrence(meetingOccurrence);
 		}
 	}
 
-	public List<PowwowMeetingOccurrence> findByPowwowMeetingId(long powwowMeetingId){
-		return powwowMeetingOccurrencePersistence.findByPowwowMeetingId(powwowMeetingId);
+	public List<PowwowMeetingOccurrence> findByPowwowMeetingId(
+		long powwowMeetingId) {
+
+		return powwowMeetingOccurrencePersistence
+			.findByPowwowMeetingId(powwowMeetingId);
 	}
 }
