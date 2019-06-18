@@ -140,4 +140,32 @@
 
 		<reference entity="User" package-path="com.liferay.portal.kernel" />
 	</entity>
+	<entity local-service="true" name="PowwowMeetingOccurrence" remote-service="true">
+		<!-- PK fields -->
+
+		<column name="occurrenceId" primary="true" type="String" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="calendarBookingId" type="long" />
+		<column name="powwowMeetingId" type="long" />
+		<column name="zoomOriginalData" type="String" />
+		<column name="occurrenceStatus" type="String" />
+		<column name="startTime" type="long" />
+		<column name="endTime" type="long" />
+
+		<!-- Finder methods -->
+
+		<finder name="PowwowMeetingId" return-type="Collection">
+			<finder-column name="powwowMeetingId" />
+		</finder>
+	</entity>
 </service-builder>
