@@ -15,6 +15,7 @@
 package com.liferay.powwow.provider;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowServer;
 
@@ -74,6 +75,8 @@ public interface PowwowServiceProvider {
 	public String getPowwowServiceProviderKey();
 
 	public String getPowwowServiceProviderName();
+
+	public JSONObject getMeetingJSONObject(long powwowMeetingId);
 
 	public boolean isFieldAPIKeyRequired();
 

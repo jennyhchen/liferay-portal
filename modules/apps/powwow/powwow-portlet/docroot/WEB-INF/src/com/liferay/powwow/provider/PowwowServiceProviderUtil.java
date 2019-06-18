@@ -16,6 +16,7 @@ package com.liferay.powwow.provider;
 
 import com.liferay.calendar.util.JCalendarUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.powwow.model.PowwowMeeting;
@@ -150,6 +151,12 @@ public class PowwowServiceProviderUtil {
 		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
 
 		return powwowServiceProvider.getPowwowServiceProviderName();
+	}
+
+	public static JSONObject getMeetingJSONObject(long powwowMeetingId) {
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+
+		return powwowServiceProvider.getMeetingJSONObject(powwowMeetingId);
 	}
 
 	public static boolean isFieldAPIKeyRequired() {
