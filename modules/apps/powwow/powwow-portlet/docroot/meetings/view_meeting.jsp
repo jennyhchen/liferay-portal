@@ -119,7 +119,9 @@ portletURL.setParameter("backURL", backURL);
 				<liferay-ui:message key="repeat" />
 			</dt>
 			<dd>
-				<span id="<portlet:namespace />recurrenceSummary"></span>
+				<span>
+					<%= PowwowUtil.getRecurrenceSummary(calendarBooking.getRecurrenceObj(), locale) %>
+				</span>
 			</dd>
 		</div>
 	</c:if>
@@ -173,72 +175,6 @@ portletURL.setParameter("backURL", backURL);
 		</dd>
 	</div>
 </div>
-
-<c:if test="<%= calendarBooking.isRecurring() %>">
-
-	<aui:script use="liferay-meeting-calendar-recurrence-util">
-		var summaryNode = A.one('#<portlet:namespace />recurrenceSummary');
-
-		var endValue = '';
-		var untilDate = null;
-
-		<%
-		java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(calendarBooking.getStartTime(), userTimeZone);
-
-		Recurrence recurrence = calendarBooking.getRecurrenceObj();
-
-		java.util.Calendar untilJCalendar = recurrence.getUntilJCalendar();
-		%>
-
-		<c:choose>
-			<c:when test="<%= untilJCalendar != null %>">
-				endValue = 'on';
-
-				untilDate = new Date(<%= untilJCalendar.get(java.util.Calendar.YEAR) %>, <%= untilJCalendar.get(java.util.Calendar.MONTH) %>, <%= untilJCalendar.get(java.util.Calendar.DATE) %>);
-			</c:when>
-			<c:when test="<%= recurrence.getCount() > 0 %>">
-				endValue = 'after';
-			</c:when>
-		</c:choose>
-
-		<%
-		Frequency frequency = recurrence.getFrequency();
-
-		PositionalWeekday positionalWeekday = recurrence.getPositionalWeekday();
-
-		JSONSerializer jsonSerializer = JSONFactoryUtil.createJSONSerializer();
-
-		List<String> weekdayValues = new ArrayList<>();
-
-		for (Weekday weekday : recurrence.getWeekdays()) {
-			weekdayValues.add(weekday.getValue());
-		}
-		%>
-
-		var positionalWeekday = null;
-
-		<c:if test="<%= frequency.equals(Frequency.MONTHLY) && (positionalWeekday != null) %>">
-			positionalWeekday = {
-				month: <%= startTimeJCalendar.get(java.util.Calendar.MONTH) %>,
-				position: <%= positionalWeekday.getPosition() %>,
-				weekday: '<%= positionalWeekday.getWeekday() %>'
-			};
-		</c:if>
-
-		var recurrence = {
-			count: <%= recurrence.getCount() %>,
-			endValue: endValue,
-			frequency: '<%= String.valueOf(frequency) %>',
-			interval: <%= recurrence.getInterval() %>,
-			positionalWeekday: positionalWeekday,
-			untilDate: untilDate,
-			weekdays: <%= jsonSerializer.serialize(weekdayValues) %>
-		};
-		var recurrenceSummary = Liferay.MeetingRecurrenceUtil.getSummary(recurrence);
-
-		summaryNode.html(recurrenceSummary);
-	</aui:script>
-</c:if>
 
 <aui:script use="aui-base,swfdetect,aui-toggler,aui-datatable">
 	var copyButton = A.one('#<portlet:namespace />copyButton');
