@@ -49,6 +49,7 @@ import com.liferay.portal.kernel.util.Digester;
 import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -296,7 +297,9 @@ public class PowwowUtil {
 			timeZoneDisplayName = timeZone.getDisplayName();
 
 			if (calendarBooking.isRecurring()) {
-				recurrenceSumary = "Repeat: "+ getRecurrenceSummary(calendarBooking.getRecurrenceObj(), serviceContext);
+				recurrenceSumary = "Repeat: " +
+					getRecurrenceSummary(calendarBooking.getRecurrenceObj(),
+						serviceContext.getLocale());
 			}
 		}
 
@@ -352,11 +355,13 @@ public class PowwowUtil {
 		return powwowSubscriptionSender;
 	}
 
-	public static String getRecurrenceSummary(Recurrence recurrence, ServiceContext serviceContext) {
+	public static String getRecurrenceSummary(Recurrence recurrence, Locale locale) {
 
 		String recurrenceSummary = StringPool.BLANK;
 
-		Locale locale = serviceContext.getLocale();
+		if (Validator.isNull(locale)) {
+			locale = LocaleThreadLocal.getDefaultLocale();
+		}
 
 		StringBuilder sb = new StringBuilder();
 
