@@ -1,7 +1,5 @@
 package com.liferay.powwow.occurrence;
 
-import java.util.Objects;
-
 /**
  * @author Vu Ho
  */
@@ -10,20 +8,23 @@ public enum OccurrenceStatus {
 	AVAILABLE("available"), DELETE("deleted"), COMPLETED("completed");
 
 	public static OccurrenceStatus parse(String value) {
-		if (Objects.equals(AVAILABLE.getValue(), value)) {
+
+		if (AVAILABLE.getValue().equals(value)) {
 			return AVAILABLE;
 		}
-		else if (Objects.equals(DELETE.getValue(), value)) {
+
+		if (DELETE.getValue().equals(value)) {
 			return DELETE;
 		}
-		else if (Objects.equals(COMPLETED.getValue(), value)) {
+
+		if (COMPLETED.getValue().equals(value)) {
 			return COMPLETED;
 		}
 
 		throw new IllegalArgumentException("Invalid value " + value);
 	}
 
-	public String getValue() {
+	public final String getValue() {
 
 		return _value;
 	}
