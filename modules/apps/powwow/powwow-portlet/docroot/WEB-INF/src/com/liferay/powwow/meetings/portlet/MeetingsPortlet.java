@@ -69,7 +69,7 @@ import com.liferay.powwow.provider.PowwowServiceProvider;
 import com.liferay.powwow.provider.PowwowServiceProviderUtil;
 import com.liferay.powwow.provider.zoom.ZoomRecurrenceSerializer;
 import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
-import com.liferay.powwow.service.PowwowMeetingOccurrenceLocalServiceUtil;
+import com.liferay.powwow.service.PowwowMeetingOccurrenceServiceUtil;
 import com.liferay.powwow.service.PowwowMeetingServiceUtil;
 import com.liferay.powwow.service.PowwowParticipantLocalServiceUtil;
 import com.liferay.powwow.util.PowwowSubscriptionSender;
@@ -410,7 +410,7 @@ public class MeetingsPortlet extends MVCPortlet {
 
 				//TODO: consider to check if recurring data has not changed?
 
-				addPowwowMeetingOccurrences(themeDisplay.getUserId(),
+				addPowwowMeetingOccurrences(themeDisplay.getScopeGroupId(),
 					powwowMeeting, calendarBooking);
 			}
 
@@ -430,7 +430,7 @@ public class MeetingsPortlet extends MVCPortlet {
 	}
 
 	protected void addPowwowMeetingOccurrences(
-			long userId, PowwowMeeting powwowMeeting, CalendarBooking calendarBooking)
+			long groupId, PowwowMeeting powwowMeeting, CalendarBooking calendarBooking)
 		throws Exception {
 
 		long powwowMeetingId = powwowMeeting.getPowwowMeetingId();
@@ -447,7 +447,7 @@ public class MeetingsPortlet extends MVCPortlet {
 
 			TimeZone calendarBookingTimeZone = calendarBooking.getTimeZone();
 
-			_addPowwowMeetingOccurrence(occurrenceJSONObject, userId, powwowMeetingId,
+			_addPowwowMeetingOccurrence(occurrenceJSONObject, groupId, powwowMeetingId,
 				calendarBookingTimeZone);
 		}
 	}
@@ -978,7 +978,7 @@ public class MeetingsPortlet extends MVCPortlet {
 	}
 
 	private void _addPowwowMeetingOccurrence(
-			JSONObject zoomOccurrenceJSONObject, long userId, long powwowMeetingId,
+			JSONObject zoomOccurrenceJSONObject, long groupId, long powwowMeetingId,
 			TimeZone calendarBookingTimeZone)
 		throws Exception {
 
@@ -997,9 +997,9 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		long endTime = calendar.getTimeInMillis();
 
-		PowwowMeetingOccurrenceLocalServiceUtil.addPowwowMeetingOccurrence(
-			userId, occurrenceId, powwowMeetingId, occurrenceStatus,
-			zoomOriginalData, startTime, endTime, 0);
+		PowwowMeetingOccurrenceServiceUtil.addPowwowMeetingOccurrence(
+			groupId, occurrenceId, powwowMeetingId, occurrenceStatus,
+			zoomOriginalData, startTime, endTime);
 	}
 
 	private void _addRecurrenceOptions(
@@ -1029,8 +1029,9 @@ public class MeetingsPortlet extends MVCPortlet {
 		}
 	}
 
-	private void _deletePowwowMeetingOccurrence(long powwowMeetingId) {
-		PowwowMeetingOccurrenceLocalServiceUtil.deleteByPowwowMeetingId(powwowMeetingId);
+	private void _deletePowwowMeetingOccurrence(long powwowMeetingId)
+		throws PortalException {
+		PowwowMeetingOccurrenceServiceUtil.deleteByPowwowMeetingId(powwowMeetingId);
 	}
 
 	private Calendar _findLimitDate(

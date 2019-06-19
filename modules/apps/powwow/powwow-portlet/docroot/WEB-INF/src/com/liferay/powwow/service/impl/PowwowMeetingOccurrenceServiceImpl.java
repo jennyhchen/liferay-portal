@@ -14,7 +14,15 @@
 
 package com.liferay.powwow.service.impl;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.powwow.model.PowwowMeetingOccurrence;
+import com.liferay.powwow.occurrence.OccurrenceStatus;
 import com.liferay.powwow.service.base.PowwowMeetingOccurrenceServiceBaseImpl;
+import com.liferay.powwow.service.permission.MeetingsPermission;
+import com.liferay.powwow.service.permission.PowwowMeetingPermission;
+import com.liferay.powwow.util.ActionKeys;
+
+import java.util.List;
 
 /**
  * The implementation of the powwow meeting occurrence remote service.
@@ -26,15 +34,67 @@ import com.liferay.powwow.service.base.PowwowMeetingOccurrenceServiceBaseImpl;
  * This is a remote service. Methods of this service are expected to have security checks based on the propagated JAAS credentials because this service can be accessed remotely.
  * </p>
  *
- * @author Shinn Lok
+ * @author Tang Hieu Ha
  * @see PowwowMeetingOccurrenceServiceBaseImpl
  */
 public class PowwowMeetingOccurrenceServiceImpl
 	extends PowwowMeetingOccurrenceServiceBaseImpl {
 
-	/*
-	 * NOTE FOR DEVELOPERS:
-	 *
-	 * Never reference this class directly. Always use <code>com.liferay.powwow.service.PowwowMeetingOccurrenceServiceUtil</code> to access the powwow meeting occurrence remote service.
-	 */
+	public PowwowMeetingOccurrence addPowwowMeetingOccurrence(
+			long groupId, String occurrenceId, long powwowMeetingId,
+			OccurrenceStatus occurrenceStatus, String zoomOriginalData,
+			long startTime, long endTime)
+		throws PortalException {
+
+		MeetingsPermission.check(
+			getPermissionChecker(), groupId, ActionKeys.ADD_MEETING);
+
+		return powwowMeetingOccurrenceLocalService.addPowwowMeetingOccurrence(
+			getUserId(), occurrenceId, powwowMeetingId, occurrenceStatus,
+			zoomOriginalData, startTime, endTime);
+	}
+
+	public void deleteByPowwowMeetingId(long powwowMeetingId)
+		throws PortalException {
+
+		PowwowMeetingPermission.check(
+			getPermissionChecker(), powwowMeetingId, ActionKeys.DELETE);
+
+		powwowMeetingOccurrenceLocalService.deleteByPowwowMeetingId(powwowMeetingId);
+	}
+
+	public List<PowwowMeetingOccurrence> findByPowwowMeetingId(
+			long powwowMeetingId)
+		throws PortalException {
+
+		PowwowMeetingPermission.check(getPermissionChecker(), powwowMeetingId,
+			ActionKeys.VIEW);
+
+		return powwowMeetingOccurrenceLocalService
+			.findByPowwowMeetingId(powwowMeetingId);
+	}
+
+	public PowwowMeetingOccurrence updateOccurrenceStatus(
+			long powwowMeetingId, String occurrenceId, OccurrenceStatus occurrenceStatus)
+		throws PortalException {
+
+		PowwowMeetingPermission.check(
+			getPermissionChecker(), powwowMeetingId, ActionKeys.UPDATE);
+
+		// TODO
+
+		return null;
+	}
+
+	public PowwowMeetingOccurrence updateOccurrenceTime(
+			long powwowMeetingId, String occurrenceId, long startTime, long endTime)
+		throws PortalException {
+
+		PowwowMeetingPermission.check(
+			getPermissionChecker(), powwowMeetingId, ActionKeys.UPDATE);
+
+		// TODO
+
+		return null;
+	}
 }
