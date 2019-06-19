@@ -41,7 +41,7 @@ public class PowwowMeetingOccurrenceServiceImpl
 	extends PowwowMeetingOccurrenceServiceBaseImpl {
 
 	public PowwowMeetingOccurrence addPowwowMeetingOccurrence(
-			long groupId, String occurrenceId, long powwowMeetingId,
+			long groupId, String occurrenceApiId, long powwowMeetingId,
 			OccurrenceStatus occurrenceStatus, String zoomOriginalData,
 			long startTime, long endTime)
 		throws PortalException {
@@ -50,7 +50,7 @@ public class PowwowMeetingOccurrenceServiceImpl
 			getPermissionChecker(), groupId, ActionKeys.ADD_MEETING);
 
 		return powwowMeetingOccurrenceLocalService.addPowwowMeetingOccurrence(
-			getUserId(), occurrenceId, powwowMeetingId, occurrenceStatus,
+			getUserId(), occurrenceApiId, powwowMeetingId, occurrenceStatus,
 			zoomOriginalData, startTime, endTime);
 	}
 
