@@ -25,7 +25,6 @@ import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.powwow.model.PowwowMeetingOccurrence;
 import com.liferay.powwow.occurrence.OccurrenceStatus;
 import com.liferay.powwow.service.base.PowwowMeetingOccurrenceLocalServiceBaseImpl;
-
 import java.util.Date;
 import java.util.List;
 
@@ -125,6 +124,49 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 
 		return powwowMeetingOccurrencePersistence
 			.findByPowwowMeetingId(powwowMeetingId, 0, 100);
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public PowwowMeetingOccurrence updateOccurrenceTime(
+		long occurrenceId, long startTime, long endTime) {
+
+		PowwowMeetingOccurrence powwowMeetingOccurrence=
+			powwowMeetingOccurrencePersistence.fetchByPrimaryKey(occurrenceId);
+
+		powwowMeetingOccurrence.setStartTime(startTime);
+		powwowMeetingOccurrence.setEndTime(endTime);
+		powwowMeetingOccurrence.setModifiedDate(new Date());
+
+		return powwowMeetingOccurrencePersistence.update(powwowMeetingOccurrence);
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public PowwowMeetingOccurrence updateOccurrenceCalendarBookingId(
+		long occurrenceId, long calendarBookingId) {
+
+		PowwowMeetingOccurrence powwowMeetingOccurrence=
+			powwowMeetingOccurrencePersistence.fetchByPrimaryKey(occurrenceId);
+
+		powwowMeetingOccurrence.setCalendarBookingId(calendarBookingId);
+		powwowMeetingOccurrence.setModifiedDate(new Date());
+
+		return powwowMeetingOccurrencePersistence.update(powwowMeetingOccurrence);
+	}
+
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public PowwowMeetingOccurrence updateOccurrenceStatus(
+		long occurrenceId, OccurrenceStatus occurrenceStatus) {
+
+		PowwowMeetingOccurrence powwowMeetingOccurrence=
+			powwowMeetingOccurrencePersistence.fetchByPrimaryKey(occurrenceId);
+
+		powwowMeetingOccurrence.setOccurrenceStatus(occurrenceStatus.getValue());
+		powwowMeetingOccurrence.setModifiedDate(new Date());
+
+		return powwowMeetingOccurrencePersistence.update(powwowMeetingOccurrence);
 	}
 
 	private static final Log _log =

@@ -75,26 +75,35 @@ public class PowwowMeetingOccurrenceServiceImpl
 	}
 
 	public PowwowMeetingOccurrence updateOccurrenceStatus(
-			long powwowMeetingId, String occurrenceId, OccurrenceStatus occurrenceStatus)
+			long powwowMeetingId, long occurrenceId, OccurrenceStatus occurrenceStatus)
 		throws PortalException {
 
 		PowwowMeetingPermission.check(
 			getPermissionChecker(), powwowMeetingId, ActionKeys.UPDATE);
 
-		// TODO
-
-		return null;
+		return powwowMeetingOccurrenceLocalService
+			.updateOccurrenceStatus(occurrenceId, occurrenceStatus);
 	}
 
 	public PowwowMeetingOccurrence updateOccurrenceTime(
-			long powwowMeetingId, String occurrenceId, long startTime, long endTime)
+			long powwowMeetingId, long occurrenceId, long startTime, long endTime)
 		throws PortalException {
 
 		PowwowMeetingPermission.check(
 			getPermissionChecker(), powwowMeetingId, ActionKeys.UPDATE);
 
-		// TODO
+		return powwowMeetingOccurrenceLocalService
+			.updateOccurrenceTime(occurrenceId, startTime, endTime);
+	}
 
-		return null;
+	public PowwowMeetingOccurrence updateOccurrenceCalendarBookingId(
+			long powwowMeetingId, long occurrenceId, long calendarBookingId)
+		throws PortalException {
+
+		PowwowMeetingPermission.check(
+			getPermissionChecker(), powwowMeetingId, ActionKeys.UPDATE);
+
+		return powwowMeetingOccurrenceLocalService
+			.updateOccurrenceCalendarBookingId(occurrenceId, calendarBookingId);
 	}
 }

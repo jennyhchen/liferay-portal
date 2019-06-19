@@ -45,13 +45,13 @@ if (calendarBookingId > 0) {
 	title='edit-occurrence'
 />
 
-<div class="message-container-editing" id="<portlet:namespace />messageContainerEditing">
-</div>
+<liferay-ui:error key="error-update-occurrence" message="error-while-updating-powwow-meeting-occurrence" />
 
 <liferay-portlet:actionURL name="updatePowwowMeetingOccurrence" var="updatePowwowMeetingOccurrenceURL" />
 
 <aui:form action="<%= updatePowwowMeetingOccurrenceURL %>" method="post" name="fm">
 	<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
+	<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 	<aui:input name="powwowMeetingId" type="hidden" value="<%= String.valueOf(powwowMeetingId) %>" />
 	<aui:input name="occurrenceId" type="hidden" value="<%= String.valueOf(occurrenceId) %>" />
 
