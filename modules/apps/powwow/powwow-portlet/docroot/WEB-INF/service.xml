@@ -61,7 +61,7 @@
 	<entity local-service="true" name="PowwowMeetingOccurrence" remote-service="true">
 		<!-- PK fields -->
 
-		<column name="occurrenceId" primary="true" type="String" />
+		<column name="occurrenceId" primary="true" type="long" />
 
 		<!-- Audit fields -->
 
@@ -77,6 +77,7 @@
 		<column name="powwowMeetingId" type="long" />
 		<column name="zoomOriginalData" type="String" />
 		<column name="occurrenceStatus" type="String" />
+		<column name="occurrenceApiId" type="String" />
 		<column name="startTime" type="long" />
 		<column name="endTime" type="long" />
 

@@ -982,7 +982,7 @@ public class MeetingsPortlet extends MVCPortlet {
 			TimeZone calendarBookingTimeZone)
 		throws Exception {
 
-		String occurrenceId = zoomOccurrenceJSONObject.getString("occurrence_id");
+		String occurrenceApiId = zoomOccurrenceJSONObject.getString("occurrence_id");
 		OccurrenceStatus occurrenceStatus = OccurrenceStatus.parse(zoomOccurrenceJSONObject.getString("status"));
 		String zoomOriginalData = zoomOccurrenceJSONObject.toString();
 		String startTimeJSONString = zoomOccurrenceJSONObject.getString("start_time");
@@ -998,7 +998,7 @@ public class MeetingsPortlet extends MVCPortlet {
 		long endTime = calendar.getTimeInMillis();
 
 		PowwowMeetingOccurrenceServiceUtil.addPowwowMeetingOccurrence(
-			groupId, occurrenceId, powwowMeetingId, occurrenceStatus,
+			groupId, occurrenceApiId, powwowMeetingId, occurrenceStatus,
 			zoomOriginalData, startTime, endTime);
 	}
 

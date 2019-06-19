@@ -44,13 +44,15 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public PowwowMeetingOccurrence addPowwowMeetingOccurrence(
-			long userId, String occurrenceId, long powwowMeetingId,
+			long userId, String occurrenceApiId, long powwowMeetingId,
 			OccurrenceStatus occurrenceStatus, String zoomOriginalData,
 			long startTime, long endTime)
 		throws PortalException {
 
 		User user = userLocalService.getUser(userId);
 		Date now = new Date();
+
+		long occurrenceId = counterLocalService.increment(getModelClassName());
 
 		PowwowMeetingOccurrence powwowMeetingOccurrence =
 			powwowMeetingOccurrencePersistence.create(occurrenceId);
@@ -65,6 +67,7 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 		powwowMeetingOccurrence.setOccurrenceStatus(occurrenceStatus.getValue());
 		powwowMeetingOccurrence.setZoomOriginalData(zoomOriginalData);
 		powwowMeetingOccurrence.setCalendarBookingId(0);
+		powwowMeetingOccurrence.setOccurrenceApiId(occurrenceApiId);
 		powwowMeetingOccurrence.setStartTime(startTime);
 		powwowMeetingOccurrence.setEndTime(endTime);
 
