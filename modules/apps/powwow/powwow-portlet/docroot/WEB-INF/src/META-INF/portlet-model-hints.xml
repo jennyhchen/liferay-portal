@@ -24,6 +24,22 @@
 		<field name="calendarBookingId" type="long" />
 		<field name="status" type="int" />
 	</model>
+	<model name="com.liferay.powwow.model.PowwowMeetingOccurrence">
+		<field name="occurrenceId" type="String" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="userName" type="String" />
+		<field name="createDate" type="Date" />
+		<field name="modifiedDate" type="Date" />
+		<field name="calendarBookingId" type="long" />
+		<field name="powwowMeetingId" type="long" />
+		<field name="zoomOriginalData" type="String">
+			<hint-collection name="TEXTAREA" />
+		</field>
+		<field name="occurrenceStatus" type="String" />
+		<field name="startTime" type="long" />
+		<field name="endTime" type="long" />
+	</model>
 	<model name="com.liferay.powwow.model.PowwowParticipant">
 		<field name="powwowParticipantId" type="long" />
 		<field name="groupId" type="long" />
