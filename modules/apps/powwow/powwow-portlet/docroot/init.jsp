@@ -73,15 +73,18 @@ page import="com.liferay.powwow.model.PowwowMeetingConstants" %><%@
 page import="com.liferay.powwow.model.PowwowParticipant" %><%@
 page import="com.liferay.powwow.model.PowwowParticipantConstants" %><%@
 page import="com.liferay.powwow.model.PowwowServer" %><%@
+page import="com.liferay.powwow.model.PowwowMeetingOccurrence" %><%@
 page import="com.liferay.powwow.provider.PowwowServiceProviderUtil" %><%@
 page import="com.liferay.powwow.service.PowwowMeetingLocalServiceUtil" %><%@
 page import="com.liferay.powwow.service.PowwowParticipantLocalServiceUtil" %><%@
 page import="com.liferay.powwow.service.PowwowServerLocalServiceUtil" %><%@
+page import="com.liferay.powwow.service.PowwowMeetingOccurrenceLocalServiceUtil" %><%@
 page import="com.liferay.powwow.service.permission.MeetingsPermission" %><%@
 page import="com.liferay.powwow.service.permission.PowwowMeetingPermission" %><%@
 page import="com.liferay.powwow.util.ActionKeys" %><%@
 page import="com.liferay.powwow.util.PortletPropsValues" %><%@
 page import="com.liferay.powwow.util.PowwowUtil" %>
+
 
 <%@ page import="java.lang.StringBuilder" %><%@
 page import="java.text.Format" %><%@
@@ -112,4 +115,5 @@ String currentURL = PortalUtil.getCurrentURL(request);
 
 Format longDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("EEEE, MMMMM dd, yyyy 'at' h:mm a", locale, timeZone);
 Format shortDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("MM/dd/yy 'at' h:mm a", locale, timeZone);
+Format occurrenceTimeFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("MM/dd/yyyy HH:mm", locale, timeZone);
 %>
