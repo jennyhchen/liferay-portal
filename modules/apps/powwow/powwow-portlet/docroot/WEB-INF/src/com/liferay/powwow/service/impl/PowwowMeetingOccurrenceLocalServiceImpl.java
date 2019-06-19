@@ -45,8 +45,8 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 	@Override
 	public PowwowMeetingOccurrence addPowwowMeetingOccurrence(
 			long userId, String occurrenceId, long powwowMeetingId,
-			OccurrenceStatus occurrenceStatus, String zoomOriginalData, long startTime,
-			long endTime, long calendarBookingId)
+			OccurrenceStatus occurrenceStatus, String zoomOriginalData,
+			long startTime, long endTime)
 		throws PortalException {
 
 		User user = userLocalService.getUser(userId);
@@ -64,7 +64,7 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 		powwowMeetingOccurrence.setPowwowMeetingId(powwowMeetingId);
 		powwowMeetingOccurrence.setOccurrenceStatus(occurrenceStatus.getValue());
 		powwowMeetingOccurrence.setZoomOriginalData(zoomOriginalData);
-		powwowMeetingOccurrence.setCalendarBookingId(calendarBookingId);
+		powwowMeetingOccurrence.setCalendarBookingId(0);
 		powwowMeetingOccurrence.setStartTime(startTime);
 		powwowMeetingOccurrence.setEndTime(endTime);
 
@@ -74,6 +74,8 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 	}
 
 	public void deleteByPowwowMeetingId(long powwowMeetingId) {
+
+		// TODO delete CalendarBooking belongs to this occurrence
 
 		List<PowwowMeetingOccurrence> meetingOccurrences =
 			powwowMeetingOccurrencePersistence
@@ -89,6 +91,6 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 		long powwowMeetingId) {
 
 		return powwowMeetingOccurrencePersistence
-			.findByPowwowMeetingId(powwowMeetingId);
+			.findByPowwowMeetingId(powwowMeetingId, 0, 100);
 	}
 }
