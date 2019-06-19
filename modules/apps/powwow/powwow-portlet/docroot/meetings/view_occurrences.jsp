@@ -14,6 +14,7 @@
  */
 --%>
 
+
 <%@ include file="/init.jsp" %>
 
 <%
@@ -26,6 +27,9 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 portletURL.setParameter("jspPage", "/meetings/view_occurrences.jsp");
 portletURL.setParameter("powwowMeetingId", String.valueOf(powwowMeetingId));
 portletURL.setParameter("backURL", backURL);
+
+List<PowwowMeetingOccurrence> powwowMeetingOccurrences =
+   PowwowMeetingOccurrenceLocalServiceUtil.findByPowwowMeetingId(powwowMeetingId);
 %>
 
 <liferay-ui:header
@@ -60,17 +64,54 @@ portletURL.setParameter("backURL", backURL);
 			<liferay-ui:message key="occurrences" />
 		</dt>
 		<dd>
-			Placeholder
+			<liferay-ui:search-container
+				total="<%= powwowMeetingOccurrences.size() %>"
+				iteratorURL="<%= portletURL %>"
+			>
 
-			<!-- TODO display occurrences -->
+				<liferay-ui:search-container-results>
+					<%
+						searchContainer.setResults(ListUtil.subList(powwowMeetingOccurrences, searchContainer.getStart(), searchContainer.getEnd()));
+					%>
+				</liferay-ui:search-container-results>
 
-			<portlet:renderURL var="editOccurrenceURL">
-				<portlet:param name="mvcPath" value="/meetings/edit_occurrence.jsp" />
-				<portlet:param name="backURL" value="<%= currentURL %>" />
-				<portlet:param name="powwowMeetingId" value="<%= String.valueOf(powwowMeeting.getPowwowMeetingId()) %>" />
-			</portlet:renderURL>
+				<liferay-ui:search-container-row
+					className="com.liferay.powwow.model.PowwowMeetingOccurrence"
+					escapedModel="<%= true %>"
+					keyProperty="occurrenceId"
+					modelVar="powwowMeetingOccurrence"
+				>
+					<%
+						Calendar startTimeCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
+						Calendar endTimeCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 
-			<aui:button onClick="<%= editOccurrenceURL.toString() %>" value="edit" />
+						startTimeCalendar.setTimeInMillis(powwowMeetingOccurrence.getStartTime());
+						endTimeCalendar.setTimeInMillis(powwowMeetingOccurrence.getEndTime());
+
+						String startTime = occurrenceTimeFormat.format(startTimeCalendar.getTime());
+						String endTime = occurrenceTimeFormat.format(endTimeCalendar.getTime());
+					%>
+					<liferay-ui:search-container-column-text
+						name="start-time"
+						value="<%= startTime %>"
+					/>
+
+					<liferay-ui:search-container-column-text
+                        name="end-time"
+                        value="<%= endTime %>"
+                    />
+
+					<liferay-ui:search-container-column-text
+						name="status"
+						property="occurrenceStatus"
+					/>
+
+					<liferay-ui:search-container-column-jsp
+						path="/meetings/occurence_row_action.jsp"
+					/>
+				</liferay-ui:search-container-row>
+				<liferay-ui:search-iterator />
+			</liferay-ui:search-container>
 
 		</dd>
 	</div>

@@ -19,7 +19,12 @@
 <%
 String backURL = ParamUtil.getString(request, "backURL");
 
-long powwowMeetingId = ParamUtil.getLong(request, "powwowMeetingId");
+String occurrenceId = ParamUtil.getString(request, "occurrenceId");
+
+PowwowMeetingOccurrence powwowMeetingOccurrence = 
+	PowwowMeetingOccurrenceLocalServiceUtil.fetchPowwowMeetingOccurrence(occurrenceId);
+
+long powwowMeetingId = powwowMeetingOccurrence.getPowwowMeetingId();
 
 PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
 
@@ -45,9 +50,10 @@ if (calendarBookingId > 0) {
 
 <liferay-portlet:actionURL name="updatePowwowMeetingOccurrence" var="updatePowwowMeetingOccurrenceURL" />
 
-<aui:form action="<%= updatePowwowMeetingOccurrenceURL %>" cssClass="edit-meeting" id="fm" method="post" name="fm" onSubmit="event.preventDefault();">
+<aui:form action="<%= updatePowwowMeetingOccurrenceURL %>" method="post" name="fm">
 	<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
 	<aui:input name="powwowMeetingId" type="hidden" value="<%= String.valueOf(powwowMeetingId) %>" />
+	<aui:input name="occurrenceId" type="hidden" value="<%= String.valueOf(occurrenceId) %>" />
 
 	<aui:input cssClass="meeting-name" disabled="true" name="name" value="<%= powwowMeeting.getName() %>"/>
 
@@ -64,36 +70,9 @@ if (calendarBookingId > 0) {
 		Calendar startCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 		Calendar endCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 
-		if ((calendarBooking != null)) {
-			Date startDate = new Date(calendarBooking.getStartTime());
+		startCalendar.setTimeInMillis(powwowMeetingOccurrence.getStartTime());
+		endCalendar.setTimeInMillis(powwowMeetingOccurrence.getEndTime());
 
-			startCalendar.setTime(startDate);
-
-			Date endDate = new Date(calendarBooking.getEndTime());
-
-			endCalendar.setTime(endDate);
-		}
-		else {
-			Date currentDate = new Date(System.currentTimeMillis());
-
-			startCalendar.setTime(currentDate);
-
-			endCalendar.setTime(currentDate);
-
-			if (startCalendar.get(Calendar.MINUTE) <= 30) {
-				startCalendar.set(Calendar.MINUTE, 30);
-
-				endCalendar.add(Calendar.HOUR, 1);
-				endCalendar.set(Calendar.MINUTE, 30);
-			}
-			else {
-				startCalendar.add(Calendar.HOUR, 1);
-				startCalendar.set(Calendar.MINUTE, 0);
-
-				endCalendar.add(Calendar.HOUR, 2);
-				endCalendar.set(Calendar.MINUTE, 0);
-			}
-		}
 		%>
 
 		<span class="start-date-container" id="<portlet:namespace />startDateContainer">
