@@ -30,7 +30,7 @@ import com.liferay.powwow.service.PowwowServerLocalServiceUtil;
 import com.liferay.powwow.util.PortletPropsValues;
 
 import java.io.Serializable;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -329,6 +329,25 @@ public abstract class BasePowwowServiceProvider
 			powwowServer, powwowMeeting, name, user, options);
 	}
 
+	@Override
+	public boolean updateOccurrence(
+			long powwowMeetingId, Map<String, String> options,
+				String occurrentApiId)
+		throws PortalException {
+
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put(PowwowMeetingConstants.OCCURRENCE_ID, occurrentApiId);
+
+		PowwowMeeting powwowMeeting =
+			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
+
+		PowwowServer powwowServer =
+			PowwowServerLocalServiceUtil.getPowwowServer(
+				powwowMeeting.getPowwowServerId());
+
+		return updateOccurrence(powwowServer, powwowMeeting, options, queryParams);
+	}
+
 	protected abstract Map<String, Serializable> addPowwowMeeting(
 		User creator, PowwowServer powwowServer, long powwowMeetingId,
 		String name, Map<String, String> options);
@@ -365,6 +384,10 @@ public abstract class BasePowwowServiceProvider
 	protected abstract Map<String, Serializable> updatePowwowMeeting(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting, String name,
 		User creator, Map<String, String> options);
+
+	protected abstract boolean updateOccurrence(
+		PowwowServer powwowServer, PowwowMeeting powwowMeeting,
+			Map<String, String> options, Map<String, String> queryParams);
 
 	protected static final int ERROR_CODE_300 = 300;
 

@@ -39,6 +39,8 @@ public class PowwowMeetingConstants {
 
 	public static final String OPTION_START_TIME = "start_time";
 
+	public static final String OCCURRENCE_ID = "occurrence_id";
+
 	public static final int POWWOW_SERVER_ID_DEFAULT = 0;
 
 	public static final int STATUS_ANY = -1;

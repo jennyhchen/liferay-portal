@@ -105,4 +105,9 @@ public interface PowwowServiceProvider {
 			Map<String, String> startOptions)
 		throws PortalException;
 
+	public boolean updateOccurrence(
+			long powwowMeetingId, Map<String, String> options,
+				String occurrentApiId)
+		throws PortalException;
+
 }

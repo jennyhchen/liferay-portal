@@ -239,6 +239,15 @@ public class PowwowServiceProviderUtil {
 			powwowMeetingId, name, userId, options);
 	}
 
+	public static boolean updateOccurrence(
+			long powwowMeetingId, Map<String, String> options, String occurrentApiId)
+		throws PortalException {
+
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+
+		return powwowServiceProvider.updateOccurrence(powwowMeetingId, options, occurrentApiId);
+	}
+
 	protected static PowwowServiceProvider getPowwowServiceProvider() {
 
 		return PowwowServiceProviderFactory.getPowwowServiceProvider();
