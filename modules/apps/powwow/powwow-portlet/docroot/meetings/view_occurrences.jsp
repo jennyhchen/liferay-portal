@@ -14,7 +14,6 @@
  */
 --%>
 
-
 <%@ include file="/init.jsp" %>
 
 <%
@@ -29,7 +28,7 @@ portletURL.setParameter("powwowMeetingId", String.valueOf(powwowMeetingId));
 portletURL.setParameter("backURL", backURL);
 
 List<PowwowMeetingOccurrence> powwowMeetingOccurrences =
-   PowwowMeetingOccurrenceLocalServiceUtil.findByPowwowMeetingId(powwowMeetingId);
+	PowwowMeetingOccurrenceLocalServiceUtil.findByPowwowMeetingId(powwowMeetingId);
 %>
 
 <liferay-ui:header
@@ -69,11 +68,8 @@ List<PowwowMeetingOccurrence> powwowMeetingOccurrences =
 				iteratorURL="<%= portletURL %>"
 			>
 
-				<liferay-ui:search-container-results>
-					<%
-						searchContainer.setResults(ListUtil.subList(powwowMeetingOccurrences, searchContainer.getStart(), searchContainer.getEnd()));
-					%>
-				</liferay-ui:search-container-results>
+				<liferay-ui:search-container-results
+					results="<%= ListUtil.subList(powwowMeetingOccurrences, searchContainer.getStart(), searchContainer.getEnd()) %>" />
 
 				<liferay-ui:search-container-row
 					className="com.liferay.powwow.model.PowwowMeetingOccurrence"
@@ -97,14 +93,13 @@ List<PowwowMeetingOccurrence> powwowMeetingOccurrences =
 					/>
 
 					<liferay-ui:search-container-column-text
-                        name="end-time"
-                        value="<%= endTime %>"
+						name="end-time"
+						value="<%= endTime %>"
                     />
 
-					<liferay-ui:search-container-column-text
-						name="status"
-						property="occurrenceStatus"
-					/>
+					<liferay-ui:search-container-column-text name="status" >
+						<liferay-ui:message key="${powwowMeetingOccurrence.occurrenceStatus}" />
+					</liferay-ui:search-container-column-text>
 
 					<liferay-ui:search-container-column-jsp
 						path="/meetings/occurence_row_action.jsp"

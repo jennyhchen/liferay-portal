@@ -85,7 +85,6 @@ page import="com.liferay.powwow.util.ActionKeys" %><%@
 page import="com.liferay.powwow.util.PortletPropsValues" %><%@
 page import="com.liferay.powwow.util.PowwowUtil" %>
 
-
 <%@ page import="java.lang.StringBuilder" %><%@
 page import="java.text.Format" %><%@
 page import="java.util.ArrayList" %><%@
@@ -115,5 +114,5 @@ String currentURL = PortalUtil.getCurrentURL(request);
 
 Format longDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("EEEE, MMMMM dd, yyyy 'at' h:mm a", locale, timeZone);
 Format shortDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("MM/dd/yy 'at' h:mm a", locale, timeZone);
-Format occurrenceTimeFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("MM/dd/yyyy HH:mm", locale, timeZone);
+Format occurrenceTimeFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("MM/dd/yyyy h:mm a", locale, timeZone);
 %>

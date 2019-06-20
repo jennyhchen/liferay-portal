@@ -19,9 +19,9 @@
 <%
 String backURL = ParamUtil.getString(request, "backURL");
 
-String occurrenceId = ParamUtil.getString(request, "occurrenceId");
+long occurrenceId = ParamUtil.getLong(request, "occurrenceId");
 
-PowwowMeetingOccurrence powwowMeetingOccurrence = 
+PowwowMeetingOccurrence powwowMeetingOccurrence =
 	PowwowMeetingOccurrenceLocalServiceUtil.fetchPowwowMeetingOccurrence(occurrenceId);
 
 long powwowMeetingId = powwowMeetingOccurrence.getPowwowMeetingId();
@@ -59,13 +59,11 @@ if (calendarBookingId > 0) {
 
 	<aui:input cssClass="" disabled="true" name="repeat" value="<%= PowwowUtil.getRecurrenceSummary(calendarBooking.getRecurrenceObj(), locale) %>"/>
 
-	<label class="control-label" for="<portlet:namespace />meetingEventDate"><liferay-ui:message key="meeting-date" /></label>
+	<label class="control-label" for="<portlet:namespace />meetingEventDate"><liferay-ui:message key="time" /></label>
 
 	<div class="control-group meeting-event-date" id="<portlet:namespace />meetingEventDate">
 
 		<%
-
-		// TODO use occurrence's time
 
 		Calendar startCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 		Calendar endCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
