@@ -41,11 +41,6 @@ import java.util.TimeZone;
  */
 public class ZoomRecurrenceSerializer {
 
-	public static String toJSONString(Recurrence recurrence) {
-
-		return toJSONString(recurrence, null);
-	}
-
 	public static String toJSONString(Recurrence recurrence, Calendar startTime) {
 
 		if (Validator.isNull(recurrence)) {
