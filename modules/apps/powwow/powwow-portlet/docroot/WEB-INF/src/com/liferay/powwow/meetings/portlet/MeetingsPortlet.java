@@ -50,6 +50,8 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
+import com.liferay.portal.kernel.util.Digester;
+import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -315,10 +317,17 @@ public class MeetingsPortlet extends MVCPortlet {
 			String languageId = ParamUtil.getString(actionRequest, "languageId");
 
 			PowwowMeeting powwowMeeting = null;
+			String oldRecurrenceHash = StringPool.BLANK;
 
 			if (powwowMeetingId > 0) {
 				powwowMeeting = PowwowMeetingServiceUtil.getPowwowMeeting(
 					powwowMeetingId);
+
+				CalendarBooking oldCalendarBooking =
+					CalendarBookingLocalServiceUtil.fetchCalendarBooking(
+						powwowMeeting.getCalendarBookingId());
+
+				oldRecurrenceHash = _getRecurrenceHash(oldCalendarBooking);
 			}
 
 			List<PowwowParticipant> powwowParticipants =
@@ -399,19 +408,20 @@ public class MeetingsPortlet extends MVCPortlet {
 					calendarBooking.getCalendarBookingId(),
 					PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
 					serviceContext);
-
-				// update the whole series, so always delete occurrences
-				// TODO consider to check if recurring data has not changed?
-
-				_deletePowwowMeetingOccurrence(powwowMeetingId);
 			}
 
-			if (calendarBooking.isRecurring()) {
+			String newRecurrenceHash = _getRecurrenceHash(calendarBooking);
 
-				//TODO: consider to check if recurring data has not changed?
+			boolean recurrenceChanged = !oldRecurrenceHash.equals(newRecurrenceHash);
 
-				addPowwowMeetingOccurrences(themeDisplay.getScopeGroupId(),
-					powwowMeeting, calendarBooking);
+			if (recurrenceChanged) {
+
+				_deletePowwowMeetingOccurrence(powwowMeetingId);
+
+				if (calendarBooking.isRecurring()) {
+					addPowwowMeetingOccurrences(themeDisplay.getScopeGroupId(),
+						powwowMeeting, calendarBooking);
+				}
 			}
 
 			jsonObject.put("success", true);
@@ -1077,6 +1087,26 @@ public class MeetingsPortlet extends MVCPortlet {
 		Duration duration = Duration.ofMillis(
 			Math.abs(calendarBooking.getEndTime() - calendarBooking.getStartTime()));
 		return duration.abs().toMinutes();
+	}
+
+	private String _getRecurrenceHash(CalendarBooking calendarBooking) {
+
+		if (Validator.isNull(calendarBooking) ||
+			!calendarBooking.isRecurring()) {
+			return StringPool.BLANK;
+		}
+
+		Recurrence recurrence = calendarBooking.getRecurrenceObj();
+
+		Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
+			calendarBooking.getStartTime(), calendarBooking.getTimeZone());
+
+		String recurrenceJson = ZoomRecurrenceSerializer
+			.toJSONString(recurrence, startTimeJCalendar);
+
+		return DigesterUtil.digestHex(Digester.SHA_1, recurrenceJson,
+			String.valueOf(calendarBooking.getStartTime()),
+			String.valueOf(calendarBooking.getEndTime()));
 	}
 
 	private Calendar _getUtcCalendar() {
