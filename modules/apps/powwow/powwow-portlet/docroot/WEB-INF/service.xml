@@ -82,6 +82,9 @@
 		<column name="endTime" type="long" />
 
 		<!-- Finder methods -->
+        <order>
+            <order-column name="startTime" order-by="asc"></order-column>
+        </order>
 
 		<finder name="PowwowMeetingId" return-type="Collection">
 			<finder-column name="powwowMeetingId" />
