@@ -14,7 +14,11 @@
 
 package com.liferay.powwow.service.impl;
 
+import com.liferay.calendar.model.CalendarBooking;
+import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
@@ -78,8 +82,6 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 
 	public void deleteByPowwowMeetingId(long powwowMeetingId) {
 
-		// TODO delete CalendarBooking belongs to this occurrence
-
 		List<PowwowMeetingOccurrence> meetingOccurrences =
 			powwowMeetingOccurrencePersistence
 				.findByPowwowMeetingId(powwowMeetingId);
@@ -90,10 +92,41 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 		}
 	}
 
+	@Indexable(type = IndexableType.DELETE)
+	@Override
+	public PowwowMeetingOccurrence deletePowwowMeetingOccurrence(
+		PowwowMeetingOccurrence powwowMeetingOccurrence) {
+
+
+		long calendarBookingId = powwowMeetingOccurrence.getCalendarBookingId();
+
+		if(calendarBookingId > 0) {
+			CalendarBooking calendarBooking = CalendarBookingLocalServiceUtil
+				.fetchCalendarBooking(calendarBookingId);
+
+			if (calendarBooking != null) {
+				try {
+					CalendarBookingLocalServiceUtil
+						.deleteCalendarBooking(calendarBookingId);
+				}
+				catch (PortalException e) {
+					_log.error("Error while deleting CalendarBooking ID:" +
+						calendarBookingId, e);
+				}
+			}
+		}
+
+		return powwowMeetingOccurrencePersistence.remove(
+			powwowMeetingOccurrence);
+	}
+
 	public List<PowwowMeetingOccurrence> findByPowwowMeetingId(
 		long powwowMeetingId) {
 
 		return powwowMeetingOccurrencePersistence
 			.findByPowwowMeetingId(powwowMeetingId, 0, 100);
 	}
+
+	private static final Log _log =
+		LogFactoryUtil.getLog(PowwowMeetingOccurrenceLocalServiceImpl.class);
 }
