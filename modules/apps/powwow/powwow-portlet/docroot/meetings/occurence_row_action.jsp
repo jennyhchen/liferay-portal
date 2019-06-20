@@ -19,7 +19,7 @@
 <%
 ResultRow row = (ResultRow)request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_ROW);
 
-PowwowMeetingOccurrence powwowMeetingOccurrence = (PowwowMeetingOccurrence)row.getObject();
+PowwowMeetingOccurrence powwowMeetingOccurrence = (PowwowMeetingOccurrence) row.getObject();
 %>
 <liferay-ui:icon-menu>
 	<portlet:renderURL var="editOccurrenceURL">
