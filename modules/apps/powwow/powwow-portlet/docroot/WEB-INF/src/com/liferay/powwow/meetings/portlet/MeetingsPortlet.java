@@ -1006,15 +1006,16 @@ public class MeetingsPortlet extends MVCPortlet {
 		CalendarBooking calendarBooking, Map<String, String> options) {
 
 		Recurrence recurrence = calendarBooking.getRecurrenceObj();
-		String recurrenceJson = ZoomRecurrenceSerializer.toJSONString(recurrence);
+
+		Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
+			calendarBooking.getStartTime(), calendarBooking.getTimeZone());
+
+		String recurrenceJson = ZoomRecurrenceSerializer
+			.toJSONString(recurrence, startTimeJCalendar);
 
 		if (!Validator.isBlank(recurrenceJson)) {
 			options.put(PowwowMeetingConstants.OPTION_RECURRENCE,
 				recurrenceJson);
-
-			Calendar startTimeJCalendar =
-				JCalendarUtil.getJCalendar(calendarBooking.getStartTime(),
-					calendarBooking.getTimeZone());
 
 			String zoomStartTimeUTC =
 				PowwowServiceProviderUtil
