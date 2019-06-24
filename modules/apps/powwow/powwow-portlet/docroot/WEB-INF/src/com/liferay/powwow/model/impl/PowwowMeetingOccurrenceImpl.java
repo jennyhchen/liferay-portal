@@ -38,4 +38,9 @@ public class PowwowMeetingOccurrenceImpl
 
 		return OccurrenceStatus.parse(getOccurrenceStatus());
 	}
+
+	public boolean isEndTimePassed() {
+
+		return getEndTime() < System.currentTimeMillis();
+	}
 }
