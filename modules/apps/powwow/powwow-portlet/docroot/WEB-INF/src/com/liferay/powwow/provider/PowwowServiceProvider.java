@@ -41,6 +41,9 @@ public interface PowwowServiceProvider {
 	public PowwowMeeting deletePowwowMeeting(long powwowMeetingId)
 		throws PortalException;
 
+	public boolean deleteOccurrence(long powwowMeetingId, String occurrenceApiId)
+		throws PortalException;
+
 	public PowwowMeeting endPowwowMeeting(long powwowMeetingId)
 		throws PortalException;
 

@@ -196,6 +196,10 @@ public class MeetingsPortlet extends MVCPortlet {
 					_updateCalendarBookingExceptionDate(powwowMeetingOccurrence,
 						mainCalendarBooking, themeDisplay, serviceContext);
 				}
+
+				PowwowServiceProviderUtil
+					.deleteOccurrence(
+						occurrence.getPowwowMeetingId(), occurrence.getOccurrenceApiId());
 			}
 
 			jsonObject.put("success", true);

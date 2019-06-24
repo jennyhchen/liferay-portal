@@ -257,7 +257,28 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 	}
 
 	@Override
-	protected boolean deletePowwowMeeting(PowwowServer powwowServer, PowwowMeeting powwowMeeting) {
+	protected boolean deleteOccurrence(
+		PowwowServer powwowServer, PowwowMeeting powwowMeeting,
+		Map<String, String> queryParams) {
+
+		Map<String, Serializable> providerTypeMetadataMap = powwowMeeting.getProviderTypeMetadataMap();
+
+		List<String> resourceParams = new ArrayList<>();
+		resourceParams.add("meetings");
+		resourceParams.add(String.valueOf(providerTypeMetadataMap.get("id")));
+
+		JSONObject responseJSONObject = execute(powwowServer, resourceParams, queryParams, Http.Method.DELETE, null);
+
+		if (!_isSuccess(responseJSONObject)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	protected boolean deletePowwowMeeting(
+		PowwowServer powwowServer, PowwowMeeting powwowMeeting) {
 		Map<String, Serializable> providerTypeMetadataMap = powwowMeeting.getProviderTypeMetadataMap();
 
 		List<String> resourceParams = new ArrayList<>();
@@ -789,5 +810,4 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 	private final List<String> _joinByPhoneDefaultNumbers = new ArrayList<>();
 	private final Map<String, List<String>> _joinByPhoneInternationalNumbers =
 		new TreeMap<>();
-
 }
