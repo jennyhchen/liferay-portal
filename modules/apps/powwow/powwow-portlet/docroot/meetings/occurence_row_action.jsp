@@ -22,12 +22,13 @@ ResultRow row = (ResultRow)request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_
 PowwowMeetingOccurrence powwowMeetingOccurrence = (PowwowMeetingOccurrence) row.getObject();
 
 long powwowMeetingId = powwowMeetingOccurrence.getPowwowMeetingId();
-
+boolean isCompleted = powwowMeetingOccurrence.isEndTimePassed();
+boolean isDeleted = OccurrenceStatus.DELETE.equals(powwowMeetingOccurrence.getOccurrenceStatusEnum());
 %>
 
 <liferay-ui:icon-menu>
 
-	<c:if test="<%= !powwowMeetingOccurrence.isEndTimePassed() %>">
+	<c:if test="<%= !isCompleted && !isDeleted %>">
 		<portlet:renderURL var="editOccurrenceURL">
 			<portlet:param name="mvcPath" value="/meetings/edit_occurrence.jsp" />
 			<portlet:param name="backURL" value="<%= currentURL %>" />
@@ -42,7 +43,7 @@ long powwowMeetingId = powwowMeetingOccurrence.getPowwowMeetingId();
 		/>
 	</c:if>
 
-	<c:if test="<%= !OccurrenceStatus.DELETE.equals(powwowMeetingOccurrence.getOccurrenceStatusEnum()) %>">
+	<c:if test="<%= !isDeleted %>">
 		<liferay-ui:icon
 			iconCssClass="icon-remove"
 			label="<%= true %>"
@@ -52,11 +53,6 @@ long powwowMeetingId = powwowMeetingOccurrence.getPowwowMeetingId();
 		/>
 	</c:if>
 </liferay-ui:icon-menu>
-
-<portlet:renderURL var="occurrencesViewURL" windowState="<%=LiferayWindowState.NORMAL.toString() %>">
-	<portlet:param name="mvcPath" value="/meetings/view_occurrences.jsp" />
-	<portlet:param name="powwowMeetingId" value="<%= String.valueOf(powwowMeetingId) %>" />
-</portlet:renderURL>
 
 <aui:script use="aui-io-request,aui-base">
 
@@ -86,7 +82,7 @@ long powwowMeetingId = powwowMeetingOccurrence.getPowwowMeetingId();
 									var responseData = this.get('responseData');
 
 									if (responseData.success) {
-										document.location.href = '<%= occurrencesViewURL.toString() %>';
+										document.location.href = '<%= currentURL %>';
 									}
 									else {
 										<portlet:namespace />displayError(responseData.message);

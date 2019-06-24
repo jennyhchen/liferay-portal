@@ -169,22 +169,32 @@ public class MeetingsPortlet extends MVCPortlet {
 		try {
 			if (occurrenceId > 0) {
 
-				PowwowMeetingOccurrence occurrence =
+				PowwowMeetingOccurrence powwowMeetingOccurrence =
 					PowwowMeetingOccurrenceLocalServiceUtil
 						.fetchPowwowMeetingOccurrence(occurrenceId);
 
 				PowwowMeetingOccurrenceServiceUtil
 					.updateOccurrenceStatus(
-						occurrence.getPowwowMeetingId(),
+						powwowMeetingOccurrence.getPowwowMeetingId(),
 						occurrenceId, OccurrenceStatus.DELETE);
 
-				if (occurrence.getCalendarBookingId() > 0) {
+				if (powwowMeetingOccurrence.getCalendarBookingId() > 0) {
 					CalendarBookingLocalServiceUtil
 						.updateStatus(
-							themeDisplay.getUserId(), occurrence.getCalendarBookingId(),
+							themeDisplay.getUserId(), powwowMeetingOccurrence.getCalendarBookingId(),
 							CalendarBookingWorkflowConstants.STATUS_INACTIVE, serviceContext);
-				} else {
-					updateRelativeDeletedOccurrence(occurrence, themeDisplay, serviceContext);
+				}
+				else {
+					PowwowMeeting powwowMeeting =
+						PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(
+							powwowMeetingOccurrence.getPowwowMeetingId());
+
+					CalendarBooking mainCalendarBooking =
+						CalendarBookingLocalServiceUtil.fetchCalendarBooking(
+							powwowMeeting.getCalendarBookingId());
+
+					_updateCalendarBookingExceptionDate(powwowMeetingOccurrence,
+						mainCalendarBooking, themeDisplay, serviceContext);
 				}
 			}
 
@@ -1113,22 +1123,6 @@ public class MeetingsPortlet extends MVCPortlet {
 		_updateOccurenceZoomApi(powwowMeeting, mainCalendarBooking,
 			powwowMeetingOccurrence, startTime, endTime);
 
-	}
-
-	protected void updateRelativeDeletedOccurrence(
-		PowwowMeetingOccurrence powwowMeetingOccurrence,
-		ThemeDisplay themeDisplay, ServiceContext serviceContext)
-	throws Exception {
-		PowwowMeeting powwowMeeting =
-			PowwowMeetingLocalServiceUtil
-				.fetchPowwowMeeting(powwowMeetingOccurrence.getPowwowMeetingId());
-
-		CalendarBooking calendarBooking =
-			CalendarBookingLocalServiceUtil
-				.fetchCalendarBooking(powwowMeeting.getCalendarBookingId());
-
-		_updateCalendarBookingExceptionDate(powwowMeetingOccurrence,
-			calendarBooking, themeDisplay, serviceContext);
 	}
 
 	private void _addPowwowMeetingOccurrence(
