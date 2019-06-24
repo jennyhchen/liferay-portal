@@ -30,6 +30,7 @@ import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.calendar.service.CalendarLocalServiceUtil;
 import com.liferay.calendar.service.CalendarResourceLocalServiceUtil;
 import com.liferay.calendar.util.JCalendarUtil;
+import com.liferay.calendar.workflow.CalendarBookingWorkflowConstants;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -145,6 +146,54 @@ public class MeetingsPortlet extends MVCPortlet {
 			jsonObject.put(
 				"message",
 				translate(actionRequest, "the-meeting-could-not-be-deleted"));
+			jsonObject.put("success", false);
+		}
+
+		writeJSON(actionRequest, actionResponse, jsonObject);
+	}
+
+	public void deleteOccurrence(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		ServiceContext serviceContext = ServiceContextFactory.getInstance(
+			PowwowMeeting.class.getName(), actionRequest);
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+		long occurrenceId = ParamUtil.getLong(actionRequest, "occurrenceId", 0);
+
+		serviceContext.setAttribute("sendNotification", Boolean.FALSE);
+
+		try {
+			if (occurrenceId > 0) {
+
+				PowwowMeetingOccurrence occurrence =
+					PowwowMeetingOccurrenceLocalServiceUtil
+						.fetchPowwowMeetingOccurrence(occurrenceId);
+
+				PowwowMeetingOccurrenceServiceUtil
+					.updateOccurrenceStatus(
+						occurrence.getPowwowMeetingId(),
+						occurrenceId, OccurrenceStatus.DELETE);
+
+				if (occurrence.getCalendarBookingId() > 0) {
+					CalendarBookingLocalServiceUtil
+						.updateStatus(
+							themeDisplay.getUserId(), occurrence.getCalendarBookingId(),
+							CalendarBookingWorkflowConstants.STATUS_INACTIVE, serviceContext);
+				} else {
+					updateRelativeDeletedOccurrence(occurrence, themeDisplay, serviceContext);
+				}
+			}
+
+			jsonObject.put("success", true);
+		}
+		catch (Exception e) {
+			jsonObject.put(
+				"message",
+				translate(actionRequest, "the-occurrence-could-not-be-deleted"));
 			jsonObject.put("success", false);
 		}
 
@@ -1064,6 +1113,22 @@ public class MeetingsPortlet extends MVCPortlet {
 		_updateOccurenceZoomApi(powwowMeeting, mainCalendarBooking,
 			powwowMeetingOccurrence, startTime, endTime);
 
+	}
+
+	protected void updateRelativeDeletedOccurrence(
+		PowwowMeetingOccurrence powwowMeetingOccurrence,
+		ThemeDisplay themeDisplay, ServiceContext serviceContext)
+	throws Exception {
+		PowwowMeeting powwowMeeting =
+			PowwowMeetingLocalServiceUtil
+				.fetchPowwowMeeting(powwowMeetingOccurrence.getPowwowMeetingId());
+
+		CalendarBooking calendarBooking =
+			CalendarBookingLocalServiceUtil
+				.fetchCalendarBooking(powwowMeeting.getCalendarBookingId());
+
+		_updateCalendarBookingExceptionDate(powwowMeetingOccurrence,
+			calendarBooking, themeDisplay, serviceContext);
 	}
 
 	private void _addPowwowMeetingOccurrence(
