@@ -18,6 +18,9 @@
 
 <%
 String backURL = ParamUtil.getString(request, "backURL");
+if (Validator.isNull(backURL)) {
+	backURL = ParamUtil.getString(request, "redirect");
+}
 long powwowMeetingId = ParamUtil.getLong(request, "powwowMeetingId");
 boolean showAll = ParamUtil.getBoolean(request, "all", false);
 TimeZone userTimeZone = TimeZone.getTimeZone(user.getTimeZoneId());
