@@ -332,7 +332,7 @@ public abstract class BasePowwowServiceProvider
 	@Override
 	public boolean updateOccurrence(
 			long powwowMeetingId, Map<String, String> options,
-				String occurrentApiId)
+			String occurrentApiId)
 		throws PortalException {
 
 		Map<String, String> queryParams = new HashMap<>();

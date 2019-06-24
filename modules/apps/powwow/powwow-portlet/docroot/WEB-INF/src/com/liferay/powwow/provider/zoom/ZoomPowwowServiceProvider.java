@@ -679,7 +679,7 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 	@Override
 	protected boolean updateOccurrence(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting,
-			Map<String, String> options, Map<String, String> queryParams) {
+		Map<String, String> options, Map<String, String> queryParams) {
 
 		Map<String, Serializable> providerTypeMetadataMap = powwowMeeting.getProviderTypeMetadataMap();
 

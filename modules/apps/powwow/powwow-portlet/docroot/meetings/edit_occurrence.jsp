@@ -45,7 +45,8 @@ if (calendarBookingId > 0) {
 	title='edit-occurrence'
 />
 
-<liferay-ui:error key="error-update-occurrence" message="error-while-updating-powwow-meeting-occurrence" />
+<liferay-ui:error key="error-while-updating-meeting-occurrence" message="error-while-updating-meeting-occurrence" />
+<liferay-ui:error key="start-time-must-be-a-future-time" message="start-time-must-be-a-future-time" />
 
 <liferay-portlet:actionURL name="updatePowwowMeetingOccurrence" var="updatePowwowMeetingOccurrenceURL" />
 
