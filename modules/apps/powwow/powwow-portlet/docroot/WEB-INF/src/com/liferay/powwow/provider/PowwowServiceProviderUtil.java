@@ -54,6 +54,14 @@ public class PowwowServiceProviderUtil {
 		return powwowServiceProvider.deletePowwowMeeting(powwowMeetingId);
 	}
 
+	public static boolean deleteOccurrence(long powwowMeetingId, String occurrenceApiId)
+		throws PortalException {
+
+		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+
+		return powwowServiceProvider.deleteOccurrence(powwowMeetingId, occurrenceApiId);
+	}
+
 	public static PowwowMeeting endPowwowMeeting(long powwowMeetingId)
 		throws PortalException {
 

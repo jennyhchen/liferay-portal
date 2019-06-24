@@ -75,6 +75,24 @@ public abstract class BasePowwowServiceProvider
 	}
 
 	@Override
+	public boolean deleteOccurrence(long powwowMeetingId, String occurrenceApiId)
+		throws PortalException {
+
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put(PowwowMeetingConstants.OCCURRENCE_ID, occurrenceApiId);
+
+		PowwowMeeting powwowMeeting =
+			PowwowMeetingLocalServiceUtil
+				.getPowwowMeeting(powwowMeetingId);
+
+		PowwowServer powwowServer =
+			PowwowServerLocalServiceUtil
+				.getPowwowServer(powwowMeeting.getPowwowServerId());
+
+		return deleteOccurrence(powwowServer, powwowMeeting, queryParams);
+	}
+
+	@Override
 	public PowwowMeeting endPowwowMeeting(long powwowMeetingId)
 		throws PortalException {
 
@@ -354,6 +372,9 @@ public abstract class BasePowwowServiceProvider
 
 	protected abstract boolean deletePowwowMeeting(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting);
+
+	protected abstract boolean deleteOccurrence(
+		PowwowServer powwowServer, PowwowMeeting powwowMeeting, Map<String, String> queryParams);
 
 	protected abstract boolean endPowwowMeeting(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting);
