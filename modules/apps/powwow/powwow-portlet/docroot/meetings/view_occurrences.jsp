@@ -19,16 +19,35 @@
 <%
 String backURL = ParamUtil.getString(request, "backURL");
 long powwowMeetingId = ParamUtil.getLong(request, "powwowMeetingId");
+boolean showAll = ParamUtil.getBoolean(request, "all", false);
 TimeZone userTimeZone = TimeZone.getTimeZone(user.getTimeZoneId());
 
 PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
 
 portletURL.setParameter("jspPage", "/meetings/view_occurrences.jsp");
 portletURL.setParameter("powwowMeetingId", String.valueOf(powwowMeetingId));
+portletURL.setParameter("all", String.valueOf(showAll));
 portletURL.setParameter("backURL", backURL);
 
 List<PowwowMeetingOccurrence> powwowMeetingOccurrences =
 	PowwowMeetingOccurrenceLocalServiceUtil.findByPowwowMeetingId(powwowMeetingId);
+
+if (!showAll) {
+
+	// filter only available occurrences
+
+	powwowMeetingOccurrences = ListUtil.filter(powwowMeetingOccurrences,
+		new PredicateFilter<PowwowMeetingOccurrence>() {
+
+			@Override
+			public boolean filter(PowwowMeetingOccurrence t) {
+
+				return OccurrenceStatus.AVAILABLE.equals(
+					t.getOccurrenceStatusEnum()) && !t.isEndTimePassed();
+			}
+		});
+}
+
 %>
 
 <liferay-ui:header
@@ -61,6 +80,17 @@ List<PowwowMeetingOccurrence> powwowMeetingOccurrences =
 	<div class="occurrences">
 		<dt>
 			<liferay-ui:message key="occurrences" />
+
+			<portlet:renderURL var="viewOccurrencesRenderURL"/>
+			<aui:form action="${viewOccurrencesRenderURL}" id="fmViewOccurrences" method="post" name="fmViewOccurrences" onSubmit="event.preventDefault();">
+				<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
+				<aui:input name="jspPage" type="hidden" value="/meetings/view_occurrences.jsp" />
+				<aui:input name="powwowMeetingId" type="hidden" value="<%= String.valueOf(powwowMeetingId) %>" />
+
+				<aui:field-wrapper inlineField="<%= true %>" label="">
+					<aui:input checked="<%= showAll %>" label="show-all" name="all" type="checkbox" onChange="submitForm(this.form)"/>
+				</aui:field-wrapper>
+			</aui:form>
 		</dt>
 		<dd>
 			<liferay-ui:search-container
@@ -98,7 +128,14 @@ List<PowwowMeetingOccurrence> powwowMeetingOccurrences =
                     />
 
 					<liferay-ui:search-container-column-text name="status" >
-						<liferay-ui:message key="${powwowMeetingOccurrence.occurrenceStatus}" />
+						<c:choose>
+							<c:when test="${powwowMeetingOccurrence.occurrenceStatus eq 'available' and powwowMeetingOccurrence.isEndTimePassed()}">
+								<liferay-ui:message key="completed" />
+							</c:when>
+							<c:otherwise>
+								<liferay-ui:message key="${powwowMeetingOccurrence.occurrenceStatus}" />
+							</c:otherwise>
+						</c:choose>
 					</liferay-ui:search-container-column-text>
 
 					<liferay-ui:search-container-column-jsp
