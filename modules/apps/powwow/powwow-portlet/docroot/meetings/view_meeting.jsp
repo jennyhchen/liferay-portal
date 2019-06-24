@@ -121,6 +121,23 @@ portletURL.setParameter("backURL", backURL);
 			<dd>
 				<span>
 					<%= PowwowUtil.getRecurrenceSummary(calendarBooking.getRecurrenceObj(), locale) %>
+					<c:if test="<%= !calendarBooking.getRecurrenceObj().getExceptionJCalendars().isEmpty() %>">
+						<br/><liferay-ui:message key="exception-occurrences" />:
+						<%
+						List<Calendar> exceptionCalendars = calendarBooking.getRecurrenceObj().getExceptionJCalendars();
+						StringBuffer exceptions = new StringBuffer();
+
+						for (int i=0; i < exceptionCalendars.size(); i++) {
+
+							exceptions.append(recurringDateFormat.format(exceptionCalendars.get(i).getTime()));
+
+							if (i < exceptionCalendars.size() - 1) {
+								exceptions.append(StringPool.COMMA_AND_SPACE);
+							}
+						}
+						%>
+						<%= exceptions.toString() %>
+					</c:if>
 				</span>
 			</dd>
 		</div>
