@@ -28,17 +28,21 @@ PowwowMeetingOccurrence powwowMeetingOccurrence = (PowwowMeetingOccurrence) row.
 		<portlet:param name="occurrenceId" value="<%= String.valueOf(powwowMeetingOccurrence.getOccurrenceId()) %>" />
 	</portlet:renderURL>
 
-	<liferay-ui:icon
-		iconCssClass="icon-edit"
-		label="<%= true %>"
-		message='edit'
-		url="<%= editOccurrenceURL %>"
-	/>
+	<c:if test="<%= !powwowMeetingOccurrence.isEndTimePassed() %>">
+		<liferay-ui:icon
+			iconCssClass="icon-edit"
+			label="<%= true %>"
+			message='edit'
+			url="<%= editOccurrenceURL %>"
+		/>
+	</c:if>
 
-	<liferay-ui:icon
-		iconCssClass="icon-remove"
-		label="<%= true %>"
-		message='delete'
-		url="javascript:;"
-	/>
+	<c:if test="<%= !OccurrenceStatus.DELETE.equals(powwowMeetingOccurrence.getOccurrenceStatusEnum()) %>">
+		<liferay-ui:icon
+			iconCssClass="icon-remove"
+			label="<%= true %>"
+			message='delete'
+			url="javascript:;"
+		/>
+	</c:if>
 </liferay-ui:icon-menu>
