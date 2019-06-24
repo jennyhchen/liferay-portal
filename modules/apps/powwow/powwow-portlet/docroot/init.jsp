@@ -118,4 +118,5 @@ String currentURL = PortalUtil.getCurrentURL(request);
 Format longDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("EEEE, MMMMM dd, yyyy 'at' h:mm a", locale, timeZone);
 Format shortDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("MM/dd/yy 'at' h:mm a", locale, timeZone);
 Format occurrenceTimeFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("MM/dd/yyyy h:mm a", locale, timeZone);
+Format recurringDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("MM/dd/yyyy", locale, timeZone);
 %>
