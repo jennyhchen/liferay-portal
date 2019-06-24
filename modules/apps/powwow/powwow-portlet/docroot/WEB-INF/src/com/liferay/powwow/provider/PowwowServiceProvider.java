@@ -107,7 +107,7 @@ public interface PowwowServiceProvider {
 
 	public boolean updateOccurrence(
 			long powwowMeetingId, Map<String, String> options,
-				String occurrentApiId)
+			String occurrentApiId)
 		throws PortalException;
 
 }

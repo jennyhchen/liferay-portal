@@ -129,28 +129,16 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public PowwowMeetingOccurrence updateOccurrenceTime(
-		long occurrenceId, long startTime, long endTime) {
+		long occurrenceId, long startTime, long endTime, long calendarBookingId) {
 
 		PowwowMeetingOccurrence powwowMeetingOccurrence=
 			powwowMeetingOccurrencePersistence.fetchByPrimaryKey(occurrenceId);
+
+		powwowMeetingOccurrence.setModifiedDate(new Date());
 
 		powwowMeetingOccurrence.setStartTime(startTime);
 		powwowMeetingOccurrence.setEndTime(endTime);
-		powwowMeetingOccurrence.setModifiedDate(new Date());
-
-		return powwowMeetingOccurrencePersistence.update(powwowMeetingOccurrence);
-	}
-
-	@Indexable(type = IndexableType.REINDEX)
-	@Override
-	public PowwowMeetingOccurrence updateOccurrenceCalendarBookingId(
-		long occurrenceId, long calendarBookingId) {
-
-		PowwowMeetingOccurrence powwowMeetingOccurrence=
-			powwowMeetingOccurrencePersistence.fetchByPrimaryKey(occurrenceId);
-
 		powwowMeetingOccurrence.setCalendarBookingId(calendarBookingId);
-		powwowMeetingOccurrence.setModifiedDate(new Date());
 
 		return powwowMeetingOccurrencePersistence.update(powwowMeetingOccurrence);
 	}
