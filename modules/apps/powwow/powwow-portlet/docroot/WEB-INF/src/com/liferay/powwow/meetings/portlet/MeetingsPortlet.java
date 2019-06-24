@@ -629,21 +629,6 @@ public class MeetingsPortlet extends MVCPortlet {
 		return invitationURLMarkup + description;
 	}
 
-	protected String getCalendarBookingDescription(
-			String description, PowwowMeeting powwowMeeting,
-			ServiceContext serviceContext)
-		throws Exception {
-
-		if (powwowMeeting == null) {
-			return StringPool.BLANK;
-		}
-
-		String invitationURLMarkup = getInvitationURLMarkup(
-			powwowMeeting.getPowwowMeetingId(), serviceContext);
-
-		return invitationURLMarkup + description;
-	}
-
 	protected long getCalendarId(long userId, ServiceContext serviceContext)
 		throws Exception {
 
@@ -1063,36 +1048,20 @@ public class MeetingsPortlet extends MVCPortlet {
 	}
 
 	protected void updateOccurrence(
-			PowwowMeeting powwowMeeting, CalendarBooking calendarBooking,
+			PowwowMeeting powwowMeeting, CalendarBooking mainCalendarBooking,
 			PowwowMeetingOccurrence powwowMeetingOccurrence, long startTime,
 			long endTime, ThemeDisplay themeDisplay, ServiceContext serviceContext)
 		throws Exception {
 
 		serviceContext.setAttribute("sendNotification", Boolean.FALSE);
 
-		List<PowwowParticipant> powwowParticipants =
-			PowwowParticipantLocalServiceUtil
-				.getPowwowParticipants(powwowMeeting.getPowwowMeetingId());
-
-		long[] childCalendarIds = getChildCalendarIds(
-			themeDisplay.getCompanyId(), powwowParticipants, serviceContext);
-
-		Map<Locale, String> titleMap =
-			getLocalizationMap(powwowMeeting.getName());
-
-		Map<Locale, String> descriptionMap = getLocalizationMap(
-			getCalendarBookingDescription(calendarBooking.getDescription(),
-				powwowMeeting, serviceContext));
-
 		_updateCalendarBookingExceptionDate(powwowMeetingOccurrence,
-			calendarBooking, childCalendarIds, titleMap, descriptionMap,
-			themeDisplay, serviceContext);
+			mainCalendarBooking, themeDisplay, serviceContext);
 
 		_updateCalendarBookingOccurrence(powwowMeeting, powwowMeetingOccurrence,
-			startTime, endTime, childCalendarIds, titleMap, descriptionMap,
-			themeDisplay, serviceContext);
+			startTime, endTime, mainCalendarBooking, themeDisplay, serviceContext);
 
-		_updateOccurenceZoomApi(powwowMeeting, calendarBooking,
+		_updateOccurenceZoomApi(powwowMeeting, mainCalendarBooking,
 			powwowMeetingOccurrence, startTime, endTime);
 
 	}
@@ -1155,6 +1124,26 @@ public class MeetingsPortlet extends MVCPortlet {
 	private void _deletePowwowMeetingOccurrence(long powwowMeetingId)
 		throws PortalException {
 		PowwowMeetingOccurrenceServiceUtil.deleteByPowwowMeetingId(powwowMeetingId);
+	}
+
+	private boolean _exceptionDateExisted(
+		final Recurrence recurrence, final Calendar startTimeOriginalCalendar) {
+
+		List<Calendar> exceptions = recurrence.getExceptionJCalendars();
+
+		if (Validator.isNull(exceptions) || exceptions.isEmpty()) {
+			return false;
+		}
+
+		int year = startTimeOriginalCalendar.get(Calendar.YEAR);
+		int month = startTimeOriginalCalendar.get(Calendar.MONTH);
+		int day = startTimeOriginalCalendar.get(Calendar.DATE);
+		TimeZone timeZone = startTimeOriginalCalendar.getTimeZone();
+
+		Calendar startDateCalendar = CalendarFactoryUtil.getCalendar(year,
+			month, day, 0, 0, 0, 0, timeZone);
+
+		return exceptions.contains(startDateCalendar);
 	}
 
 	private Calendar _findLimitDate(
@@ -1370,9 +1359,8 @@ public class MeetingsPortlet extends MVCPortlet {
 
 	private void _updateCalendarBookingExceptionDate(
 			PowwowMeetingOccurrence powwowMeetingOccurrence,
-			CalendarBooking calendarBooking, long[] childCalendarIds,
-			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
-			ThemeDisplay themeDisplay, ServiceContext serviceContext)
+			CalendarBooking calendarBooking, ThemeDisplay themeDisplay,
+			ServiceContext serviceContext)
 		throws Exception {
 
 		Recurrence recurrence = calendarBooking.getRecurrenceObj();
@@ -1385,6 +1373,10 @@ public class MeetingsPortlet extends MVCPortlet {
 			_parseZoomUtcTime(zoomOriginalDataJSON.getString("start_time"),
 				calendarBooking.getTimeZone());
 
+		if (_exceptionDateExisted(recurrence, startTimeOriginalCalendar)) {
+			return;
+		}
+
 		recurrence.addExceptionDate(startTimeOriginalCalendar);
 
 		String recurrenceSerializedData =
@@ -1392,18 +1384,17 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		CalendarBookingLocalServiceUtil.updateCalendarBooking(
 			themeDisplay.getUserId(), calendarBooking.getCalendarBookingId(),
-			calendarBooking.getCalendarId(), childCalendarIds, titleMap,
-			descriptionMap, StringPool.BLANK, calendarBooking.getStartTime(),
-			calendarBooking.getEndTime(), false, recurrenceSerializedData, 0,
-			"email", 0, "email", serviceContext);
+			calendarBooking.getCalendarId(), calendarBooking.getTitleMap(),
+			new HashMap<>(), StringPool.BLANK,
+			calendarBooking.getStartTime(), calendarBooking.getEndTime(), false,
+			recurrenceSerializedData, 0, "email", 0, "email", serviceContext);
 	}
 
 	private void _updateCalendarBookingOccurrence(
 			PowwowMeeting powwowMeeting,
 			PowwowMeetingOccurrence powwowMeetingOccurrence, long startTime,
-			long endTime, long[] childCalendarIds, Map<Locale, String> titleMap,
-			Map<Locale, String> descriptionMap, ThemeDisplay themeDisplay,
-			ServiceContext serviceContext)
+			long endTime, CalendarBooking mainCalendarBooking,
+			ThemeDisplay themeDisplay, ServiceContext serviceContext)
 		throws Exception {
 
 		long calendarBookingId = 0;
@@ -1411,17 +1402,18 @@ public class MeetingsPortlet extends MVCPortlet {
 		long powwowMeetingId = powwowMeeting.getPowwowMeetingId();
 
 		if (powwowMeetingOccurrence.getCalendarBookingId() > 0) {
-			CalendarBooking calendarBookingOccurrence =
+			CalendarBooking occurrenceCalendarBooking =
 				CalendarBookingLocalServiceUtil.fetchCalendarBooking(
 					powwowMeetingOccurrence.getCalendarBookingId());
 
-			calendarBookingId = calendarBookingOccurrence.getCalendarBookingId();
+			calendarBookingId = occurrenceCalendarBooking.getCalendarBookingId();
 
 			CalendarBookingLocalServiceUtil.updateCalendarBooking(
-				themeDisplay.getUserId(),
-				calendarBookingId,
-				calendarBookingOccurrence.getCalendarId(), childCalendarIds,
-				titleMap, descriptionMap, StringPool.BLANK, startTime, endTime,
+				themeDisplay.getUserId(), calendarBookingId,
+				occurrenceCalendarBooking.getCalendarId(),
+				mainCalendarBooking.getTitleMap(),
+				new HashMap<>(), StringPool.BLANK,
+				startTime, endTime,
 				false, StringPool.BLANK, 0, "email", 0, "email",
 				serviceContext);
 		}
@@ -1429,15 +1421,21 @@ public class MeetingsPortlet extends MVCPortlet {
 			long calendarId =
 				getCalendarId(themeDisplay.getUserId(), serviceContext);
 
-			CalendarBooking calendarBookingNew =
+			long[] childCalendarIds = CalendarBookingLocalServiceUtil
+				.getChildCalendarIds(mainCalendarBooking.getCalendarBookingId(),
+					mainCalendarBooking.getCalendarId());
+
+			CalendarBooking occurrenceCalendarBooking =
 				CalendarBookingLocalServiceUtil.addCalendarBooking(
 					themeDisplay.getUserId(), calendarId, childCalendarIds,
 					CalendarBookingConstants.PARENT_CALENDAR_BOOKING_ID_DEFAULT,
-					titleMap, descriptionMap, StringPool.BLANK, startTime,
-					endTime, false, StringPool.BLANK, 0, "email", 0, "email",
+					mainCalendarBooking.getTitleMap(),
+					mainCalendarBooking.getDescriptionMap(), StringPool.BLANK,
+					startTime, endTime,
+					false, StringPool.BLANK, 0, "email", 0, "email",
 					serviceContext);
 
-			calendarBookingId = calendarBookingNew.getCalendarBookingId();
+			calendarBookingId = occurrenceCalendarBooking.getCalendarBookingId();
 		}
 
 		PowwowMeetingOccurrenceServiceUtil.updateOccurrenceTime(powwowMeetingId,
