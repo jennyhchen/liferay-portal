@@ -128,7 +128,7 @@ if (!showAll) {
 					<liferay-ui:search-container-column-text
 						name="end-time"
 						value="<%= endTime %>"
-                    />
+					/>
 
 					<liferay-ui:search-container-column-text name="status" >
 						<c:choose>
