@@ -97,8 +97,9 @@ if (!showAll) {
 		</dt>
 		<dd>
 			<liferay-ui:search-container
-				total="<%= powwowMeetingOccurrences.size() %>"
+				emptyResultsMessage="no-available-occurrences"
 				iteratorURL="<%= portletURL %>"
+				total="<%= powwowMeetingOccurrences.size() %>"
 			>
 
 				<liferay-ui:search-container-results

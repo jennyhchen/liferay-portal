@@ -124,15 +124,12 @@ portletURL.setParameter("tabs1", tabs1);
 			%>
 
 			<liferay-ui:search-container-column-text
-				href="<%= rowURL %>"
 				name="date"
 				orderable="<%= true %>"
 			>
-				<fmt:formatDate
-					pattern="MM/dd/yyyy hh:mm a"
-					timeZone="<%= timeZone.getDisplayName(false, 0) %>"
-					value="<%= startCalendar.getTime() %>"
-				/>
+				<a href="<%= rowURL %>" title="${powwowMeeting.name}">
+					<%= occurrenceTimeFormat.format(startCalendar.getTime()) %>
+				</a>
 
 				<%
 				String recurrenceLabel = StringPool.BLANK;
@@ -165,7 +162,18 @@ portletURL.setParameter("tabs1", tabs1);
 
 				<c:if test="<%= recurrenceLabel.length() > 0 %>">
 					<br/>
-					(<%= recurrenceLabel %>)
+					<%= recurrenceLabel %>
+
+					<%
+					Date occurrenceStartTime = startCalendar.getTime();
+					PowwowMeetingOccurrence nextOccurrence = powwowMeeting.findNextOccurrence();
+
+					if (Validator.isNotNull(nextOccurrence)) {
+						occurrenceStartTime = new Date(nextOccurrence.getStartTime());
+					}
+					%>
+					<br/>
+					<liferay-ui:message key="next-occurrence" />: <%= occurrenceTimeFormat.format(occurrenceStartTime) %>
 				</c:if>
 			</liferay-ui:search-container-column-text>
 

@@ -126,6 +126,15 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 			.findByPowwowMeetingId(powwowMeetingId, 0, 100);
 	}
 
+	public List<PowwowMeetingOccurrence> findByPowwowMeetingIdAndStatusAndEndTimeGE(
+		long powwowMeetingId, OccurrenceStatus occurrenceStatus,
+		long maxEndTime, int start, int end) {
+
+		return powwowMeetingOccurrencePersistence.findByPMI_OS_ET(
+			powwowMeetingId, occurrenceStatus.getValue(), maxEndTime, start,
+			end);
+	}
+
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public PowwowMeetingOccurrence updateOccurrenceTime(
