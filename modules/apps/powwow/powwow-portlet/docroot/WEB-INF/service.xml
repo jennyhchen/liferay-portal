@@ -89,6 +89,11 @@
 		<finder name="PowwowMeetingId" return-type="Collection">
 			<finder-column name="powwowMeetingId" />
 		</finder>
+		<finder name="PMI_OS_ET" return-type="Collection">
+			<finder-column name="powwowMeetingId" />
+			<finder-column name="occurrenceStatus" />
+			<finder-column name="endTime" comparator="&gt;=" />
+		</finder>
 	</entity>
 	<entity local-service="true" name="PowwowParticipant" remote-service="true">
 

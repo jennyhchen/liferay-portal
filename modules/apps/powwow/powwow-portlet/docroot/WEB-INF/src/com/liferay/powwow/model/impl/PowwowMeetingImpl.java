@@ -18,9 +18,12 @@ import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.powwow.model.PowwowMeetingOccurrence;
+import com.liferay.powwow.occurrence.OccurrenceStatus;
+import com.liferay.powwow.service.PowwowMeetingOccurrenceLocalServiceUtil;
 
 import java.io.Serializable;
-
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +47,21 @@ public class PowwowMeetingImpl extends PowwowMeetingBaseImpl {
 				providerTypeMetadata);
 
 		return _providerTypeMetadataMap;
+	}
+
+	public PowwowMeetingOccurrence findNextOccurrence() {
+
+		List<PowwowMeetingOccurrence> occurrences =
+			PowwowMeetingOccurrenceLocalServiceUtil
+				.findByPowwowMeetingIdAndStatusAndEndTimeGE(
+					getPowwowMeetingId(), OccurrenceStatus.AVAILABLE,
+					System.currentTimeMillis(), 0, 1);
+
+		if (!occurrences.isEmpty()) {
+			return occurrences.get(0);
+		}
+
+		return null;
 	}
 
 	public boolean isRecurring() {

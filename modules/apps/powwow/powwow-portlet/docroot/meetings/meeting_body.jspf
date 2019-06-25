@@ -42,15 +42,25 @@
 
 		<%
 		CalendarBooking calendarBooking = CalendarBookingServiceUtil.fetchCalendarBooking(powwowMeeting.getCalendarBookingId());
+		long meetingStartTime = calendarBooking.getStartTime();
+		long meetingEndTime = calendarBooking.getEndTime();
+		if (calendarBooking.isRecurring()) {
+			PowwowMeetingOccurrence nextOccurrence = powwowMeeting.findNextOccurrence();
+
+			if (Validator.isNotNull(nextOccurrence)) {
+				meetingStartTime = nextOccurrence.getStartTime();
+				meetingEndTime = nextOccurrence.getEndTime();
+			}
+		}
 		%>
 
 		<c:if test="<%= (calendarBooking != null) && !calendarBooking.isInTrash() %>">
 			<div class="meeting-time">
-				<span title="<%= longDateFormat.format(calendarBooking.getStartTime()) %>"><%= shortDateFormat.format(calendarBooking.getStartTime()) %></span>
+				<span title="<%= longDateFormat.format(meetingStartTime) %>"><%= shortDateFormat.format(meetingStartTime) %></span>
 
 				<span><liferay-ui:message key="to" /></span>
 
-				<span title="<%= longDateFormat.format(calendarBooking.getEndTime()) %>"><%= shortDateFormat.format(calendarBooking.getEndTime()) %></span>
+				<span title="<%= longDateFormat.format(meetingEndTime) %>"><%= shortDateFormat.format(meetingEndTime) %></span>
 			</div>
 		</c:if>
 	</div>
