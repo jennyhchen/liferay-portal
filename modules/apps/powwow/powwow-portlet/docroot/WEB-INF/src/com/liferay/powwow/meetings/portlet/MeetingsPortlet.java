@@ -199,7 +199,8 @@ public class MeetingsPortlet extends MVCPortlet {
 
 				PowwowServiceProviderUtil
 					.deleteOccurrence(
-						occurrence.getPowwowMeetingId(), occurrence.getOccurrenceApiId());
+						powwowMeetingOccurrence.getPowwowMeetingId(),
+						powwowMeetingOccurrence.getOccurrenceApiId());
 			}
 
 			jsonObject.put("success", true);
