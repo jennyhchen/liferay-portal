@@ -1504,6 +1504,9 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		PowwowMeetingOccurrenceServiceUtil.updateOccurrenceTime(powwowMeetingId,
 			occurrenceId, startTime, endTime, calendarBookingId);
+
+		PowwowUtil.sendNotificationsToPowwowParticipants(
+			powwowMeetingId, calendarBookingId, serviceContext);
 	}
 
 	private void _updateOccurenceZoomApi(
