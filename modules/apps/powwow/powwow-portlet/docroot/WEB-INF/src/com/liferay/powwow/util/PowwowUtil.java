@@ -244,115 +244,28 @@ public class PowwowUtil {
 	}
 
 	public static PowwowSubscriptionSender getPowwowSubscriptionSender(
-			long powwowMeetingId, ServiceContext serviceContext)
+			long powwowMeetingId, long calendarBookingId,
+			ServiceContext serviceContext)
 		throws Exception {
-
-		PowwowSubscriptionSender powwowSubscriptionSender =
-			new PowwowSubscriptionSender();
 
 		PowwowMeeting powwowMeeting =
 			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
 
-		PortletPreferences portletPreferences =
-			PortletPreferencesLocalServiceUtil.getPreferences(
-				powwowMeeting.getCompanyId(), powwowMeeting.getGroupId(),
-				PowwowPortletKeys.PREFS_OWNER_TYPE_GROUP,
-				LayoutConstants.DEFAULT_PLID,
-				PowwowPortletKeys.POWWOW_MEETINGS);
+		return _getSubcriptionSender(powwowMeeting, calendarBookingId,
+			serviceContext);
+	}
 
-		if (powwowMeeting.getCalendarBookingId() > 0) {
-			powwowSubscriptionSender.addFileAttachment(
-				FileUtil.createTempFile(
-					exportPowwowMeetingCalendar(powwowMeetingId)),
-				"invite.ics");
-		}
+	public static PowwowSubscriptionSender getPowwowSubscriptionSender(
+			long powwowMeetingId, ServiceContext serviceContext)
+		throws Exception {
 
-		powwowSubscriptionSender.setCompanyId(powwowMeeting.getCompanyId());
+		PowwowMeeting powwowMeeting =
+			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
 
-		String startDateString = StringPool.BLANK;
-		String startTimeString = StringPool.BLANK;
-		String timeZoneDisplayName = StringPool.BLANK;
-		String recurrenceSumary = StringPool.BLANK;
+		long calendarBookingId = powwowMeeting.getCalendarBookingId();
 
-		if (powwowMeeting.getCalendarBookingId() > 0) {
-			CalendarBooking calendarBooking =
-				CalendarBookingLocalServiceUtil.getCalendarBooking(
-					powwowMeeting.getCalendarBookingId());
-
-			User user = UserLocalServiceUtil.getUser(powwowMeeting.getUserId());
-
-			Format format = FastDateFormatFactoryUtil.getSimpleDateFormat(
-				"EEEE, dd MMMMM yyyy", user.getLocale(), user.getTimeZone());
-
-			startDateString = format.format(calendarBooking.getStartTime());
-
-			Format timeFormatDate = FastDateFormatFactoryUtil.getTime(
-				user.getLocale(), user.getTimeZone());
-
-			startTimeString = timeFormatDate.format(
-				calendarBooking.getStartTime());
-
-			TimeZone timeZone = user.getTimeZone();
-
-			timeZoneDisplayName = timeZone.getDisplayName();
-
-			if (calendarBooking.isRecurring()) {
-				recurrenceSumary = "Repeat: " +
-					getRecurrenceSummary(calendarBooking.getRecurrenceObj(),
-						serviceContext.getLocale());
-			}
-		}
-
-		powwowSubscriptionSender.setContextAttributes(
-			"[$MEETING_DATE$]", startDateString, "[$MEETING_DESCRIPTION$]",
-			powwowMeeting.getDescription(),
-			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE$]",
-			PowwowServiceProviderUtil.getJoinByPhoneAccessCode(powwowMeetingId),
-			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE_LABEL$]",
-			LanguageUtil.get(serviceContext.getLocale(),
-				PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel()),
-			"[$MEETING_NAME$]", powwowMeeting.getName(), "[$MEETING_PASSWORD$]",
-			PowwowServiceProviderUtil.getOptionPassword(
-				powwowMeeting.getPowwowMeetingId()),
-			"[$RECURRENCE_SUMMARY$]", recurrenceSumary,
-			"[$MEETING_TIME$]", startTimeString, "[$MEETING_TIME_ZONE$]",
-			timeZoneDisplayName, "[$MEETING_URL$]",
-			getInvitationURL(
-				powwowMeeting.getPowwowMeetingId(), null,
-				serviceContext.getRequest()));
-
-		powwowSubscriptionSender.setContextCreatorUserPrefix("MEETING");
-
-		String fromName = PrefsPropsUtil.getString(
-			powwowMeeting.getCompanyId(), PropsKeys.ADMIN_EMAIL_FROM_NAME);
-		String fromAddress = PrefsPropsUtil.getString(
-			powwowMeeting.getCompanyId(), PropsKeys.ADMIN_EMAIL_FROM_ADDRESS);
-
-		powwowSubscriptionSender.setFrom(fromAddress, fromName);
-
-		powwowSubscriptionSender.setHtmlFormat(true);
-		powwowSubscriptionSender.setBody(
-			portletPreferences.getValue(
-				"emailBody_" + powwowMeeting.getLanguageId(),
-				ContentUtil.get(
-					PowwowUtil.class.getClassLoader(),
-					PortletPropsValues.POWWOW_INVITATION_EMAIL_BODY)));
-		powwowSubscriptionSender.setSubject(
-			portletPreferences.getValue(
-				"emailSubject_" + powwowMeeting.getLanguageId(),
-				ContentUtil.get(
-					PowwowUtil.class.getClassLoader(),
-					PortletPropsValues.POWWOW_INVITATION_EMAIL_SUBJECT)));
-		powwowSubscriptionSender.setMailId(
-			"powwowMeeting", powwowMeeting.getPowwowMeetingId());
-		powwowSubscriptionSender.setPortletId(
-			PowwowPortletKeys.POWWOW_MEETINGS);
-		powwowSubscriptionSender.setReplyToAddress(fromAddress);
-		powwowSubscriptionSender.setScopeGroupId(powwowMeeting.getGroupId());
-		powwowSubscriptionSender.setServiceContext(serviceContext);
-		powwowSubscriptionSender.setUserId(powwowMeeting.getUserId());
-
-		return powwowSubscriptionSender;
+		return _getSubcriptionSender(powwowMeeting, calendarBookingId,
+			serviceContext);
 	}
 
 	public static String getRecurrenceSummary(Recurrence recurrence, Locale locale) {
@@ -419,7 +332,7 @@ public class PowwowUtil {
 		else if (Validator.isNotNull(recurrence.getUntilJCalendar())) {
 			Calendar untilDateJCalendar = recurrence.getUntilJCalendar();
 
-			sb.append(", ");
+			sb.append(StringPool.COMMA_AND_SPACE);
 			sb.append(LanguageUtil.get(locale, "until"));
 			sb.append(STR_SPACE);
 			sb.append("${untilMonthLabel}");
@@ -473,6 +386,27 @@ public class PowwowUtil {
 		powwowSubscriptionSender.flushNotificationsAsync();
 	}
 
+	public static void sendNotificationsToPowwowParticipants(
+			long powwowMeetingId, long calendarBookingId, ServiceContext serviceContext)
+		throws Exception {
+		PowwowSubscriptionSender powwowSubscriptionSender =
+			getPowwowSubscriptionSender(powwowMeetingId, calendarBookingId, serviceContext);
+
+		List<PowwowParticipant> powwowParticipants =
+			PowwowParticipantLocalServiceUtil.getPowwowParticipants(powwowMeetingId);
+
+		for (PowwowParticipant powwowParticipant : powwowParticipants) {
+
+			powwowSubscriptionSender.addRuntimeSubscribers(
+				powwowParticipant.getEmailAddress(),
+				powwowParticipant.getName());
+
+			_sendNotificationEvent(powwowParticipant);
+		}
+
+		powwowSubscriptionSender.flushNotificationsAsync();
+	}
+
 	private static PowwowParticipant _getPowwowParticipant(
 		long powwowMeetingId, String name, long participantUserId,
 		String emailAddress, int type) {
@@ -503,6 +437,116 @@ public class PowwowUtil {
 		powwowParticipant.setType(type);
 
 		return powwowParticipant;
+	}
+
+	private static PowwowSubscriptionSender _getSubcriptionSender(
+			PowwowMeeting powwowMeeting, long calendarBookingId,
+			ServiceContext serviceContext)
+		throws Exception {
+
+		String startDateString = StringPool.BLANK;
+		String startTimeString = StringPool.BLANK;
+		String timeZoneDisplayName = StringPool.BLANK;
+		String recurrenceSumary = StringPool.BLANK;
+
+		if (calendarBookingId > 0) {
+			CalendarBooking calendarBooking =
+				CalendarBookingLocalServiceUtil.getCalendarBooking(
+					calendarBookingId);
+
+			User user = UserLocalServiceUtil.getUser(powwowMeeting.getUserId());
+
+			Format format = FastDateFormatFactoryUtil.getSimpleDateFormat(
+				"EEEE, dd MMMMM yyyy", user.getLocale(), user.getTimeZone());
+
+			startDateString = format.format(calendarBooking.getStartTime());
+
+			Format timeFormatDate = FastDateFormatFactoryUtil.getTime(
+				user.getLocale(), user.getTimeZone());
+
+			startTimeString = timeFormatDate.format(
+				calendarBooking.getStartTime());
+
+			TimeZone timeZone = user.getTimeZone();
+
+			timeZoneDisplayName = timeZone.getDisplayName();
+
+			if (calendarBooking.isRecurring()) {
+				recurrenceSumary = "Repeat: " +
+					getRecurrenceSummary(calendarBooking.getRecurrenceObj(),
+						serviceContext.getLocale());
+			}
+		}
+
+		PowwowSubscriptionSender powwowSubscriptionSender =
+			new PowwowSubscriptionSender();
+
+		PortletPreferences portletPreferences =
+			PortletPreferencesLocalServiceUtil.getPreferences(
+				powwowMeeting.getCompanyId(), powwowMeeting.getGroupId(),
+				PowwowPortletKeys.PREFS_OWNER_TYPE_GROUP,
+				LayoutConstants.DEFAULT_PLID,
+				PowwowPortletKeys.POWWOW_MEETINGS);
+
+		if (calendarBookingId > 0) {
+			powwowSubscriptionSender.addFileAttachment(
+				FileUtil.createTempFile(exportPowwowMeetingCalendar(
+					powwowMeeting.getPowwowMeetingId())),
+				"invite.ics");
+		}
+
+		powwowSubscriptionSender.setCompanyId(powwowMeeting.getCompanyId());
+
+		powwowSubscriptionSender.setContextAttributes(
+			"[$MEETING_DATE$]", startDateString, "[$MEETING_DESCRIPTION$]",
+			powwowMeeting.getDescription(),
+			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE$]",
+			PowwowServiceProviderUtil
+				.getJoinByPhoneAccessCode(powwowMeeting.getPowwowMeetingId()),
+			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE_LABEL$]",
+			LanguageUtil.get(serviceContext.getLocale(),
+				PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel()),
+			"[$MEETING_NAME$]", powwowMeeting.getName(), "[$MEETING_PASSWORD$]",
+			PowwowServiceProviderUtil.getOptionPassword(
+				powwowMeeting.getPowwowMeetingId()),
+			"[$RECURRENCE_SUMMARY$]", recurrenceSumary,
+			"[$MEETING_TIME$]", startTimeString, "[$MEETING_TIME_ZONE$]",
+			timeZoneDisplayName, "[$MEETING_URL$]",
+			getInvitationURL(
+				powwowMeeting.getPowwowMeetingId(), null,
+				serviceContext.getRequest()));
+
+		powwowSubscriptionSender.setContextCreatorUserPrefix("MEETING");
+
+		String fromName = PrefsPropsUtil.getString(
+			powwowMeeting.getCompanyId(), PropsKeys.ADMIN_EMAIL_FROM_NAME);
+		String fromAddress = PrefsPropsUtil.getString(
+			powwowMeeting.getCompanyId(), PropsKeys.ADMIN_EMAIL_FROM_ADDRESS);
+
+		powwowSubscriptionSender.setFrom(fromAddress, fromName);
+
+		powwowSubscriptionSender.setHtmlFormat(true);
+		powwowSubscriptionSender.setBody(
+			portletPreferences.getValue(
+				"emailBody_" + powwowMeeting.getLanguageId(),
+				ContentUtil.get(
+					PowwowUtil.class.getClassLoader(),
+					PortletPropsValues.POWWOW_INVITATION_EMAIL_BODY)));
+		powwowSubscriptionSender.setSubject(
+			portletPreferences.getValue(
+				"emailSubject_" + powwowMeeting.getLanguageId(),
+				ContentUtil.get(
+					PowwowUtil.class.getClassLoader(),
+					PortletPropsValues.POWWOW_INVITATION_EMAIL_SUBJECT)));
+		powwowSubscriptionSender.setMailId(
+			"powwowMeeting", powwowMeeting.getPowwowMeetingId());
+		powwowSubscriptionSender.setPortletId(
+			PowwowPortletKeys.POWWOW_MEETINGS);
+		powwowSubscriptionSender.setReplyToAddress(fromAddress);
+		powwowSubscriptionSender.setScopeGroupId(powwowMeeting.getGroupId());
+		powwowSubscriptionSender.setServiceContext(serviceContext);
+		powwowSubscriptionSender.setUserId(powwowMeeting.getUserId());
+		return powwowSubscriptionSender;
 	}
 
 	private static void _sendNotificationEvent(
