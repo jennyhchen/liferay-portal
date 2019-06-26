@@ -94,6 +94,10 @@
 			<finder-column name="occurrenceStatus" />
 			<finder-column name="endTime" comparator="&gt;=" />
 		</finder>
+		<finder name="OS_ET" return-type="Collection">
+			<finder-column name="occurrenceStatus" />
+			<finder-column name="endTime" comparator="&lt;" />
+		</finder>
 	</entity>
 	<entity local-service="true" name="PowwowParticipant" remote-service="true">
 

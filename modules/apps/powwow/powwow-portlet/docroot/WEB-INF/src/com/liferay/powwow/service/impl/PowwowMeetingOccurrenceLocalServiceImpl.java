@@ -79,6 +79,12 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 		return powwowMeetingOccurrence;
 	}
 
+	public int countByStatusAndEndTimeLE(
+		OccurrenceStatus occurrenceStatus, long maxEndTime) {
+		return powwowMeetingOccurrencePersistence
+			.countByOS_ET(occurrenceStatus.getValue(), maxEndTime);
+	}
+
 	public void deleteByPowwowMeetingId(long powwowMeetingId) {
 
 		List<PowwowMeetingOccurrence> meetingOccurrences =
@@ -133,6 +139,14 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 		return powwowMeetingOccurrencePersistence.findByPMI_OS_ET(
 			powwowMeetingId, occurrenceStatus.getValue(), maxEndTime, start,
 			end);
+	}
+
+	public List<PowwowMeetingOccurrence> findByStatusAndEndTimeLE(
+		OccurrenceStatus occurrenceStatus,
+		long maxEndTime, int start, int end) {
+
+		return powwowMeetingOccurrencePersistence.findByOS_ET(
+			occurrenceStatus.getValue(), maxEndTime, start, end);
 	}
 
 	@Indexable(type = IndexableType.REINDEX)
