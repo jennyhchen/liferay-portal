@@ -322,7 +322,7 @@ public class PowwowMeetingLocalServiceImpl
 
 		powwowMeeting.setStatus(status);
 
-		powwowMeetingPersistence.update(powwowMeeting);
+		powwowMeetingLocalService.updatePowwowMeeting(powwowMeeting);
 
 		return powwowMeeting;
 	}
