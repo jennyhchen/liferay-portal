@@ -189,6 +189,7 @@ public class PowwowMeetingIndexer extends BaseIndexer {
 		}
 
 		document.addKeyword("startTime", startTime);
+		document.addKeyword("startTime_sortable", startTime);
 
 		document.addNumber("status", powwowMeeting.getStatus());
 
