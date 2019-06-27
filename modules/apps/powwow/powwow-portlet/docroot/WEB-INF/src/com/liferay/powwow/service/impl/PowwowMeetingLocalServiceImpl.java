@@ -123,13 +123,16 @@ public class PowwowMeetingLocalServiceImpl
 				continue;
 			}
 
-			if (!PowwowServiceProviderUtil.isPowwowMeetingRunning(
-					powwowMeeting.getPowwowMeetingId())) {
+			boolean isPowwowMeetingAndNextOccurrence=
+				!PowwowServiceProviderUtil.isPowwowMeetingRunning(
+					powwowMeeting.getPowwowMeetingId())
+						&& Validator.isNotNull(powwowMeeting.findNextOccurrence());
 
-				powwowMeetingLocalService.updateStatus(
-					powwowMeeting.getPowwowMeetingId(),
-					PowwowMeetingConstants.STATUS_COMPLETED);
-			}
+			int meetingStatus = isPowwowMeetingAndNextOccurrence ?
+				PowwowMeetingConstants.STATUS_SCHEDULED :
+					PowwowMeetingConstants.STATUS_COMPLETED;
+
+			updateStatus(powwowMeeting.getPowwowMeetingId(), meetingStatus);
 		}
 	}
 
