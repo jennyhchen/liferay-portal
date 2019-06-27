@@ -121,6 +121,12 @@ portletURL.setParameter("backURL", backURL);
 			<dd>
 				<span>
 					<%= PowwowUtil.getRecurrenceSummary(calendarBooking.getRecurrenceObj(), locale) %>
+					<br/>
+					<span><liferay-ui:message key="schedule-time" />:
+						<%= shortDateFormat.format(calendarBooking.getStartTime()) %>
+						<liferay-ui:message key="to" />
+						<%= shortDateFormat.format(calendarBooking.getEndTime()) %>
+					</span>
 					<c:if test="<%= !calendarBooking.getRecurrenceObj().getExceptionJCalendars().isEmpty() %>">
 						<br/><liferay-ui:message key="exception-occurrences" />:
 						<%
