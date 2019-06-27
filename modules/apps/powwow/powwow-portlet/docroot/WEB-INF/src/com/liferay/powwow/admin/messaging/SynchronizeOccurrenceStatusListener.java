@@ -1,4 +1,4 @@
-package com.liferay.powwow.meetings.messaging;
+package com.liferay.powwow.admin.messaging;
 
 import com.liferay.portal.kernel.messaging.BaseMessageListener;
 import com.liferay.portal.kernel.messaging.Message;
