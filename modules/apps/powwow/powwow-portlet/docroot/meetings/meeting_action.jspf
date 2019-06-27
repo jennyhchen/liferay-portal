@@ -35,7 +35,7 @@ boolean isEditable = PowwowMeetingPermission.contains(permissionChecker, powwowM
 	/>
 </c:if>
 
-<c:if test="<%= isEditable && powwowMeeting.isRecurring() %>">
+<c:if test="<%= isEditable && (powwowMeeting.getStatus() != PowwowMeetingConstants.STATUS_COMPLETED) && powwowMeeting.isRecurring() %>">
 	<portlet:renderURL var="viewOccurrencesURL">
 		<portlet:param name="mvcPath" value="/meetings/view_occurrences.jsp" />
 		<portlet:param name="redirect" value="<%= currentURL %>" />
