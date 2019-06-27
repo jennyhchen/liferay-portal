@@ -123,14 +123,19 @@ public class PowwowMeetingLocalServiceImpl
 				continue;
 			}
 
-			boolean isPowwowMeetingAndNextOccurrence=
-				!PowwowServiceProviderUtil.isPowwowMeetingRunning(
-					powwowMeeting.getPowwowMeetingId())
-						&& Validator.isNotNull(powwowMeeting.findNextOccurrence());
+			boolean isPowwowMeetingRunning = PowwowServiceProviderUtil.isPowwowMeetingRunning(
+				powwowMeeting.getPowwowMeetingId());
 
-			int meetingStatus = isPowwowMeetingAndNextOccurrence ?
-				PowwowMeetingConstants.STATUS_SCHEDULED :
-					PowwowMeetingConstants.STATUS_COMPLETED;
+			if (isPowwowMeetingRunning) {
+				continue;
+			}
+
+			boolean hasNextOccurrence =
+				Validator.isNotNull(powwowMeeting.findNextOccurrence());
+
+			int meetingStatus = hasNextOccurrence
+				? PowwowMeetingConstants.STATUS_SCHEDULED
+				: PowwowMeetingConstants.STATUS_COMPLETED;
 
 			updateStatus(powwowMeeting.getPowwowMeetingId(), meetingStatus);
 		}
