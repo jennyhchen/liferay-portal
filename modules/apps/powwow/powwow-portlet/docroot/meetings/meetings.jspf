@@ -163,15 +163,25 @@ portletURL.setParameter("tabs1", tabs1);
 				<c:if test="<%= calendarBooking.isRecurring() %>">
 					<br/>
 					<%= recurrenceLabel %>
-
-					<%
-					PowwowMeetingOccurrence nextOccurrence = powwowMeeting.findNextOccurrence();
-					%>
-
-					<br/>
-					<liferay-ui:message key="next-occurrence" />: <%= Validator.isNull(nextOccurrence) ? "N/A" : occurrenceTimeFormat.format(new Date(nextOccurrence.getStartTime())) %>
 				</c:if>
 			</liferay-ui:search-container-column-text>
+
+			<c:if test="<%= tabs1.equals("current") %>">
+				<liferay-ui:search-container-column-text
+					name="next-scheduled-time" >
+
+					<c:if test="<%= !calendarBooking.isRecurring() %>">
+						<%= occurrenceTimeFormat.format(startCalendar.getTime()) %>
+					</c:if>
+
+					<c:if test="<%= calendarBooking.isRecurring() %>">
+						<%
+						PowwowMeetingOccurrence nextOccurrence = powwowMeeting.findNextOccurrence();
+						%>
+						<%= Validator.isNull(nextOccurrence) ? "N/A" : occurrenceTimeFormat.format(new Date(nextOccurrence.getStartTime())) %>
+					</c:if>
+				</liferay-ui:search-container-column-text>
+			</c:if>
 
 			<liferay-ui:search-container-column-text
 				href="<%= rowURL %>"
