@@ -160,20 +160,16 @@ portletURL.setParameter("tabs1", tabs1);
 				}
 				%>
 
-				<c:if test="<%= recurrenceLabel.length() > 0 %>">
+				<c:if test="<%= calendarBooking.isRecurring() %>">
 					<br/>
 					<%= recurrenceLabel %>
 
 					<%
-					Date occurrenceStartTime = startCalendar.getTime();
 					PowwowMeetingOccurrence nextOccurrence = powwowMeeting.findNextOccurrence();
-
-					if (Validator.isNotNull(nextOccurrence)) {
-						occurrenceStartTime = new Date(nextOccurrence.getStartTime());
-					}
 					%>
+
 					<br/>
-					<liferay-ui:message key="next-occurrence" />: <%= occurrenceTimeFormat.format(occurrenceStartTime) %>
+					<liferay-ui:message key="next-occurrence" />: <%= Validator.isNull(nextOccurrence) ? "N/A" : occurrenceTimeFormat.format(new Date(nextOccurrence.getStartTime())) %>
 				</c:if>
 			</liferay-ui:search-container-column-text>
 

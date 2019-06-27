@@ -126,7 +126,7 @@ public class PowwowMeetingLocalServiceImpl
 			if (!PowwowServiceProviderUtil.isPowwowMeetingRunning(
 					powwowMeeting.getPowwowMeetingId())) {
 
-				updateStatus(
+				powwowMeetingLocalService.updateStatus(
 					powwowMeeting.getPowwowMeetingId(),
 					PowwowMeetingConstants.STATUS_COMPLETED);
 			}
@@ -206,6 +206,12 @@ public class PowwowMeetingLocalServiceImpl
 	@Override
 	public List<PowwowMeeting> getPowwowMeetings(int status) {
 		return powwowMeetingPersistence.findByStatus(status);
+	}
+
+	public List<PowwowMeeting> getPowwowMeetings(
+		int status, int start, int end) {
+
+		return powwowMeetingPersistence.findByStatus(status, start, end);
 	}
 
 	@Override
