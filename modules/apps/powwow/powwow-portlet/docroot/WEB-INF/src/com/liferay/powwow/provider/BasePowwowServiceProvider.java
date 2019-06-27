@@ -111,10 +111,7 @@ public abstract class BasePowwowServiceProvider
 			return null;
 		}
 
-		if (endPowwowMeeting(powwowServer, powwowMeeting)) {
-			PowwowMeetingLocalServiceUtil.updateStatus(
-				powwowMeetingId, PowwowMeetingConstants.STATUS_COMPLETED);
-		}
+		endPowwowMeeting(powwowServer, powwowMeeting);
 
 		return powwowMeeting;
 	}

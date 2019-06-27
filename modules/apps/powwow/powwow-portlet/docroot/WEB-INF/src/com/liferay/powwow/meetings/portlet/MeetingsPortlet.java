@@ -222,7 +222,18 @@ public class MeetingsPortlet extends MVCPortlet {
 		long powwowMeetingId = ParamUtil.getLong(
 			actionRequest, "powwowMeetingId");
 
-		PowwowServiceProviderUtil.endPowwowMeeting(powwowMeetingId);
+		PowwowMeeting powwowMeeting =
+			PowwowServiceProviderUtil.endPowwowMeeting(powwowMeetingId);
+
+		boolean hasNextOccurrence =
+			Validator.isNotNull(powwowMeeting.findNextOccurrence());
+
+		int meetingStatus =
+			hasNextOccurrence ? PowwowMeetingConstants.STATUS_SCHEDULED
+				: PowwowMeetingConstants.STATUS_COMPLETED;
+
+		PowwowMeetingLocalServiceUtil
+			.updateStatus(powwowMeetingId, meetingStatus);
 	}
 
 	public void joinPowwowMeeting(
