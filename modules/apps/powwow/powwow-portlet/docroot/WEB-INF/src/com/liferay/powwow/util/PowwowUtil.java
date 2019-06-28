@@ -59,6 +59,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.powwow.meetings.portlet.MeetingsPortlet;
 import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowParticipant;
 import com.liferay.powwow.model.PowwowParticipantConstants;
@@ -546,6 +547,10 @@ public class PowwowUtil {
 		powwowSubscriptionSender.setScopeGroupId(powwowMeeting.getGroupId());
 		powwowSubscriptionSender.setServiceContext(serviceContext);
 		powwowSubscriptionSender.setUserId(powwowMeeting.getUserId());
+		powwowSubscriptionSender.setNotificationType(PowwowParticipantConstants.STATUS_INVITED);
+		powwowSubscriptionSender.addPersistedSubscribers(MeetingsPortlet.class.getName(),0);
+		powwowSubscriptionSender.setClassPK(powwowMeeting.getPowwowMeetingId());
+
 		return powwowSubscriptionSender;
 	}
 
