@@ -35,6 +35,9 @@ import com.liferay.portal.kernel.notifications.NotificationEvent;
 import com.liferay.portal.kernel.notifications.NotificationEventFactoryUtil;
 import com.liferay.portal.kernel.notifications.UserNotificationManagerUtil;
 import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
@@ -67,6 +70,7 @@ import com.liferay.powwow.provider.PowwowServiceProviderUtil;
 import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
 import com.liferay.powwow.service.PowwowParticipantLocalServiceUtil;
 
+import java.io.IOError;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -186,7 +190,12 @@ public class PowwowUtil {
 			reverse = false;
 		}
 
-		if (orderByCol.equals("created-by")) {
+		if (orderByCol.equals("next-scheduled-time")) {
+			return new Sort[] {
+				SortFactoryUtil.create("nextScheduleTime", Sort.LONG_TYPE, reverse)
+			};
+		}
+		else if (orderByCol.equals("created-by")) {
 			return new Sort[] {
 				SortFactoryUtil.create("creatorName", Sort.STRING_TYPE, reverse)
 			};
@@ -353,6 +362,18 @@ public class PowwowUtil {
 		recurrenceSummary = sub.replace(sb.toString());
 
 		return recurrenceSummary;
+	}
+
+	public static void reindexPowwowMeeting(PowwowMeeting powwowMeeting) {
+		Indexer<PowwowMeeting> index =
+			IndexerRegistryUtil.nullSafeGetIndexer(PowwowMeeting.class);
+
+		try {
+			index.reindex(powwowMeeting);
+		}
+		catch (SearchException e) {
+			throw new IOError(e);
+		}
 	}
 
 	public static void sendNotifications(

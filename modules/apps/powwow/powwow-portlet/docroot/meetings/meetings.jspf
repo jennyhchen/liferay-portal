@@ -15,17 +15,18 @@
 --%>
 
 <%
+int delta = ParamUtil.getInteger(request, "delta", 10);
+String orderByCol = ParamUtil.getString(request, "orderByCol", "next-scheduled-time");
+String orderByType = ParamUtil.getString(request, "orderByType", "asc");
+
 String tabs1 = ParamUtil.getString(request, "tabs1", "current");
 
 int[] statuses = {PowwowMeetingConstants.STATUS_IN_PROGRESS, PowwowMeetingConstants.STATUS_SCHEDULED};
 
 if (tabs1.equals("completed")) {
 	statuses = new int[] {PowwowMeetingConstants.STATUS_COMPLETED};
+	orderByCol = ParamUtil.getString(request, "orderByCol", "date");
 }
-
-int delta = ParamUtil.getInteger(request, "delta", 10);
-String orderByCol = ParamUtil.getString(request, "orderByCol", "date");
-String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 
 portletURL.setParameter("tabs1", tabs1);
 %>
@@ -168,7 +169,7 @@ portletURL.setParameter("tabs1", tabs1);
 
 			<c:if test="<%= tabs1.equals("current") %>">
 				<liferay-ui:search-container-column-text
-					name="next-scheduled-time" >
+					name="next-scheduled-time" orderable="<%= true %>">
 
 					<c:if test="<%= !calendarBooking.isRecurring() %>">
 						<%= occurrenceTimeFormat.format(startCalendar.getTime()) %>
