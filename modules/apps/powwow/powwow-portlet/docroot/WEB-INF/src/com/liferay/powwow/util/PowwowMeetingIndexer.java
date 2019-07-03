@@ -31,7 +31,9 @@ import com.liferay.portal.kernel.search.TermQueryFactoryUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.powwow.model.PowwowMeeting;
+import com.liferay.powwow.model.PowwowMeetingOccurrence;
 import com.liferay.powwow.model.PowwowParticipant;
 import com.liferay.powwow.provider.PowwowServiceProviderUtil;
 import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
@@ -192,6 +194,16 @@ public class PowwowMeetingIndexer extends BaseIndexer {
 		document.addKeyword("startTime_sortable", startTime);
 
 		document.addNumber("status", powwowMeeting.getStatus());
+
+		long nextScheduleTime = startTime;
+		PowwowMeetingOccurrence nextOccurrence = powwowMeeting.findNextOccurrence();
+
+		if(Validator.isNotNull(nextOccurrence)) {
+			nextScheduleTime = nextOccurrence.getStartTime();
+		}
+
+		document.addKeyword("nextScheduleTime", nextScheduleTime);
+		document.addKeyword("nextScheduleTime_sortable", nextScheduleTime);
 
 		return document;
 	}

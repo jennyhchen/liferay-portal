@@ -420,6 +420,10 @@ public class MeetingsPortlet extends MVCPortlet {
 			CalendarBooking calendarBooking = updateCalendarBooking(
 				actionRequest, powwowMeeting, powwowParticipants, serviceContext);
 
+			String newRecurrenceHash = _getRecurrenceHash(calendarBooking);
+
+			boolean recurrenceChanged = !oldRecurrenceHash.equals(newRecurrenceHash);
+
 			Map<String, String> options = new HashMap<>();
 
 			boolean autoStartVideo = ParamUtil.getBoolean(
@@ -480,6 +484,10 @@ public class MeetingsPortlet extends MVCPortlet {
 							powwowMeetingId, name, hostUserId, options);
 				}
 
+				if (recurrenceChanged) {
+					_deletePowwowMeetingOccurrence(powwowMeetingId);
+				}
+
 				powwowMeeting = PowwowMeetingServiceUtil.updatePowwowMeeting(
 					powwowMeetingId, powwowMeeting.getPowwowServerId(), name,
 					description, providerTypeMetadataMap, languageId,
@@ -488,16 +496,8 @@ public class MeetingsPortlet extends MVCPortlet {
 					serviceContext);
 			}
 
-			String newRecurrenceHash = _getRecurrenceHash(calendarBooking);
-
-			boolean recurrenceChanged = !oldRecurrenceHash.equals(newRecurrenceHash);
-
-			if (recurrenceChanged) {
-				if (powwowMeetingId > 0) {
-					_deletePowwowMeetingOccurrence(powwowMeetingId);
-				}
-
-				if (calendarBooking.isRecurring()) {
+			if (calendarBooking.isRecurring()) {
+				if (recurrenceChanged) {
 					addPowwowMeetingOccurrences(themeDisplay.getScopeGroupId(),
 						powwowMeeting, calendarBooking);
 				}
@@ -1533,11 +1533,21 @@ public class MeetingsPortlet extends MVCPortlet {
 			calendarBookingId = occurrenceCalendarBooking.getCalendarBookingId();
 		}
 
-		PowwowMeetingOccurrenceServiceUtil.updateOccurrenceTime(powwowMeetingId,
-			occurrenceId, startTime, endTime, calendarBookingId);
+		_updateOccurrenceTime(powwowMeeting, occurrenceId,
+			startTime, endTime, calendarBookingId);
 
 		PowwowUtil.sendNotificationsToPowwowParticipants(
 			powwowMeetingId, calendarBookingId, serviceContext);
+	}
+
+	private void _updateOccurrenceTime(PowwowMeeting powwowMeeting, long occurrenceId,
+		long startTime, long endTime, long calendarBookingId) throws PortalException {
+
+		PowwowMeetingOccurrenceServiceUtil.
+			updateOccurrenceTime(powwowMeeting.getPowwowMeetingId(),
+				occurrenceId, startTime, endTime, calendarBookingId);
+
+		PowwowUtil.reindexPowwowMeeting(powwowMeeting);
 	}
 
 	private void _updateOccurenceZoomApi(
