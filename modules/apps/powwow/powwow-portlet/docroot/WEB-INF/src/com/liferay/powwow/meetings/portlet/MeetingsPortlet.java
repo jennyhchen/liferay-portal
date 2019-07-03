@@ -1084,12 +1084,24 @@ public class MeetingsPortlet extends MVCPortlet {
 			getCalendarBookingDescription(
 				actionRequest, powwowMeeting, serviceContext));
 
+		TimeZone timeZone = getTimeZone(actionRequest);
+
 		long startTime = getTime(
-			actionRequest, "startTime", getTimeZone(actionRequest));
+			actionRequest, "startTime", timeZone);
 		long endTime = getTime(
-			actionRequest, "endTime", getTimeZone(actionRequest));
+			actionRequest, "endTime", timeZone);
 
 		Recurrence recurrence = getRecurrence(actionRequest);
+
+		if(Validator.isNotNull(calendarBooking)) {
+			String oldReccurrenceHash = _getRecurrenceHash(calendarBooking);
+			String newReccurrenceHash = _getRecurrenceHash(recurrence, startTime, endTime, timeZone);
+
+			if(!oldReccurrenceHash.equals(newReccurrenceHash)) {
+				recurrence.setExceptionJCalendars(new ArrayList<>());
+			}
+		}
+
 		String recurrenceSerializedData = RecurrenceSerializer.serialize(recurrence);
 
 		serviceContext.setAttribute("sendNotification", Boolean.FALSE);
@@ -1273,15 +1285,23 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		Recurrence recurrence = calendarBooking.getRecurrenceObj();
 
-		Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
-			calendarBooking.getStartTime(), calendarBooking.getTimeZone());
+		return _getRecurrenceHash(
+			recurrence, calendarBooking.getStartTime(),
+			calendarBooking.getEndTime(), calendarBooking.getTimeZone());
+	}
+
+	private String _getRecurrenceHash(
+		Recurrence recurrence, long startTime, long endTime, TimeZone timeZone) {
+
+		Calendar startTimeJCalendar = JCalendarUtil
+			.getJCalendar(startTime, timeZone);
 
 		String recurrenceJson = ZoomRecurrenceSerializer
 			.toJSONString(recurrence, startTimeJCalendar);
 
 		return DigesterUtil.digestHex(Digester.SHA_1, recurrenceJson,
-			String.valueOf(calendarBooking.getStartTime()),
-			String.valueOf(calendarBooking.getEndTime()));
+			String.valueOf(startTime),
+			String.valueOf(endTime));
 	}
 
 	private Calendar _getUtcCalendar() {
