@@ -51,6 +51,8 @@ if (!showAll) {
 		});
 }
 
+request.setAttribute("OccurrenceStatus_AVAILABLE", OccurrenceStatus.AVAILABLE);
+
 %>
 
 <liferay-ui:header
@@ -133,11 +135,11 @@ if (!showAll) {
 
 					<liferay-ui:search-container-column-text name="status" >
 						<c:choose>
-							<c:when test="${powwowMeetingOccurrence.occurrenceStatus eq 'available' and powwowMeetingOccurrence.isEndTimePassed()}">
+							<c:when test="${powwowMeetingOccurrence.occurrenceStatus eq OccurrenceStatus_AVAILABLE.value and powwowMeetingOccurrence.isEndTimePassed()}">
 								<liferay-ui:message key="completed" />
 							</c:when>
 							<c:otherwise>
-								<liferay-ui:message key="${powwowMeetingOccurrence.occurrenceStatus}" />
+								<liferay-ui:message key="${powwowMeetingOccurrence.occurrenceStatusEnum.languageKey}" />
 							</c:otherwise>
 						</c:choose>
 					</liferay-ui:search-container-column-text>
