@@ -5,7 +5,8 @@ package com.liferay.powwow.occurrence;
  */
 public enum OccurrenceStatus {
 
-	AVAILABLE("available"), DELETE("deleted"), COMPLETED("completed");
+		AVAILABLE("available", "scheduled"), DELETE("deleted", "deleted"),
+		COMPLETED("completed", "completed");
 
 	public static OccurrenceStatus parse(String value) {
 
@@ -24,6 +25,11 @@ public enum OccurrenceStatus {
 		throw new IllegalArgumentException("Invalid value " + value);
 	}
 
+	public final String getLanguageKey() {
+
+		return _languageKey;
+	}
+
 	public final String getValue() {
 
 		return _value;
@@ -35,10 +41,12 @@ public enum OccurrenceStatus {
 		return _value;
 	}
 
-	private OccurrenceStatus(String value) {
+	private OccurrenceStatus(String value, String languageKey) {
 
+		_languageKey = languageKey;
 		_value = value;
 	}
 
+	private final String _languageKey;
 	private final String _value;
 }
