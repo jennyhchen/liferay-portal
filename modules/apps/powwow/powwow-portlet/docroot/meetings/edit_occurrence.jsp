@@ -21,8 +21,7 @@ String backURL = ParamUtil.getString(request, "backURL");
 
 long occurrenceId = ParamUtil.getLong(request, "occurrenceId");
 
-PowwowMeetingOccurrence powwowMeetingOccurrence =
-	PowwowMeetingOccurrenceLocalServiceUtil.fetchPowwowMeetingOccurrence(occurrenceId);
+PowwowMeetingOccurrence powwowMeetingOccurrence = PowwowMeetingOccurrenceLocalServiceUtil.fetchPowwowMeetingOccurrence(occurrenceId);
 
 long powwowMeetingId = powwowMeetingOccurrence.getPowwowMeetingId();
 
@@ -35,6 +34,7 @@ if (powwowMeeting != null) {
 }
 
 CalendarBooking calendarBooking = null;
+
 if (calendarBookingId > 0) {
 	calendarBooking = CalendarBookingServiceUtil.fetchCalendarBooking(calendarBookingId);
 }
@@ -42,11 +42,11 @@ if (calendarBookingId > 0) {
 
 <liferay-ui:header
 	backURL="<%= backURL %>"
-	title='edit-occurrence'
+	title="edit-occurrence"
 />
 
-<liferay-ui:error key="error-while-updating-meeting-occurrence" message="error-while-updating-meeting-occurrence" />
-<liferay-ui:error key="start-time-must-be-a-future-time" message="start-time-must-be-a-future-time" />
+<liferay-ui:error key="errorWhileUpdatingMeetingOccurrence" message="error-while-updating-meeting-occurrence" />
+<liferay-ui:error key="startTimeMustBeAFutureTime" message="start-time-must-be-a-future-time" />
 
 <liferay-portlet:actionURL name="updatePowwowMeetingOccurrence" var="updatePowwowMeetingOccurrenceURL" />
 
@@ -56,22 +56,20 @@ if (calendarBookingId > 0) {
 	<aui:input name="powwowMeetingId" type="hidden" value="<%= String.valueOf(powwowMeetingId) %>" />
 	<aui:input name="occurrenceId" type="hidden" value="<%= String.valueOf(occurrenceId) %>" />
 
-	<aui:input cssClass="meeting-name" disabled="true" name="name" value="<%= powwowMeeting.getName() %>"/>
+	<aui:input cssClass="meeting-name" disabled="<%= true %>" name="name" value="<%= powwowMeeting.getName() %>" />
 
-	<aui:input cssClass="" disabled="true" name="repeat" value="<%= PowwowUtil.getRecurrenceSummary(calendarBooking.getRecurrenceObj(), locale) %>"/>
+	<aui:input cssClass="" disabled="<%= true %>" name="repeat" value="<%= PowwowUtil.getRecurrenceSummary(calendarBooking.getRecurrenceObj(), locale) %>" />
 
 	<label class="control-label" for="<portlet:namespace />meetingEventDate"><liferay-ui:message key="time" /></label>
 
 	<div class="control-group meeting-event-date" id="<portlet:namespace />meetingEventDate">
 
 		<%
-
 		Calendar startCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 		Calendar endCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 
 		startCalendar.setTimeInMillis(powwowMeetingOccurrence.getStartTime());
 		endCalendar.setTimeInMillis(powwowMeetingOccurrence.getEndTime());
-
 		%>
 
 		<span class="start-date-container" id="<portlet:namespace />startDateContainer">

@@ -6,16 +6,16 @@
 }
 
 .powwow-portlet .meeting-container .meeting-body,
-.powwow-portlet .meeting-container .meeting-url,
 .powwow-portlet .meeting-container .meeting-password,
 .powwow-portlet .meeting-container .join-by-phone,
+.powwow-portlet .meeting-container .meeting-url,
 .powwow-portlet .recurrence {
 	padding-bottom: 15px ;
 }
 
- .powwow-portlet .meeting-container .meeting-url input.only {
+.powwow-portlet .meeting-container .meeting-url input.only {
 	width: 80%;
- }
+}
 
 .powwow-portlet {
 
@@ -33,13 +33,6 @@
 			display: inline-block;
 		}
 
-		.meeting-name {
-			@include box-sizing(border-box);
-
-			height: 30px;
-			width: 100%;
-		}
-
 		.meeting-description {
 			@include box-sizing(border-box);
 
@@ -47,16 +40,16 @@
 		}
 
 		.meeting-event-date {
+			.end-date-container, .start-date-container {
+				white-space: nowrap;
+			}
+
 			.input-medium {
 				width: 100px;
 			}
 
 			.input-small {
 				width: 80px;
-			}
-
-			.end-date-container, .start-date-container {
-				white-space: nowrap;
 			}
 
 			.to {
@@ -66,6 +59,13 @@
 				padding: 5px;
 				vertical-align: top;
 			}
+		}
+
+		.meeting-name {
+			@include box-sizing(border-box);
+
+			height: 30px;
+			width: 100%;
 		}
 
 		.provider {
@@ -124,16 +124,16 @@
 					}
 				}
 
-				.user-info {
-					margin-left: 10px;
+				.email-address {
+					font-size: 0.8em;
 				}
 
 				.full-name {
 					font-weight: bold;
 				}
 
-				.email-address {
-					font-size: 0.8em;
+				.user-info {
+					margin-left: 10px;
 				}
 			}
 		}
@@ -144,14 +144,6 @@
 			height: 30px;
 			max-width: 350px;
 			width: 100%;
-		}
-
-		.participant-list {
-			margin-left: 20px;
-
-			.alert {
-				margin-bottom: 0;
-			}
 		}
 
 		.participant-invited {
@@ -167,6 +159,14 @@
 			.participant-menu i {
 				margin-left: 0.5em;
 				margin-top: 0.6em;
+			}
+		}
+
+		.participant-list {
+			margin-left: 20px;
+
+			.alert {
+				margin-bottom: 0;
 			}
 		}
 
@@ -201,6 +201,71 @@
 
 		.alert {
 			display: block;
+		}
+
+		.join-by-phone {
+			clear: both;
+			margin-bottom: 10px;
+
+			.join-by-phone-content {
+				border: 1px solid #C8C9CA;
+
+				@include border-radius(4px);
+
+				margin-top: 5px;
+				padding: 10px;
+
+				.icon-phone {
+					padding-right: 5px;
+				}
+
+				.title {
+					font-weight: bold;
+				}
+
+				.access-code, .default-number {
+					padding-bottom: 5px;
+				}
+
+				.international-numbers-toggler {
+					border: 1px solid #C8C9CA;
+					margin-top: 5px;
+				}
+
+				.international-numbers-header {
+					background-color: #F0EFEF;
+					cursor: pointer;
+					padding: 3px 5px;
+
+					&:before {
+						font-family: 'fontawesome-alloy';
+						font-style: normal;
+						font-variant: normal;
+						font-weight: normal;
+						line-height: 1;
+						padding: 0 3px;
+						speak: none;
+						text-transform: none;
+						-webkit-font-smoothing: antialiased;
+					}
+				}
+
+				.toggler-header-collapsed:before {
+					content: "\f067";
+				}
+
+				.toggler-header-expanded:before {
+					content: "\f068";
+				}
+			}
+		}
+
+		.lfr-search-container {
+			margin: 10px 0;
+
+			.table {
+				margin-bottom: 0;
+			}
 		}
 
 		.meeting-body {
@@ -270,29 +335,12 @@
 			}
 		}
 
+		.meeting-password {
+			margin-bottom: 10px;
+		}
+
 		.meeting-url {
 			margin-bottom: 10px;
-
-			dd {
-				min-height: 30px;
-				padding-bottom: 5px;
-				padding-top: 5px;
-			}
-
-			input {
-				@include border-radius(4px 0 0 4px);
-
-				border-right-width: 0;
-				cursor: text;
-				float: left;
-				margin: 0;
-
-				&.only {
-					@include border-radius(4px);
-
-					border-right-width: 1px;
-				}
-			}
 
 			button {
 				@include border-radius(0 4px 4px 0);
@@ -359,80 +407,32 @@
 					width: 50px;
 				}
 			}
-		}
 
-		.meeting-password {
-			margin-bottom: 10px;
-		}
+			dd {
+				min-height: 30px;
+				padding-bottom: 5px;
+				padding-top: 5px;
+			}
 
-		.join-by-phone {
-			clear: both;
-			margin-bottom: 10px;
+			input {
+				@include border-radius(4px 0 0 4px);
 
-			.join-by-phone-content {
-				border: 1px solid #C8C9CA;
+				border-right-width: 0;
+				cursor: text;
+				float: left;
+				margin: 0;
 
-				@include border-radius(4px);
+				&.only {
+ 					@include border-radius(4px);
 
-				margin-top: 5px;
-				padding: 10px;
-
-				.icon-phone {
-					padding-right: 5px;
-				}
-
-				.title {
-					font-weight: bold;
-				}
-
-				.access-code, .default-number {
-					padding-bottom: 5px;
-				}
-
-				.international-numbers-toggler {
-					border: 1px solid #C8C9CA;
-					margin-top: 5px;
-				}
-
-				.international-numbers-header {
-					background-color: #F0EFEF;
-					cursor: pointer;
-					padding: 3px 5px;
-
-					&:before {
-						font-family: 'fontawesome-alloy';
-						font-style: normal;
-						font-variant: normal;
-						font-weight: normal;
-						line-height: 1;
-						padding: 0 3px;
-						speak: none;
-						text-transform: none;
-						-webkit-font-smoothing: antialiased;
-					}
-				}
-
-				.toggler-header-collapsed:before {
-					content: "\f067";
-				}
-
-				.toggler-header-expanded:before {
-					content: "\f068";
-				}
+					 border-right-width: 1px;
+ 				}
 			}
 		}
 
 		.provider {
 			clear: both;
 			margin-bottom: 10px;
-		}
-
-		.lfr-search-container {
-			margin: 10px 0;
-
-			.table {
-				margin-bottom: 0;
-			}
 		}
 	}
 
@@ -445,12 +445,12 @@
 			margin: 0 0 20px;
 		}
 
-		.nav-tabs {
-			margin-bottom: 10px;
-		}
-
 		.lfr-search-container {
 			margin-top: 10px;
+		}
+
+		.nav-tabs {
+			margin-bottom: 10px;
 		}
 	}
 }
@@ -474,10 +474,6 @@
 		.edit-meeting {
 			margin: 10px;
 
-			.meeting-event-date .input-medium {
-				width: 160px;
-			}
-
 			.lfr-form-row .row-fields {
 				margin-right: 10px;
 				max-width: 350px;
@@ -494,6 +490,10 @@
 						width: 100%;
 					}
 				}
+			}
+
+			.meeting-event-date .input-medium {
+				width: 160px;
 			}
 		}
 

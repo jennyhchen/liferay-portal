@@ -23,8 +23,11 @@ import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowServer;
 
 import java.io.Serializable;
+
 import java.text.DateFormat;
+
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -35,55 +38,67 @@ import java.util.TimeZone;
  */
 public class PowwowServiceProviderUtil {
 
+	public static final String ZOOM_UTC_DATETIME_PATTERN =
+		"yyyy-MM-dd'T'HH:mm:ss'Z'";
+
 	public static Map<String, Serializable> addPowwowMeeting(
 			long userId, long powwowServerId, long powwowMeetingId, String name,
 			Map<String, String> options)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.addPowwowMeeting(
 			userId, powwowServerId, powwowMeetingId, name, options);
 	}
 
+	public static boolean deleteOccurrence(
+			long powwowMeetingId, String occurrenceApiId)
+		throws PortalException {
+
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
+
+		return powwowServiceProvider.deleteOccurrence(
+			powwowMeetingId, occurrenceApiId);
+	}
+
 	public static PowwowMeeting deletePowwowMeeting(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.deletePowwowMeeting(powwowMeetingId);
-	}
-
-	public static boolean deleteOccurrence(long powwowMeetingId, String occurrenceApiId)
-		throws PortalException {
-
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
-
-		return powwowServiceProvider.deleteOccurrence(powwowMeetingId, occurrenceApiId);
 	}
 
 	public static PowwowMeeting endPowwowMeeting(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.endPowwowMeeting(powwowMeetingId);
 	}
 
 	public static int getAddPowwowMeetingStrategy() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getAddPowwowMeetingStrategy();
 	}
 
 	public static List<String> getBrandingFeatures() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getBrandingFeatures();
 	}
 
 	public static String getBrandingLabel() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getBrandingLabel();
 	}
@@ -91,7 +106,8 @@ public class PowwowServiceProviderUtil {
 	public static Map<String, String> getIndexFields(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getIndexFields(powwowMeetingId);
 	}
@@ -99,27 +115,31 @@ public class PowwowServiceProviderUtil {
 	public static long getJoinByPhoneAccessCode(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinByPhoneAccessCode(powwowMeetingId);
 	}
 
 	public static String getJoinByPhoneAccessCodeLabel() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinByPhoneAccessCodeLabel();
 	}
 
 	public static List<String> getJoinByPhoneDefaultNumbers() {
-
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinByPhoneDefaultNumbers();
 	}
 
-	public static Map<String, List<String>> getJoinByPhoneInternationalNumbers() {
+	public static Map<String, List<String>>
+		getJoinByPhoneInternationalNumbers() {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinByPhoneInternationalNumbers();
 	}
@@ -128,16 +148,25 @@ public class PowwowServiceProviderUtil {
 			long powwowMeetingId, String name, int type)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getJoinPowwowMeetingURL(
 			powwowMeetingId, name, type);
 	}
 
+	public static JSONObject getMeetingJSONObject(long powwowMeetingId) {
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
+
+		return powwowServiceProvider.getMeetingJSONObject(powwowMeetingId);
+	}
+
 	public static boolean getOptionAutoStartVideo(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getOptionAutoStartVideo(powwowMeetingId);
 	}
@@ -145,37 +174,36 @@ public class PowwowServiceProviderUtil {
 	public static String getOptionPassword(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getOptionPassword(powwowMeetingId);
 	}
 
 	public static long getPowwowServerId() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getPowwowServerId();
 	}
 
 	public static String getPowwowServiceProviderName() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.getPowwowServiceProviderName();
 	}
 
-	public static JSONObject getMeetingJSONObject(long powwowMeetingId) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
-
-		return powwowServiceProvider.getMeetingJSONObject(powwowMeetingId);
-	}
-
 	public static boolean isFieldAPIKeyRequired() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isFieldAPIKeyRequired();
 	}
 
 	public static boolean isFieldSecretRequired() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isFieldSecretRequired();
 	}
@@ -183,7 +211,8 @@ public class PowwowServiceProviderUtil {
 	public static boolean isPowwowMeetingCreated(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isPowwowMeetingCreated(powwowMeetingId);
 	}
@@ -191,49 +220,70 @@ public class PowwowServiceProviderUtil {
 	public static boolean isPowwowMeetingRunning(long powwowMeetingId)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isPowwowMeetingRunning(powwowMeetingId);
 	}
 
 	public static boolean isServerActive(PowwowServer powwowServer) {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isServerActive(powwowServer);
 	}
 
 	public static boolean isSupportsJoinByPhone() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isSupportsJoinByPhone();
 	}
 
 	public static boolean isSupportsOptionAutoStartVideo() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isSupportsOptionAutoStartVideo();
 	}
 
 	public static boolean isSupportsOptionPassword() {
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isSupportsOptionPassword();
 	}
 
 	public static boolean isSupportsPresettingParticipantName() {
-
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.isSupportsPresettingParticipantName();
 	}
 
 	public static final String toZoomDateTimeUTC(Calendar calendar) {
-
 		TimeZone utcTimeZone = TimeZone.getTimeZone(StringPool.UTC);
 
-		DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(ZOOM_UTC_DATETIME_PATTERN, utcTimeZone);
+		DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
+			ZOOM_UTC_DATETIME_PATTERN, utcTimeZone);
 
-		return dateFormat.format(JCalendarUtil.getJCalendar(calendar, utcTimeZone).getTime());
+		Calendar jCalendar = JCalendarUtil.getJCalendar(calendar, utcTimeZone);
+
+		Date jCalendarTime = jCalendar.getTime();
+
+		return dateFormat.format(jCalendarTime);
+	}
+
+	public static boolean updateOccurrence(
+			long powwowMeetingId, Map<String, String> options,
+			String occurrentApiId)
+		throws PortalException {
+
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
+
+		return powwowServiceProvider.updateOccurrence(
+			powwowMeetingId, options, occurrentApiId);
 	}
 
 	public static Map<String, Serializable> updatePowwowMeeting(
@@ -241,26 +291,15 @@ public class PowwowServiceProviderUtil {
 			Map<String, String> options)
 		throws PortalException {
 
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
+		PowwowServiceProvider powwowServiceProvider =
+			getPowwowServiceProvider();
 
 		return powwowServiceProvider.updatePowwowMeeting(
 			powwowMeetingId, name, userId, options);
 	}
 
-	public static boolean updateOccurrence(
-			long powwowMeetingId, Map<String, String> options, String occurrentApiId)
-		throws PortalException {
-
-		PowwowServiceProvider powwowServiceProvider = getPowwowServiceProvider();
-
-		return powwowServiceProvider.updateOccurrence(powwowMeetingId, options, occurrentApiId);
-	}
-
 	protected static PowwowServiceProvider getPowwowServiceProvider() {
-
 		return PowwowServiceProviderFactory.getPowwowServiceProvider();
 	}
 
-	public static final String ZOOM_UTC_DATETIME_PATTERN =
-		"yyyy-MM-dd'T'HH:mm:ss'Z'";
 }

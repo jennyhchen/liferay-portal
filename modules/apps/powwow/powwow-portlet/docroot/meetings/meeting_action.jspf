@@ -45,7 +45,7 @@ boolean isEditable = PowwowMeetingPermission.contains(permissionChecker, powwowM
 	<liferay-ui:icon
 		iconCssClass="icon-edit"
 		label="<%= true %>"
-		message='edit-occurrence'
+		message="edit-occurrence"
 		url="<%= viewOccurrencesURL %>"
 	/>
 </c:if>

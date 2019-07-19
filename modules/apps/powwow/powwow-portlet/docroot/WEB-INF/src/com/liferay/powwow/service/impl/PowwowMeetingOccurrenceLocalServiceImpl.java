@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.powwow.model.PowwowMeetingOccurrence;
 import com.liferay.powwow.occurrence.OccurrenceStatus;
 import com.liferay.powwow.service.base.PowwowMeetingOccurrenceLocalServiceBaseImpl;
+
 import java.util.Date;
 import java.util.List;
 
@@ -66,10 +67,11 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 		powwowMeetingOccurrence.setCreateDate(now);
 		powwowMeetingOccurrence.setModifiedDate(now);
 
-		powwowMeetingOccurrence.setPowwowMeetingId(powwowMeetingId);
-		powwowMeetingOccurrence.setOccurrenceStatus(occurrenceStatus.getValue());
-		powwowMeetingOccurrence.setZoomOriginalData(zoomOriginalData);
 		powwowMeetingOccurrence.setCalendarBookingId(0);
+		powwowMeetingOccurrence.setPowwowMeetingId(powwowMeetingId);
+		powwowMeetingOccurrence.setZoomOriginalData(zoomOriginalData);
+		powwowMeetingOccurrence.setOccurrenceStatus(
+			occurrenceStatus.getValue());
 		powwowMeetingOccurrence.setOccurrenceApiId(occurrenceApiId);
 		powwowMeetingOccurrence.setStartTime(startTime);
 		powwowMeetingOccurrence.setEndTime(endTime);
@@ -81,19 +83,19 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 
 	public int countByStatusAndEndTimeLE(
 		OccurrenceStatus occurrenceStatus, long maxEndTime) {
-		return powwowMeetingOccurrencePersistence
-			.countByOS_ET(occurrenceStatus.getValue(), maxEndTime);
+
+		return powwowMeetingOccurrencePersistence.countByOS_ET(
+			occurrenceStatus.getValue(), maxEndTime);
 	}
 
 	public void deleteByPowwowMeetingId(long powwowMeetingId) {
-
 		List<PowwowMeetingOccurrence> meetingOccurrences =
-			powwowMeetingOccurrencePersistence
-				.findByPowwowMeetingId(powwowMeetingId);
+			powwowMeetingOccurrencePersistence.findByPowwowMeetingId(
+				powwowMeetingId);
 
 		for (PowwowMeetingOccurrence meetingOccurrence : meetingOccurrences) {
-			powwowMeetingOccurrenceLocalService
-				.deletePowwowMeetingOccurrence(meetingOccurrence);
+			powwowMeetingOccurrenceLocalService.deletePowwowMeetingOccurrence(
+				meetingOccurrence);
 		}
 	}
 
@@ -102,21 +104,23 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 	public PowwowMeetingOccurrence deletePowwowMeetingOccurrence(
 		PowwowMeetingOccurrence powwowMeetingOccurrence) {
 
-
 		long calendarBookingId = powwowMeetingOccurrence.getCalendarBookingId();
 
-		if(calendarBookingId > 0) {
-			CalendarBooking calendarBooking = CalendarBookingLocalServiceUtil
-				.fetchCalendarBooking(calendarBookingId);
+		if (calendarBookingId > 0) {
+			CalendarBooking calendarBooking =
+				CalendarBookingLocalServiceUtil.fetchCalendarBooking(
+					calendarBookingId);
 
 			if (calendarBooking != null) {
 				try {
-					CalendarBookingLocalServiceUtil
-						.deleteCalendarBooking(calendarBookingId);
+					CalendarBookingLocalServiceUtil.deleteCalendarBooking(
+						calendarBookingId);
 				}
-				catch (PortalException e) {
-					_log.error("Error while deleting CalendarBooking ID:" +
-						calendarBookingId, e);
+				catch (PortalException pe) {
+					_log.error(
+						"Error while deleting CalendarBooking ID:" +
+							calendarBookingId,
+						pe);
 				}
 			}
 		}
@@ -128,13 +132,14 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 	public List<PowwowMeetingOccurrence> findByPowwowMeetingId(
 		long powwowMeetingId) {
 
-		return powwowMeetingOccurrencePersistence
-			.findByPowwowMeetingId(powwowMeetingId, 0, 100);
+		return powwowMeetingOccurrencePersistence.findByPowwowMeetingId(
+			powwowMeetingId, 0, 100);
 	}
 
-	public List<PowwowMeetingOccurrence> findByPowwowMeetingIdAndStatusAndEndTimeGE(
-		long powwowMeetingId, OccurrenceStatus occurrenceStatus,
-		long maxEndTime, int start, int end) {
+	public List<PowwowMeetingOccurrence>
+		findByPowwowMeetingIdAndStatusAndEndTimeGE(
+			long powwowMeetingId, OccurrenceStatus occurrenceStatus,
+			long maxEndTime, int start, int end) {
 
 		return powwowMeetingOccurrencePersistence.findByPMI_OS_ET(
 			powwowMeetingId, occurrenceStatus.getValue(), maxEndTime, start,
@@ -142,8 +147,8 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 	}
 
 	public List<PowwowMeetingOccurrence> findByStatusAndEndTimeLE(
-		OccurrenceStatus occurrenceStatus,
-		long maxEndTime, int start, int end) {
+		OccurrenceStatus occurrenceStatus, long maxEndTime, int start,
+		int end) {
 
 		return powwowMeetingOccurrencePersistence.findByOS_ET(
 			occurrenceStatus.getValue(), maxEndTime, start, end);
@@ -151,35 +156,40 @@ public class PowwowMeetingOccurrenceLocalServiceImpl
 
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
-	public PowwowMeetingOccurrence updateOccurrenceTime(
-		long occurrenceId, long startTime, long endTime, long calendarBookingId) {
+	public PowwowMeetingOccurrence updateOccurrenceStatus(
+		long occurrenceId, OccurrenceStatus occurrenceStatus) {
 
-		PowwowMeetingOccurrence powwowMeetingOccurrence=
+		PowwowMeetingOccurrence powwowMeetingOccurrence =
 			powwowMeetingOccurrencePersistence.fetchByPrimaryKey(occurrenceId);
 
 		powwowMeetingOccurrence.setModifiedDate(new Date());
+		powwowMeetingOccurrence.setOccurrenceStatus(
+			occurrenceStatus.getValue());
 
-		powwowMeetingOccurrence.setStartTime(startTime);
-		powwowMeetingOccurrence.setEndTime(endTime);
-		powwowMeetingOccurrence.setCalendarBookingId(calendarBookingId);
-
-		return powwowMeetingOccurrencePersistence.update(powwowMeetingOccurrence);
+		return powwowMeetingOccurrencePersistence.update(
+			powwowMeetingOccurrence);
 	}
 
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
-	public PowwowMeetingOccurrence updateOccurrenceStatus(
-		long occurrenceId, OccurrenceStatus occurrenceStatus) {
+	public PowwowMeetingOccurrence updateOccurrenceTime(
+		long occurrenceId, long startTime, long endTime,
+		long calendarBookingId) {
 
-		PowwowMeetingOccurrence powwowMeetingOccurrence=
+		PowwowMeetingOccurrence powwowMeetingOccurrence =
 			powwowMeetingOccurrencePersistence.fetchByPrimaryKey(occurrenceId);
 
-		powwowMeetingOccurrence.setOccurrenceStatus(occurrenceStatus.getValue());
 		powwowMeetingOccurrence.setModifiedDate(new Date());
 
-		return powwowMeetingOccurrencePersistence.update(powwowMeetingOccurrence);
+		powwowMeetingOccurrence.setCalendarBookingId(calendarBookingId);
+		powwowMeetingOccurrence.setStartTime(startTime);
+		powwowMeetingOccurrence.setEndTime(endTime);
+
+		return powwowMeetingOccurrencePersistence.update(
+			powwowMeetingOccurrence);
 	}
 
-	private static final Log _log =
-		LogFactoryUtil.getLog(PowwowMeetingOccurrenceLocalServiceImpl.class);
+	private static final Log _log = LogFactoryUtil.getLog(
+		PowwowMeetingOccurrenceLocalServiceImpl.class);
+
 }

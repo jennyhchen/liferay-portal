@@ -18,6 +18,7 @@ import com.google.ical.iter.RecurrenceIterator;
 import com.google.ical.iter.RecurrenceIteratorFactory;
 import com.google.ical.values.DateValue;
 import com.google.ical.values.DateValueImpl;
+
 import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.model.CalendarBookingConstants;
 import com.liferay.calendar.model.CalendarResource;
@@ -87,9 +88,12 @@ import java.io.IOError;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+
 import java.text.DateFormat;
 import java.text.ParseException;
+
 import java.time.Duration;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -113,6 +117,69 @@ import javax.portlet.ResourceResponse;
  * @author Evan Thibodeau
  */
 public class MeetingsPortlet extends MVCPortlet {
+
+	public void deleteOccurrence(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		ServiceContext serviceContext = ServiceContextFactory.getInstance(
+			PowwowMeeting.class.getName(), actionRequest);
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+		long occurrenceId = ParamUtil.getLong(actionRequest, "occurrenceId", 0);
+
+		serviceContext.setAttribute("sendNotification", Boolean.FALSE);
+
+		try {
+			if (occurrenceId > 0) {
+				PowwowMeetingOccurrence powwowMeetingOccurrence =
+					PowwowMeetingOccurrenceLocalServiceUtil.
+						fetchPowwowMeetingOccurrence(occurrenceId);
+
+				PowwowMeetingOccurrenceServiceUtil.updateOccurrenceStatus(
+					powwowMeetingOccurrence.getPowwowMeetingId(), occurrenceId,
+					OccurrenceStatus.DELETE);
+
+				if (powwowMeetingOccurrence.getCalendarBookingId() > 0) {
+					CalendarBookingLocalServiceUtil.updateStatus(
+						themeDisplay.getUserId(),
+						powwowMeetingOccurrence.getCalendarBookingId(),
+						CalendarBookingWorkflowConstants.STATUS_INACTIVE,
+						serviceContext);
+				}
+				else {
+					PowwowMeeting powwowMeeting =
+						PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(
+							powwowMeetingOccurrence.getPowwowMeetingId());
+
+					CalendarBooking mainCalendarBooking =
+						CalendarBookingLocalServiceUtil.fetchCalendarBooking(
+							powwowMeeting.getCalendarBookingId());
+
+					_updateCalendarBookingExceptionDate(
+						powwowMeetingOccurrence, mainCalendarBooking,
+						themeDisplay, serviceContext);
+				}
+
+				PowwowServiceProviderUtil.deleteOccurrence(
+					powwowMeetingOccurrence.getPowwowMeetingId(),
+					powwowMeetingOccurrence.getOccurrenceApiId());
+			}
+
+			jsonObject.put("success", true);
+		}
+		catch (Exception e) {
+			jsonObject.put(
+				"message",
+				translate(
+					actionRequest, "the-occurrence-could-not-be-deleted"));
+			jsonObject.put("success", false);
+		}
+
+		writeJSON(actionRequest, actionResponse, jsonObject);
+	}
 
 	public void deletePowwowMeeting(
 			ActionRequest actionRequest, ActionResponse actionResponse)
@@ -152,69 +219,6 @@ public class MeetingsPortlet extends MVCPortlet {
 		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
 
-	public void deleteOccurrence(
-			ActionRequest actionRequest, ActionResponse actionResponse)
-		throws Exception {
-
-		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			PowwowMeeting.class.getName(), actionRequest);
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-		long occurrenceId = ParamUtil.getLong(actionRequest, "occurrenceId", 0);
-
-		serviceContext.setAttribute("sendNotification", Boolean.FALSE);
-
-		try {
-			if (occurrenceId > 0) {
-
-				PowwowMeetingOccurrence powwowMeetingOccurrence =
-					PowwowMeetingOccurrenceLocalServiceUtil
-						.fetchPowwowMeetingOccurrence(occurrenceId);
-
-				PowwowMeetingOccurrenceServiceUtil
-					.updateOccurrenceStatus(
-						powwowMeetingOccurrence.getPowwowMeetingId(),
-						occurrenceId, OccurrenceStatus.DELETE);
-
-				if (powwowMeetingOccurrence.getCalendarBookingId() > 0) {
-					CalendarBookingLocalServiceUtil
-						.updateStatus(
-							themeDisplay.getUserId(), powwowMeetingOccurrence.getCalendarBookingId(),
-							CalendarBookingWorkflowConstants.STATUS_INACTIVE, serviceContext);
-				}
-				else {
-					PowwowMeeting powwowMeeting =
-						PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(
-							powwowMeetingOccurrence.getPowwowMeetingId());
-
-					CalendarBooking mainCalendarBooking =
-						CalendarBookingLocalServiceUtil.fetchCalendarBooking(
-							powwowMeeting.getCalendarBookingId());
-
-					_updateCalendarBookingExceptionDate(powwowMeetingOccurrence,
-						mainCalendarBooking, themeDisplay, serviceContext);
-				}
-
-				PowwowServiceProviderUtil
-					.deleteOccurrence(
-						powwowMeetingOccurrence.getPowwowMeetingId(),
-						powwowMeetingOccurrence.getOccurrenceApiId());
-			}
-
-			jsonObject.put("success", true);
-		}
-		catch (Exception e) {
-			jsonObject.put(
-				"message",
-				translate(actionRequest, "the-occurrence-could-not-be-deleted"));
-			jsonObject.put("success", false);
-		}
-
-		writeJSON(actionRequest, actionResponse, jsonObject);
-	}
-
 	public void endPowwowMeeting(
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
@@ -225,15 +229,14 @@ public class MeetingsPortlet extends MVCPortlet {
 		PowwowMeeting powwowMeeting =
 			PowwowServiceProviderUtil.endPowwowMeeting(powwowMeetingId);
 
-		boolean hasNextOccurrence =
-			Validator.isNotNull(powwowMeeting.findNextOccurrence());
+		int meetingStatus = PowwowMeetingConstants.STATUS_COMPLETED;
 
-		int meetingStatus =
-			hasNextOccurrence ? PowwowMeetingConstants.STATUS_SCHEDULED
-				: PowwowMeetingConstants.STATUS_COMPLETED;
+		if (powwowMeeting.findNextOccurrence() != null) {
+			meetingStatus = PowwowMeetingConstants.STATUS_SCHEDULED;
+		}
 
-		PowwowMeetingLocalServiceUtil
-			.updateStatus(powwowMeetingId, meetingStatus);
+		PowwowMeetingLocalServiceUtil.updateStatus(
+			powwowMeetingId, meetingStatus);
 	}
 
 	public void joinPowwowMeeting(
@@ -269,7 +272,8 @@ public class MeetingsPortlet extends MVCPortlet {
 
 			String name = StringPool.BLANK;
 
-			if (PowwowServiceProviderUtil.isSupportsPresettingParticipantName()) {
+			if (PowwowServiceProviderUtil.
+					isSupportsPresettingParticipantName()) {
 
 				name = ParamUtil.getString(actionRequest, "name");
 
@@ -384,15 +388,17 @@ public class MeetingsPortlet extends MVCPortlet {
 		try {
 			_validateRecurrence(actionRequest);
 
-			ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
 			long powwowMeetingId = ParamUtil.getLong(
 				actionRequest, "powwowMeetingId");
 
 			String name = ParamUtil.getString(actionRequest, "name");
-			String description = ParamUtil.getString(actionRequest, "description");
-			String languageId = ParamUtil.getString(actionRequest, "languageId");
+			String description = ParamUtil.getString(
+				actionRequest, "description");
+			String languageId = ParamUtil.getString(
+				actionRequest, "languageId");
 
 			PowwowMeeting powwowMeeting = null;
 			String oldRecurrenceHash = StringPool.BLANK;
@@ -418,11 +424,13 @@ public class MeetingsPortlet extends MVCPortlet {
 				PowwowMeeting.class.getName(), actionRequest);
 
 			CalendarBooking calendarBooking = updateCalendarBooking(
-				actionRequest, powwowMeeting, powwowParticipants, serviceContext);
+				actionRequest, powwowMeeting, powwowParticipants,
+				serviceContext);
 
 			String newRecurrenceHash = _getRecurrenceHash(calendarBooking);
 
-			boolean recurrenceChanged = !oldRecurrenceHash.equals(newRecurrenceHash);
+			boolean recurrenceChanged = !oldRecurrenceHash.equals(
+				newRecurrenceHash);
 
 			Map<String, String> options = new HashMap<>();
 
@@ -454,20 +462,23 @@ public class MeetingsPortlet extends MVCPortlet {
 					PowwowServiceProviderUtil.getAddPowwowMeetingStrategy();
 
 				if (addPowwowMeetingStrategy ==
-						PowwowServiceProvider.ADD_POWWOW_MEETING_STRATEGY_EAGER) {
+						PowwowServiceProvider.
+							ADD_POWWOW_MEETING_STRATEGY_EAGER) {
 
-					powwowServerId = PowwowServiceProviderUtil.getPowwowServerId();
+					powwowServerId =
+						PowwowServiceProviderUtil.getPowwowServerId();
 
 					providerTypeMetadataMap =
 						PowwowServiceProviderUtil.addPowwowMeeting(
-							hostUserId, powwowServerId, powwowMeetingId, name, options);
+							hostUserId, powwowServerId, powwowMeetingId, name,
+							options);
 				}
 
 				String portletId = PortalUtil.getPortletId(actionRequest);
 
 				powwowMeeting = PowwowMeetingServiceUtil.addPowwowMeeting(
-					themeDisplay.getScopeGroupId(), portletId, powwowServerId, name,
-					description, providerTypeMetadataMap, languageId,
+					themeDisplay.getScopeGroupId(), portletId, powwowServerId,
+					name, description, providerTypeMetadataMap, languageId,
 					calendarBooking.getCalendarBookingId(),
 					PowwowMeetingConstants.STATUS_SCHEDULED, powwowParticipants,
 					serviceContext);
@@ -477,7 +488,8 @@ public class MeetingsPortlet extends MVCPortlet {
 					PowwowServiceProviderUtil.getAddPowwowMeetingStrategy();
 
 				if (addPowwowMeetingStrategy ==
-						PowwowServiceProvider.ADD_POWWOW_MEETING_STRATEGY_EAGER) {
+						PowwowServiceProvider.
+							ADD_POWWOW_MEETING_STRATEGY_EAGER) {
 
 					providerTypeMetadataMap =
 						PowwowServiceProviderUtil.updatePowwowMeeting(
@@ -496,22 +508,18 @@ public class MeetingsPortlet extends MVCPortlet {
 					serviceContext);
 			}
 
-			if (calendarBooking.isRecurring()) {
-				if (recurrenceChanged) {
-					addPowwowMeetingOccurrences(themeDisplay.getScopeGroupId(),
-						powwowMeeting, calendarBooking);
-				}
+			if (calendarBooking.isRecurring() && recurrenceChanged) {
+				addPowwowMeetingOccurrences(
+					themeDisplay.getScopeGroupId(), powwowMeeting,
+					calendarBooking);
 			}
 
 			jsonObject.put("success", true);
 		}
 		catch (Exception e) {
+			_log.error("Error while updating meeting", e);
 
-			_log.error("Error while updating meeting.", e);
-
-			jsonObject.put(
-				"message",
-				translate(actionRequest, e.getMessage()));
+			jsonObject.put("message", translate(actionRequest, e.getMessage()));
 			jsonObject.put("success", false);
 		}
 
@@ -527,13 +535,14 @@ public class MeetingsPortlet extends MVCPortlet {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		long powwowMeetingId = ParamUtil.getLong(actionRequest, "powwowMeetingId");
+		long powwowMeetingId = ParamUtil.getLong(
+			actionRequest, "powwowMeetingId");
 		long occurrenceId = ParamUtil.getLong(actionRequest, "occurrenceId");
 
 		try {
 			PowwowMeetingOccurrence powwowMeetingOccurrence =
-				PowwowMeetingOccurrenceLocalServiceUtil
-					.fetchPowwowMeetingOccurrence(occurrenceId);
+				PowwowMeetingOccurrenceLocalServiceUtil.
+					fetchPowwowMeetingOccurrence(occurrenceId);
 
 			long startTime = getTime(
 				actionRequest, "startTime", getTimeZone(actionRequest));
@@ -542,40 +551,46 @@ public class MeetingsPortlet extends MVCPortlet {
 
 			_validateOccurrenceTime(startTime);
 
-			boolean isUpdate =
-				powwowMeetingOccurrence.getStartTime() != startTime ||
-					powwowMeetingOccurrence.getEndTime() != endTime;
+			boolean update = false;
 
-			if (isUpdate) {
+			if ((powwowMeetingOccurrence.getStartTime() != startTime) ||
+				(powwowMeetingOccurrence.getEndTime() != endTime)) {
 
+				update = true;
+			}
+
+			if (update) {
 				PowwowMeeting powwowMeeting =
-					PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
+					PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(
+						powwowMeetingId);
 
 				CalendarBooking calendarBooking =
-					CalendarBookingLocalServiceUtil
-						.fetchCalendarBooking(powwowMeeting.getCalendarBookingId());
+					CalendarBookingLocalServiceUtil.fetchCalendarBooking(
+						powwowMeeting.getCalendarBookingId());
 
-				if (Validator.isNotNull(calendarBooking)) {
-					updateOccurrence(powwowMeeting, calendarBooking, powwowMeetingOccurrence,
+				if (calendarBooking != null) {
+					updateOccurrence(
+						powwowMeeting, calendarBooking, powwowMeetingOccurrence,
 						startTime, endTime, themeDisplay, serviceContext);
-
 				}
 			}
 		}
-		catch (PortalException e) {
-			_log.error(e);
-			SessionErrors.add(actionRequest, e.getMessage());
+		catch (PortalException pe) {
+			_log.error(pe, pe);
+			SessionErrors.add(actionRequest, pe.getMessage());
 		}
 		catch (Exception e) {
-			_log.error(e);
-			SessionErrors.add(actionRequest, "error-while-updating-meeting-occurrence");
+			_log.error(e, e);
+			SessionErrors.add(
+				actionRequest, "errorWhileUpdatingMeetingOccurrence");
 		}
 
 		sendRedirect(actionRequest, actionResponse);
 	}
 
 	protected void addPowwowMeetingOccurrences(
-			long groupId, PowwowMeeting powwowMeeting, CalendarBooking calendarBooking)
+			long groupId, PowwowMeeting powwowMeeting,
+			CalendarBooking calendarBooking)
 		throws Exception {
 
 		long powwowMeetingId = powwowMeeting.getPowwowMeetingId();
@@ -583,16 +598,17 @@ public class MeetingsPortlet extends MVCPortlet {
 		JSONObject meetingJSONObject =
 			PowwowServiceProviderUtil.getMeetingJSONObject(powwowMeetingId);
 
-		JSONArray occurrencesJsonArray =
-			meetingJSONObject.getJSONArray("occurrences");
+		JSONArray occurrencesJSONArray = meetingJSONObject.getJSONArray(
+			"occurrences");
 
-		for (int i = 0; i < occurrencesJsonArray.length(); i++) {
+		for (int i = 0; i < occurrencesJSONArray.length(); i++) {
 			JSONObject occurrenceJSONObject =
-				occurrencesJsonArray.getJSONObject(i);
+				occurrencesJSONArray.getJSONObject(i);
 
 			TimeZone calendarBookingTimeZone = calendarBooking.getTimeZone();
 
-			_addPowwowMeetingOccurrence(occurrenceJSONObject, groupId, powwowMeetingId,
+			_addPowwowMeetingOccurrence(
+				occurrenceJSONObject, groupId, powwowMeetingId,
 				calendarBookingTimeZone);
 		}
 	}
@@ -603,41 +619,46 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		try {
 			JSONObject jsonResponse = JSONFactoryUtil.createJSONObject();
-			boolean isValid = true;
+			boolean valid = true;
 
 			TimeZone timeZone = getTimeZone(resourceRequest);
 			Recurrence recurrence = getRecurrence(resourceRequest);
 
-			Calendar startTimeCalendar =
-				getJCalendar(resourceRequest, "startTime", timeZone);
-			Calendar untilJCalendar =
-				getJCalendar(resourceRequest, "untilDate", timeZone);
+			Calendar startTimeCalendar = getJCalendar(
+				resourceRequest, "startTime", timeZone);
+			Calendar untilJCalendar = getJCalendar(
+				resourceRequest, "untilDate", timeZone);
 
-			Calendar limitDateJCalendar =
-				_findLimitDate(recurrence, startTimeCalendar);
+			Calendar limitDateJCalendar = _findLimitDate(
+				recurrence, startTimeCalendar);
 
-			boolean isUntilDateExceededLimitDate =
-				Validator.isNotNull(limitDateJCalendar) &&
-				Validator.isNotNull(untilJCalendar) &&
-					untilJCalendar.after(limitDateJCalendar);
+			boolean untilDateExceededLimitDate = false;
 
-			if (isUntilDateExceededLimitDate) {
+			if ((limitDateJCalendar != null) && (untilJCalendar != null) &&
+				untilJCalendar.after(limitDateJCalendar)) {
 
-				DateFormat dateFormat = DateFormatFactoryUtil.getDate(resourceRequest.getLocale());
+				untilDateExceededLimitDate = true;
+			}
 
-				String maxDateFormatted = dateFormat.format(limitDateJCalendar.getTime());
+			if (untilDateExceededLimitDate) {
+				DateFormat dateFormat = DateFormatFactoryUtil.getDate(
+					resourceRequest.getLocale());
+
+				String maxDateFormatted = dateFormat.format(
+					limitDateJCalendar.getTime());
 
 				String errorMessage = LanguageUtil.format(
 					resourceRequest.getLocale(),
-					"occurrences-exceeded-50-times-please-choose-a-date-that-not-after-x",
+					"occurrences-exceeded-50-times-please-choose-a-date-that-" +
+						"not-after-x",
 					maxDateFormatted);
 
 				jsonResponse.put("errorMessage", errorMessage);
 
-				isValid = false;
+				valid = false;
 			}
 
-			jsonResponse.put("valid", isValid);
+			jsonResponse.put("valid", valid);
 
 			writeJSON(resourceRequest, resourceResponse, jsonResponse);
 		}
@@ -857,7 +878,8 @@ public class MeetingsPortlet extends MVCPortlet {
 		return sb.toString();
 	}
 
-	protected Calendar getJCalendar(PortletRequest portletRequest, String name, TimeZone timeZone) {
+	protected Calendar getJCalendar(
+		PortletRequest portletRequest, String name, TimeZone timeZone) {
 
 		int month = ParamUtil.getInteger(portletRequest, name + "Month");
 		int day = ParamUtil.getInteger(portletRequest, name + "Day");
@@ -871,7 +893,8 @@ public class MeetingsPortlet extends MVCPortlet {
 			hour += 12;
 		}
 
-		return JCalendarUtil.getJCalendar(year, month, day, hour, minute, 0, 0, timeZone);
+		return JCalendarUtil.getJCalendar(
+			year, month, day, hour, minute, 0, 0, timeZone);
 	}
 
 	protected Map<Locale, String> getLocalizationMap(String key) {
@@ -937,30 +960,27 @@ public class MeetingsPortlet extends MVCPortlet {
 			String[] weekdayValues = ParamUtil.getStringValues(
 				portletRequest, "weekdays");
 
-			String weekdaysCheckbox =
-				ParamUtil.getString(portletRequest, "weekdaysCheckbox");
+			String weekdaysCheckbox = ParamUtil.getString(
+				portletRequest, "weekdaysCheckbox");
 
-			if (weekdayValues.length == 1 && weekdayValues[0].equals("false")) {
-				weekdayValues = new String[] {
-					weekdaysCheckbox
-				};
+			if ((weekdayValues.length == 1) &&
+				weekdayValues[0].equals("false")) {
+
+				weekdayValues = new String[] {weekdaysCheckbox};
 			}
 			else {
-				weekdayValues = ArrayUtil.append(weekdayValues, new String[] {
-					weekdaysCheckbox
-				});
+				weekdayValues = ArrayUtil.append(
+					weekdayValues, new String[] {weekdaysCheckbox});
 			}
 
 			for (String weekdayValue : weekdayValues) {
 				Weekday weekday = Weekday.parse(weekdayValue);
 
-				Calendar weekdayJCalendar =
-					JCalendarUtil.getJCalendar(
-						startTimeJCalendar.getTimeInMillis(), timeZone);
+				Calendar weekdayJCalendar = JCalendarUtil.getJCalendar(
+					startTimeJCalendar.getTimeInMillis(), timeZone);
 
 				weekdayJCalendar.set(
-					Calendar.DAY_OF_WEEK,
-					weekday.getCalendarWeekday());
+					Calendar.DAY_OF_WEEK, weekday.getCalendarWeekday());
 
 				weekday = Weekday.getWeekday(weekdayJCalendar);
 
@@ -968,7 +988,7 @@ public class MeetingsPortlet extends MVCPortlet {
 			}
 		}
 		else if ((frequency == Frequency.MONTHLY) ||
-			(frequency == Frequency.YEARLY)) {
+				 (frequency == Frequency.YEARLY)) {
 
 			boolean repeatOnWeekday = ParamUtil.getBoolean(
 				portletRequest, "repeatOnWeekday");
@@ -1007,11 +1027,14 @@ public class MeetingsPortlet extends MVCPortlet {
 	protected long getTime(
 		PortletRequest portletRequest, String name, TimeZone timeZone) {
 
-		return getJCalendar(portletRequest, name, timeZone).getTimeInMillis();
+		Calendar jCalendar = getJCalendar(portletRequest, name, timeZone);
+
+		return jCalendar.getTimeInMillis();
 	}
 
 	protected TimeZone getTimeZone(PortletRequest portletRequest) {
-		ThemeDisplay themeDisplay = (ThemeDisplay) portletRequest.getAttribute(WebKeys.THEME_DISPLAY);
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
 		User user = themeDisplay.getUser();
 
@@ -1086,23 +1109,23 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		TimeZone timeZone = getTimeZone(actionRequest);
 
-		long startTime = getTime(
-			actionRequest, "startTime", timeZone);
-		long endTime = getTime(
-			actionRequest, "endTime", timeZone);
+		long startTime = getTime(actionRequest, "startTime", timeZone);
+		long endTime = getTime(actionRequest, "endTime", timeZone);
 
 		Recurrence recurrence = getRecurrence(actionRequest);
 
-		if(Validator.isNotNull(calendarBooking)) {
+		if (calendarBooking != null) {
 			String oldReccurrenceHash = _getRecurrenceHash(calendarBooking);
-			String newReccurrenceHash = _getRecurrenceHash(recurrence, startTime, endTime, timeZone);
+			String newReccurrenceHash = _getRecurrenceHash(
+				recurrence, startTime, endTime, timeZone);
 
-			if(!oldReccurrenceHash.equals(newReccurrenceHash)) {
+			if (!oldReccurrenceHash.equals(newReccurrenceHash)) {
 				recurrence.setExceptionJCalendars(new ArrayList<>());
 			}
 		}
 
-		String recurrenceSerializedData = RecurrenceSerializer.serialize(recurrence);
+		String recurrenceSerializedData = RecurrenceSerializer.serialize(
+			recurrence);
 
 		serviceContext.setAttribute("sendNotification", Boolean.FALSE);
 
@@ -1119,7 +1142,8 @@ public class MeetingsPortlet extends MVCPortlet {
 					calendarBooking.getCalendarBookingId(),
 					calendarBooking.getCalendarId(), childCalendarIds, titleMap,
 					descriptionMap, StringPool.BLANK, startTime, endTime, false,
-					recurrenceSerializedData, 0, "email", 0, "email", serviceContext);
+					recurrenceSerializedData, 0, "email", 0, "email",
+					serviceContext);
 		}
 		else {
 			calendarBooking =
@@ -1127,8 +1151,8 @@ public class MeetingsPortlet extends MVCPortlet {
 					themeDisplay.getUserId(), calendarId, childCalendarIds,
 					CalendarBookingConstants.PARENT_CALENDAR_BOOKING_ID_DEFAULT,
 					titleMap, descriptionMap, StringPool.BLANK, startTime,
-					endTime, false, recurrenceSerializedData, 0, "email", 0, "email",
-					serviceContext);
+					endTime, false, recurrenceSerializedData, 0, "email", 0,
+					"email", serviceContext);
 		}
 
 		return calendarBooking;
@@ -1137,20 +1161,23 @@ public class MeetingsPortlet extends MVCPortlet {
 	protected void updateOccurrence(
 			PowwowMeeting powwowMeeting, CalendarBooking mainCalendarBooking,
 			PowwowMeetingOccurrence powwowMeetingOccurrence, long startTime,
-			long endTime, ThemeDisplay themeDisplay, ServiceContext serviceContext)
+			long endTime, ThemeDisplay themeDisplay,
+			ServiceContext serviceContext)
 		throws Exception {
 
 		serviceContext.setAttribute("sendNotification", Boolean.FALSE);
 
-		_updateCalendarBookingExceptionDate(powwowMeetingOccurrence,
+		_updateCalendarBookingExceptionDate(
+			powwowMeetingOccurrence, mainCalendarBooking, themeDisplay,
+			serviceContext);
+
+		_updateCalendarBookingOccurrence(
+			powwowMeeting, powwowMeetingOccurrence, startTime, endTime,
 			mainCalendarBooking, themeDisplay, serviceContext);
 
-		_updateCalendarBookingOccurrence(powwowMeeting, powwowMeetingOccurrence,
-			startTime, endTime, mainCalendarBooking, themeDisplay, serviceContext);
-
-		_updateOccurenceZoomApi(powwowMeeting, mainCalendarBooking,
-			powwowMeetingOccurrence, startTime, endTime);
-
+		_updateOccurenceZoomApi(
+			powwowMeeting, mainCalendarBooking, powwowMeetingOccurrence,
+			startTime, endTime);
 	}
 
 	private void _addPowwowMeetingOccurrence(
@@ -1158,14 +1185,16 @@ public class MeetingsPortlet extends MVCPortlet {
 			long powwowMeetingId, TimeZone calendarBookingTimeZone)
 		throws Exception {
 
-		String occurrenceApiId = zoomOccurrenceJSONObject.getString("occurrence_id");
-		OccurrenceStatus occurrenceStatus = OccurrenceStatus.parse(zoomOccurrenceJSONObject.getString("status"));
+		String occurrenceApiId = zoomOccurrenceJSONObject.getString(
+			"occurrence_id");
+		OccurrenceStatus occurrenceStatus = OccurrenceStatus.parse(
+			zoomOccurrenceJSONObject.getString("status"));
 		String zoomOriginalData = zoomOccurrenceJSONObject.toString();
-		String startTimeJSONString = zoomOccurrenceJSONObject.getString("start_time");
+		String startTimeJSON = zoomOccurrenceJSONObject.getString("start_time");
 		int duration = zoomOccurrenceJSONObject.getInt("duration", 0);
 
-		Calendar calendar =
-			_parseZoomUtcTime(startTimeJSONString, calendarBookingTimeZone);
+		Calendar calendar = _parseZoomUtcTime(
+			startTimeJSON, calendarBookingTimeZone);
 
 		long startTime = calendar.getTimeInMillis();
 
@@ -1186,31 +1215,33 @@ public class MeetingsPortlet extends MVCPortlet {
 		Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
 			calendarBooking.getStartTime(), calendarBooking.getTimeZone());
 
-		String recurrenceJson = ZoomRecurrenceSerializer
-			.toJSONString(recurrence, startTimeJCalendar);
+		String recurrenceJSON = ZoomRecurrenceSerializer.toJSONString(
+			recurrence, startTimeJCalendar);
 
-		if (!Validator.isBlank(recurrenceJson)) {
-			options.put(PowwowMeetingConstants.OPTION_RECURRENCE,
-				recurrenceJson);
+		if (!Validator.isBlank(recurrenceJSON)) {
+			options.put(
+				PowwowMeetingConstants.OPTION_RECURRENCE, recurrenceJSON);
 
 			String zoomStartTimeUTC =
-				PowwowServiceProviderUtil
-					.toZoomDateTimeUTC(startTimeJCalendar);
-			options.put(PowwowMeetingConstants.OPTION_START_TIME,
-				zoomStartTimeUTC);
+				PowwowServiceProviderUtil.toZoomDateTimeUTC(startTimeJCalendar);
 
-			long minutes =
-				_getDurationInMinutes(
-					calendarBooking.getStartTime(), calendarBooking.getEndTime());
+			options.put(
+				PowwowMeetingConstants.OPTION_START_TIME, zoomStartTimeUTC);
 
-			options.put(PowwowMeetingConstants.OPTION_DURATION,
+			long minutes = _getDurationInMinutes(
+				calendarBooking.getStartTime(), calendarBooking.getEndTime());
+
+			options.put(
+				PowwowMeetingConstants.OPTION_DURATION,
 				String.valueOf(minutes));
 		}
 	}
 
 	private void _deletePowwowMeetingOccurrence(long powwowMeetingId)
 		throws PortalException {
-		PowwowMeetingOccurrenceServiceUtil.deleteByPowwowMeetingId(powwowMeetingId);
+
+		PowwowMeetingOccurrenceServiceUtil.deleteByPowwowMeetingId(
+			powwowMeetingId);
 	}
 
 	private boolean _exceptionDateExisted(
@@ -1218,7 +1249,7 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		List<Calendar> exceptions = recurrence.getExceptionJCalendars();
 
-		if (Validator.isNull(exceptions) || exceptions.isEmpty()) {
+		if ((exceptions == null) || exceptions.isEmpty()) {
 			return false;
 		}
 
@@ -1227,18 +1258,18 @@ public class MeetingsPortlet extends MVCPortlet {
 		int day = startTimeOriginalCalendar.get(Calendar.DATE);
 		TimeZone timeZone = startTimeOriginalCalendar.getTimeZone();
 
-		Calendar startDateCalendar = CalendarFactoryUtil.getCalendar(year,
-			month, day, 0, 0, 0, 0, timeZone);
+		Calendar startDateCalendar = CalendarFactoryUtil.getCalendar(
+			year, month, day, 0, 0, 0, 0, timeZone);
 
 		return exceptions.contains(startDateCalendar);
 	}
 
 	private Calendar _findLimitDate(
-		Recurrence recurrence, Calendar startTimeCalendar)
+			Recurrence recurrence, Calendar startTimeCalendar)
 		throws ParseException {
 
-		if (recurrence.getCount() > 0 ||
-			Validator.isNull(recurrence.getUntilJCalendar())) {
+		if ((recurrence.getCount() > 0) ||
+			(recurrence.getUntilJCalendar() == null)) {
 
 			// Only find limit date if using untilDate
 
@@ -1257,29 +1288,33 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		DateValue maxDateOccurrence = null;
 
-		for (int i = 1; i <= 50 && recurrenceIterator.hasNext(); i++) {
-
+		for (int i = 1; (i <= 50) && recurrenceIterator.hasNext(); i++) {
 			if (i == 50) {
 				maxDateOccurrence = recurrenceIterator.next();
+
 				break;
 			}
 
 			recurrenceIterator.next();
 		}
 
-		return Validator.isNotNull(maxDateOccurrence) ? _toJCalendar(maxDateOccurrence, timeZone) : null;
+		if (maxDateOccurrence != null) {
+			return _toJCalendar(maxDateOccurrence, timeZone);
+		}
+
+		return null;
 	}
 
 	private long _getDurationInMinutes(long startTime, long endTime) {
-
 		Duration duration = Duration.ofMillis(Math.abs(endTime - startTime));
-		return duration.abs().toMinutes();
+
+		Duration abs = duration.abs();
+
+		return abs.toMinutes();
 	}
 
 	private String _getRecurrenceHash(CalendarBooking calendarBooking) {
-
-		if (Validator.isNull(calendarBooking) ||
-			!calendarBooking.isRecurring()) {
+		if ((calendarBooking == null) || !calendarBooking.isRecurring()) {
 			return StringPool.BLANK;
 		}
 
@@ -1291,32 +1326,32 @@ public class MeetingsPortlet extends MVCPortlet {
 	}
 
 	private String _getRecurrenceHash(
-		Recurrence recurrence, long startTime, long endTime, TimeZone timeZone) {
+		Recurrence recurrence, long startTime, long endTime,
+		TimeZone timeZone) {
 
-		Calendar startTimeJCalendar = JCalendarUtil
-			.getJCalendar(startTime, timeZone);
+		Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
+			startTime, timeZone);
 
-		String recurrenceJson = ZoomRecurrenceSerializer
-			.toJSONString(recurrence, startTimeJCalendar);
+		String recurrenceJSON = ZoomRecurrenceSerializer.toJSONString(
+			recurrence, startTimeJCalendar);
 
-		return DigesterUtil.digestHex(Digester.SHA_1, recurrenceJson,
-			String.valueOf(startTime),
+		return DigesterUtil.digestHex(
+			Digester.SHA_1, recurrenceJSON, String.valueOf(startTime),
 			String.valueOf(endTime));
 	}
 
 	private Calendar _getUtcCalendar() {
-
-		if (Validator.isNotNull(_utcCalendar)) {
+		if (_utcCalendar != null) {
 			return _utcCalendar;
 		}
 
 		_utcCalendar = CalendarFactoryUtil.getCalendar(_getUtcTimeZone());
+
 		return _utcCalendar;
 	}
 
 	private TimeZone _getUtcTimeZone() {
-
-		if (Validator.isNotNull(_utcTimeZone)) {
+		if (_utcTimeZone != null) {
 			return _utcTimeZone;
 		}
 
@@ -1326,8 +1361,7 @@ public class MeetingsPortlet extends MVCPortlet {
 	}
 
 	private DateFormat _getZoomUtcDateFormat() {
-
-		if (Validator.isNotNull(_zoomUtcDateFormat)) {
+		if (_zoomUtcDateFormat != null) {
 			return _zoomUtcDateFormat;
 		}
 
@@ -1351,105 +1385,16 @@ public class MeetingsPortlet extends MVCPortlet {
 		return JCalendarUtil.getJCalendar(utcCalendar, timeZone);
 	}
 
-	private void _validateOccurrenceTime(long startTime)
-		throws PortalException {
-
-		Calendar startTimeCalendar = CalendarFactoryUtil.getCalendar(startTime);
-
-		Calendar currentTimeCalendar = Calendar.getInstance();
-
-		if (startTimeCalendar.before(currentTimeCalendar)) {
-			throw new PortalException("start-time-must-be-a-future-time");
-		}
-	}
-
-	private void _validateRecurrence(ActionRequest actionRequest)
-		throws PortalException {
-
-		Recurrence recurrence = getRecurrence(actionRequest);
-
-		if (Validator.isNull(recurrence)) {
-			return;
-		}
-
-		if (Frequency.YEARLY.equals(recurrence.getFrequency())) {
-			throw new PortalException("invalid-frequency");
-		}
-
-		boolean isValidDailyInterval =
-			Frequency.DAILY.equals(recurrence.getFrequency()) &&
-				recurrence.getInterval() <= 30;
-
-		boolean isValidWeeklyInterval =
-			Frequency.WEEKLY.equals(recurrence.getFrequency()) &&
-				recurrence.getInterval() <= 12;
-
-		boolean isValidMonthlyInterval =
-			Frequency.MONTHLY.equals(recurrence.getFrequency()) &&
-				recurrence.getInterval() <= 3;
-
-		if (!(isValidDailyInterval || isValidWeeklyInterval ||
-			isValidMonthlyInterval)) {
-			throw new PortalException("invalid-interval");
-		}
-
-		boolean hasStopRepeating =
-			Validator.isNotNull(recurrence.getUntilJCalendar()) ||
-				recurrence.getCount() > 0;
-
-		if (!hasStopRepeating) {
-			throw new PortalException("recurrence-must-have-stop-repeating-choice");
-		}
-
-		boolean isValidNumberOfOccurrence =
-			(Validator.isNotNull(recurrence.getUntilJCalendar()) &&
-				recurrence.getCount() <= 0) ||
-				(recurrence.getCount() >= 2 && recurrence.getCount() <= 50);
-
-		if (!isValidNumberOfOccurrence) {
-			throw new PortalException("invalid-number-of-occurrence");
-		}
-
-		if (Validator.isNotNull(recurrence.getUntilJCalendar()) &&
-			recurrence.getCount() <= 0) {
-
-			TimeZone timeZone = getTimeZone(actionRequest);
-
-			Calendar startTimeCalendar =
-				getJCalendar(actionRequest, "startTime", timeZone);
-			Calendar untilJCalendar =
-				getJCalendar(actionRequest, "untilDate", timeZone);
-
-			try {
-				Calendar limitDateJCalendar = _findLimitDate(recurrence, startTimeCalendar);
-
-				boolean isUntilDateExceededLimitDate =
-					Validator.isNotNull(limitDateJCalendar) &&
-						Validator.isNotNull(untilJCalendar) &&
-						untilJCalendar.after(limitDateJCalendar);
-
-				if (isUntilDateExceededLimitDate) {
-					throw new PortalException(
-						"occurrences-exceeded-50-times-please-choose-an-earlier-date");
-				}
-			}
-			catch (ParseException e) {
-				_log.warn("Error while parsing recurrence rule.", e);
-			}
-		}
-	}
-
 	private DateValue _toDateValue(Calendar calendar) {
-
-		return new DateValueImpl(calendar.get(Calendar.YEAR),
-			calendar.get(Calendar.MONTH) + 1,
+		return new DateValueImpl(
+			calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
 			calendar.get(Calendar.DAY_OF_MONTH));
 	}
 
 	private Calendar _toJCalendar(DateValue dateValue, TimeZone timeZone) {
-
-		return JCalendarUtil.getJCalendar(dateValue.year(),
-			dateValue.month() - 1, dateValue.day(), 23, 59, 59, 990, timeZone);
+		return JCalendarUtil.getJCalendar(
+			dateValue.year(), dateValue.month() - 1, dateValue.day(), 23, 59,
+			59, 990, timeZone);
 	}
 
 	private void _updateCalendarBookingExceptionDate(
@@ -1461,12 +1406,13 @@ public class MeetingsPortlet extends MVCPortlet {
 		Recurrence recurrence = calendarBooking.getRecurrenceObj();
 
 		String zoomOriginalData = powwowMeetingOccurrence.getZoomOriginalData();
-		JSONObject zoomOriginalDataJSON =
+
+		JSONObject zoomOriginalDataJSONObject =
 			JSONFactoryUtil.createJSONObject(zoomOriginalData);
 
-		Calendar startTimeOriginalCalendar =
-			_parseZoomUtcTime(zoomOriginalDataJSON.getString("start_time"),
-				calendarBooking.getTimeZone());
+		Calendar startTimeOriginalCalendar = _parseZoomUtcTime(
+			zoomOriginalDataJSONObject.getString("start_time"),
+			calendarBooking.getTimeZone());
 
 		if (_exceptionDateExisted(recurrence, startTimeOriginalCalendar)) {
 			return;
@@ -1474,15 +1420,15 @@ public class MeetingsPortlet extends MVCPortlet {
 
 		recurrence.addExceptionDate(startTimeOriginalCalendar);
 
-		String recurrenceSerializedData =
-			RecurrenceSerializer.serialize(recurrence);
+		String recurrenceSerializedData = RecurrenceSerializer.serialize(
+			recurrence);
 
 		CalendarBookingLocalServiceUtil.updateCalendarBooking(
 			themeDisplay.getUserId(), calendarBooking.getCalendarBookingId(),
 			calendarBooking.getCalendarId(), calendarBooking.getTitleMap(),
-			new HashMap<>(), StringPool.BLANK,
-			calendarBooking.getStartTime(), calendarBooking.getEndTime(), false,
-			recurrenceSerializedData, 0, "email", 0, "email", serviceContext);
+			new HashMap<>(), StringPool.BLANK, calendarBooking.getStartTime(),
+			calendarBooking.getEndTime(), false, recurrenceSerializedData, 0,
+			"email", 0, "email", serviceContext);
 	}
 
 	private void _updateCalendarBookingOccurrence(
@@ -1501,23 +1447,23 @@ public class MeetingsPortlet extends MVCPortlet {
 				CalendarBookingLocalServiceUtil.fetchCalendarBooking(
 					powwowMeetingOccurrence.getCalendarBookingId());
 
-			calendarBookingId = occurrenceCalendarBooking.getCalendarBookingId();
+			calendarBookingId =
+				occurrenceCalendarBooking.getCalendarBookingId();
 
 			CalendarBookingLocalServiceUtil.updateCalendarBooking(
 				themeDisplay.getUserId(), calendarBookingId,
 				occurrenceCalendarBooking.getCalendarId(),
-				mainCalendarBooking.getTitleMap(),
-				new HashMap<>(), StringPool.BLANK,
-				startTime, endTime,
-				false, StringPool.BLANK, 0, "email", 0, "email",
-				serviceContext);
+				mainCalendarBooking.getTitleMap(), new HashMap<>(),
+				StringPool.BLANK, startTime, endTime, false, StringPool.BLANK,
+				0, "email", 0, "email", serviceContext);
 		}
 		else {
-			long calendarId =
-				getCalendarId(themeDisplay.getUserId(), serviceContext);
+			long calendarId = getCalendarId(
+				themeDisplay.getUserId(), serviceContext);
 
-			long[] childCalendarIds = CalendarBookingLocalServiceUtil
-				.getChildCalendarIds(mainCalendarBooking.getCalendarBookingId(),
+			long[] childCalendarIds =
+				CalendarBookingLocalServiceUtil.getChildCalendarIds(
+					mainCalendarBooking.getCalendarBookingId(),
 					mainCalendarBooking.getCalendarId());
 
 			CalendarBooking occurrenceCalendarBooking =
@@ -1526,28 +1472,18 @@ public class MeetingsPortlet extends MVCPortlet {
 					CalendarBookingConstants.PARENT_CALENDAR_BOOKING_ID_DEFAULT,
 					mainCalendarBooking.getTitleMap(),
 					mainCalendarBooking.getDescriptionMap(), StringPool.BLANK,
-					startTime, endTime,
-					false, StringPool.BLANK, 0, "email", 0, "email",
-					serviceContext);
+					startTime, endTime, false, StringPool.BLANK, 0, "email", 0,
+					"email", serviceContext);
 
-			calendarBookingId = occurrenceCalendarBooking.getCalendarBookingId();
+			calendarBookingId =
+				occurrenceCalendarBooking.getCalendarBookingId();
 		}
 
-		_updateOccurrenceTime(powwowMeeting, occurrenceId,
-			startTime, endTime, calendarBookingId);
+		_updateOccurrenceTime(
+			powwowMeeting, occurrenceId, startTime, endTime, calendarBookingId);
 
 		PowwowUtil.sendNotificationsToPowwowParticipants(
 			powwowMeetingId, calendarBookingId, serviceContext);
-	}
-
-	private void _updateOccurrenceTime(PowwowMeeting powwowMeeting, long occurrenceId,
-		long startTime, long endTime, long calendarBookingId) throws PortalException {
-
-		PowwowMeetingOccurrenceServiceUtil.
-			updateOccurrenceTime(powwowMeeting.getPowwowMeetingId(),
-				occurrenceId, startTime, endTime, calendarBookingId);
-
-		PowwowUtil.reindexPowwowMeeting(powwowMeeting);
 	}
 
 	private void _updateOccurenceZoomApi(
@@ -1559,25 +1495,157 @@ public class MeetingsPortlet extends MVCPortlet {
 		Map<String, String> options = new HashMap<>();
 		String occurrenceApiId = powwowMeetingOccurrence.getOccurrenceApiId();
 
-		Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(startTime,
-			calendarBooking.getTimeZone());
+		Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
+			startTime, calendarBooking.getTimeZone());
 
-		String zoomStartTimeUTC =
-			PowwowServiceProviderUtil.toZoomDateTimeUTC(startTimeJCalendar);
+		String zoomStartTimeUTC = PowwowServiceProviderUtil.toZoomDateTimeUTC(
+			startTimeJCalendar);
+
 		options.put(PowwowMeetingConstants.OPTION_START_TIME, zoomStartTimeUTC);
 
 		long duration = _getDurationInMinutes(startTime, endTime);
 
-		options.put(PowwowMeetingConstants.OPTION_DURATION,
-			String.valueOf(duration));
+		options.put(
+			PowwowMeetingConstants.OPTION_DURATION, String.valueOf(duration));
 
 		PowwowServiceProviderUtil.updateOccurrence(
 			powwowMeeting.getPowwowMeetingId(), options, occurrenceApiId);
 	}
 
+	private void _updateOccurrenceTime(
+			PowwowMeeting powwowMeeting, long occurrenceId, long startTime,
+			long endTime, long calendarBookingId)
+		throws PortalException {
+
+		PowwowMeetingOccurrenceServiceUtil.updateOccurrenceTime(
+			powwowMeeting.getPowwowMeetingId(), occurrenceId, startTime,
+			endTime, calendarBookingId);
+
+		PowwowUtil.reindexPowwowMeeting(powwowMeeting);
+	}
+
+	private void _validateOccurrenceTime(long startTime)
+		throws PortalException {
+
+		Calendar startTimeCalendar = CalendarFactoryUtil.getCalendar(startTime);
+
+		Calendar currentTimeCalendar = Calendar.getInstance();
+
+		if (startTimeCalendar.before(currentTimeCalendar)) {
+			throw new PortalException("start-time-must-be-a-future-time");
+		}
+	}
+
+	private void _validateRecurrence(ActionRequest actionRequest)
+		throws PortalException {
+
+		Recurrence recurrence = getRecurrence(actionRequest);
+
+		if (recurrence == null) {
+			return;
+		}
+
+		if (Frequency.YEARLY.equals(recurrence.getFrequency())) {
+			throw new PortalException("invalid-frequency");
+		}
+
+		boolean validDailyInterval = false;
+
+		if (Frequency.DAILY.equals(recurrence.getFrequency()) &&
+			(recurrence.getInterval() <= 30)) {
+
+			validDailyInterval = true;
+		}
+
+		boolean validWeeklyInterval = false;
+
+		if (Frequency.WEEKLY.equals(recurrence.getFrequency()) &&
+			(recurrence.getInterval() <= 12)) {
+
+			validWeeklyInterval = true;
+		}
+
+		boolean validMonthlyInterval = false;
+
+		if (Frequency.MONTHLY.equals(recurrence.getFrequency()) &&
+			(recurrence.getInterval() <= 3)) {
+
+			validMonthlyInterval = true;
+		}
+
+		if (!(validDailyInterval || validWeeklyInterval ||
+			  validMonthlyInterval)) {
+
+			throw new PortalException("invalid-interval");
+		}
+
+		boolean hasStopRepeating = false;
+
+		if ((recurrence.getUntilJCalendar() != null) ||
+			(recurrence.getCount() > 0)) {
+
+			hasStopRepeating = true;
+		}
+
+		if (!hasStopRepeating) {
+			throw new PortalException(
+				"recurrence-must-have-stop-repeating-choice");
+		}
+
+		boolean validNumberOfOccurrence = false;
+
+		if (((recurrence.getUntilJCalendar() != null) &&
+			 (recurrence.getCount() <= 0)) ||
+			((recurrence.getCount() >= 2) && (recurrence.getCount() <= 50))) {
+
+			validNumberOfOccurrence = true;
+		}
+
+		if (!validNumberOfOccurrence) {
+			throw new PortalException("invalid-number-of-occurrence");
+		}
+
+		if ((recurrence.getUntilJCalendar() != null) &&
+			(recurrence.getCount() <= 0)) {
+
+			TimeZone timeZone = getTimeZone(actionRequest);
+
+			Calendar startTimeCalendar = getJCalendar(
+				actionRequest, "startTime", timeZone);
+			Calendar untilJCalendar = getJCalendar(
+				actionRequest, "untilDate", timeZone);
+
+			try {
+				Calendar limitDateJCalendar = _findLimitDate(
+					recurrence, startTimeCalendar);
+
+				boolean untilDateExceededLimitDate = false;
+
+				if ((limitDateJCalendar != null) && (untilJCalendar != null) &&
+					untilJCalendar.after(limitDateJCalendar)) {
+
+					untilDateExceededLimitDate = true;
+				}
+
+				if (untilDateExceededLimitDate) {
+					throw new PortalException(
+						"occurrences-exceeded-50-times-please-choose-an-" +
+							"earlier-date");
+				}
+			}
+			catch (ParseException pe) {
+				if (_log.isWarnEnabled()) {
+					_log.warn("Error while parsing recurrence rule", pe);
+				}
+			}
+		}
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		MeetingsPortlet.class);
+
 	private Calendar _utcCalendar;
 	private TimeZone _utcTimeZone;
 	private DateFormat _zoomUtcDateFormat;
 
-	private static final Log _log = LogFactoryUtil.getLog(MeetingsPortlet.class);
 }

@@ -30,6 +30,7 @@ import com.liferay.powwow.service.PowwowServerLocalServiceUtil;
 import com.liferay.powwow.util.PortletPropsValues;
 
 import java.io.Serializable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,25 @@ public abstract class BasePowwowServiceProvider
 	}
 
 	@Override
+	public boolean deleteOccurrence(
+			long powwowMeetingId, String occurrenceApiId)
+		throws PortalException {
+
+		Map<String, String> queryParams = new HashMap<>();
+
+		queryParams.put(PowwowMeetingConstants.OCCURRENCE_ID, occurrenceApiId);
+
+		PowwowMeeting powwowMeeting =
+			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
+
+		PowwowServer powwowServer =
+			PowwowServerLocalServiceUtil.getPowwowServer(
+				powwowMeeting.getPowwowServerId());
+
+		return deleteOccurrence(powwowServer, powwowMeeting, queryParams);
+	}
+
+	@Override
 	public PowwowMeeting deletePowwowMeeting(long powwowMeetingId)
 		throws PortalException {
 
@@ -72,24 +92,6 @@ public abstract class BasePowwowServiceProvider
 		}
 
 		return powwowMeeting;
-	}
-
-	@Override
-	public boolean deleteOccurrence(long powwowMeetingId, String occurrenceApiId)
-		throws PortalException {
-
-		Map<String, String> queryParams = new HashMap<>();
-		queryParams.put(PowwowMeetingConstants.OCCURRENCE_ID, occurrenceApiId);
-
-		PowwowMeeting powwowMeeting =
-			PowwowMeetingLocalServiceUtil
-				.getPowwowMeeting(powwowMeetingId);
-
-		PowwowServer powwowServer =
-			PowwowServerLocalServiceUtil
-				.getPowwowServer(powwowMeeting.getPowwowServerId());
-
-		return deleteOccurrence(powwowServer, powwowMeeting, queryParams);
 	}
 
 	@Override
@@ -176,6 +178,18 @@ public abstract class BasePowwowServiceProvider
 	}
 
 	@Override
+	public JSONObject getMeetingJSONObject(long powwowMeetingId) {
+		PowwowMeeting powwowMeeting =
+			PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
+
+		PowwowServer powwowServer =
+			PowwowServerLocalServiceUtil.fetchPowwowServer(
+				powwowMeeting.getPowwowServerId());
+
+		return getZoomMeetingJSONObject(powwowServer, powwowMeeting);
+	}
+
+	@Override
 	public boolean getOptionAutoStartVideo(long powwowMeetingId) {
 		PowwowMeeting powwowMeeting =
 			PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
@@ -215,18 +229,6 @@ public abstract class BasePowwowServiceProvider
 		Map.Entry<Integer, Long> entry = powwowServerIds.firstEntry();
 
 		return entry.getValue();
-	}
-
-	@Override
-	public JSONObject getMeetingJSONObject(long powwowMeetingId) {
-
-		PowwowMeeting powwowMeeting =
-			PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
-
-		PowwowServer powwowServer =
-			PowwowServerLocalServiceUtil.fetchPowwowServer(powwowMeeting.getPowwowServerId());
-
-		return getZoomMeetingJSONObject(powwowServer, powwowMeeting);
 	}
 
 	@Override
@@ -307,8 +309,11 @@ public abstract class BasePowwowServiceProvider
 
 				// Return in case no content returned
 
-				if (options.getResponse().getResponseCode() < ERROR_CODE_300) {
+				Http.Response response = options.getResponse();
 
+				int responseCode = response.getResponseCode();
+
+				if (responseCode < ERROR_CODE_300) {
 					return "{}";
 				}
 
@@ -323,6 +328,27 @@ public abstract class BasePowwowServiceProvider
 
 		throw new SystemException(
 			"Unable to complete request to " + options.getLocation());
+	}
+
+	@Override
+	public boolean updateOccurrence(
+			long powwowMeetingId, Map<String, String> options,
+			String occurrentApiId)
+		throws PortalException {
+
+		Map<String, String> queryParams = new HashMap<>();
+
+		queryParams.put(PowwowMeetingConstants.OCCURRENCE_ID, occurrentApiId);
+
+		PowwowMeeting powwowMeeting =
+			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
+
+		PowwowServer powwowServer =
+			PowwowServerLocalServiceUtil.getPowwowServer(
+				powwowMeeting.getPowwowServerId());
+
+		return updateOccurrence(
+			powwowServer, powwowMeeting, options, queryParams);
 	}
 
 	@Override
@@ -344,34 +370,16 @@ public abstract class BasePowwowServiceProvider
 			powwowServer, powwowMeeting, name, user, options);
 	}
 
-	@Override
-	public boolean updateOccurrence(
-			long powwowMeetingId, Map<String, String> options,
-			String occurrentApiId)
-		throws PortalException {
-
-		Map<String, String> queryParams = new HashMap<>();
-		queryParams.put(PowwowMeetingConstants.OCCURRENCE_ID, occurrentApiId);
-
-		PowwowMeeting powwowMeeting =
-			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
-
-		PowwowServer powwowServer =
-			PowwowServerLocalServiceUtil.getPowwowServer(
-				powwowMeeting.getPowwowServerId());
-
-		return updateOccurrence(powwowServer, powwowMeeting, options, queryParams);
-	}
-
 	protected abstract Map<String, Serializable> addPowwowMeeting(
 		User creator, PowwowServer powwowServer, long powwowMeetingId,
 		String name, Map<String, String> options);
 
+	protected abstract boolean deleteOccurrence(
+		PowwowServer powwowServer, PowwowMeeting powwowMeeting,
+		Map<String, String> queryParams);
+
 	protected abstract boolean deletePowwowMeeting(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting);
-
-	protected abstract boolean deleteOccurrence(
-		PowwowServer powwowServer, PowwowMeeting powwowMeeting, Map<String, String> queryParams);
 
 	protected abstract boolean endPowwowMeeting(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting);
@@ -386,12 +394,13 @@ public abstract class BasePowwowServiceProvider
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting, String name,
 		int type);
 
-	protected abstract JSONObject getZoomMeetingJSONObject(PowwowServer powwowServer, PowwowMeeting powwowMeeting);
-
 	protected abstract boolean getOptionAutoStartVideo(
 		PowwowMeeting powwowMeeting);
 
 	protected abstract String getOptionPassword(PowwowMeeting powwowMeeting);
+
+	protected abstract JSONObject getZoomMeetingJSONObject(
+		PowwowServer powwowServer, PowwowMeeting powwowMeeting);
 
 	protected abstract boolean isPowwowMeetingCreated(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting);
@@ -399,13 +408,13 @@ public abstract class BasePowwowServiceProvider
 	protected abstract boolean isPowwowMeetingRunning(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting);
 
+	protected abstract boolean updateOccurrence(
+		PowwowServer powwowServer, PowwowMeeting powwowMeeting,
+		Map<String, String> options, Map<String, String> queryParams);
+
 	protected abstract Map<String, Serializable> updatePowwowMeeting(
 		PowwowServer powwowServer, PowwowMeeting powwowMeeting, String name,
 		User creator, Map<String, String> options);
-
-	protected abstract boolean updateOccurrence(
-		PowwowServer powwowServer, PowwowMeeting powwowMeeting,
-			Map<String, String> options, Map<String, String> queryParams);
 
 	protected static final int ERROR_CODE_300 = 300;
 

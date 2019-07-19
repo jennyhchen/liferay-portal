@@ -18,12 +18,13 @@
 
 <%
 String backURL = ParamUtil.getString(request, "backURL");
+
 if (Validator.isNull(backURL)) {
 	backURL = ParamUtil.getString(request, "redirect");
 }
+
 long powwowMeetingId = ParamUtil.getLong(request, "powwowMeetingId");
 boolean showAll = ParamUtil.getBoolean(request, "all", false);
-TimeZone userTimeZone = TimeZone.getTimeZone(user.getTimeZoneId());
 
 PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
 
@@ -32,27 +33,26 @@ portletURL.setParameter("powwowMeetingId", String.valueOf(powwowMeetingId));
 portletURL.setParameter("all", String.valueOf(showAll));
 portletURL.setParameter("backURL", backURL);
 
-List<PowwowMeetingOccurrence> powwowMeetingOccurrences =
-	PowwowMeetingOccurrenceLocalServiceUtil.findByPowwowMeetingId(powwowMeetingId);
+List<PowwowMeetingOccurrence> powwowMeetingOccurrences = PowwowMeetingOccurrenceLocalServiceUtil.findByPowwowMeetingId(powwowMeetingId);
 
 if (!showAll) {
 
 	// filter only available occurrences
 
-	powwowMeetingOccurrences = ListUtil.filter(powwowMeetingOccurrences,
+	powwowMeetingOccurrences = ListUtil.filter(
+		powwowMeetingOccurrences,
 		new PredicateFilter<PowwowMeetingOccurrence>() {
 
 			@Override
 			public boolean filter(PowwowMeetingOccurrence t) {
 
-				return OccurrenceStatus.AVAILABLE.equals(
-					t.getOccurrenceStatusEnum()) && !t.isEndTimePassed();
+				return OccurrenceStatus.AVAILABLE.equals(t.getOccurrenceStatusEnum()) && !t.isEndTimePassed();
 			}
+
 		});
 }
 
 request.setAttribute("OccurrenceStatus_AVAILABLE", OccurrenceStatus.AVAILABLE);
-
 %>
 
 <liferay-ui:header
@@ -86,14 +86,15 @@ request.setAttribute("OccurrenceStatus_AVAILABLE", OccurrenceStatus.AVAILABLE);
 		<dt>
 			<liferay-ui:message key="occurrences" />
 
-			<portlet:renderURL var="viewOccurrencesRenderURL"/>
+			<portlet:renderURL var="viewOccurrencesRenderURL" />
+
 			<aui:form action="${viewOccurrencesRenderURL}" id="fmViewOccurrences" method="post" name="fmViewOccurrences" onSubmit="event.preventDefault();">
 				<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
 				<aui:input name="jspPage" type="hidden" value="/meetings/view_occurrences.jsp" />
 				<aui:input name="powwowMeetingId" type="hidden" value="<%= String.valueOf(powwowMeetingId) %>" />
 
 				<aui:field-wrapper inlineField="<%= true %>" label="">
-					<aui:input checked="<%= showAll %>" label="show-all" name="all" type="checkbox" onChange="submitForm(this.form)"/>
+					<aui:input checked="<%= showAll %>" label="show-all" name="all" onChange="submitForm(this.form)" type="checkbox" />
 				</aui:field-wrapper>
 			</aui:form>
 		</dt>
@@ -103,9 +104,9 @@ request.setAttribute("OccurrenceStatus_AVAILABLE", OccurrenceStatus.AVAILABLE);
 				iteratorURL="<%= portletURL %>"
 				total="<%= powwowMeetingOccurrences.size() %>"
 			>
-
 				<liferay-ui:search-container-results
-					results="<%= ListUtil.subList(powwowMeetingOccurrences, searchContainer.getStart(), searchContainer.getEnd()) %>" />
+					results="<%= ListUtil.subList(powwowMeetingOccurrences, searchContainer.getStart(), searchContainer.getEnd()) %>"
+				/>
 
 				<liferay-ui:search-container-row
 					className="com.liferay.powwow.model.PowwowMeetingOccurrence"
@@ -113,16 +114,18 @@ request.setAttribute("OccurrenceStatus_AVAILABLE", OccurrenceStatus.AVAILABLE);
 					keyProperty="occurrenceId"
 					modelVar="powwowMeetingOccurrence"
 				>
+
 					<%
-						Calendar startTimeCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
-						Calendar endTimeCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
+					Calendar startTimeCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
+					Calendar endTimeCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 
-						startTimeCalendar.setTimeInMillis(powwowMeetingOccurrence.getStartTime());
-						endTimeCalendar.setTimeInMillis(powwowMeetingOccurrence.getEndTime());
+					startTimeCalendar.setTimeInMillis(powwowMeetingOccurrence.getStartTime());
+					endTimeCalendar.setTimeInMillis(powwowMeetingOccurrence.getEndTime());
 
-						String startTime = occurrenceTimeFormat.format(startTimeCalendar.getTime());
-						String endTime = occurrenceTimeFormat.format(endTimeCalendar.getTime());
+					String startTime = occurrenceTimeFormat.format(startTimeCalendar.getTime());
+					String endTime = occurrenceTimeFormat.format(endTimeCalendar.getTime());
 					%>
+
 					<liferay-ui:search-container-column-text
 						name="start-time"
 						value="<%= startTime %>"
@@ -133,7 +136,9 @@ request.setAttribute("OccurrenceStatus_AVAILABLE", OccurrenceStatus.AVAILABLE);
 						value="<%= endTime %>"
 					/>
 
-					<liferay-ui:search-container-column-text name="status" >
+					<liferay-ui:search-container-column-text
+						name="status"
+					>
 						<c:choose>
 							<c:when test="${powwowMeetingOccurrence.occurrenceStatus eq OccurrenceStatus_AVAILABLE.value and powwowMeetingOccurrence.isEndTimePassed()}">
 								<liferay-ui:message key="completed" />
@@ -148,9 +153,9 @@ request.setAttribute("OccurrenceStatus_AVAILABLE", OccurrenceStatus.AVAILABLE);
 						path="/meetings/occurence_row_action.jsp"
 					/>
 				</liferay-ui:search-container-row>
+
 				<liferay-ui:search-iterator />
 			</liferay-ui:search-container>
-
 		</dd>
 	</div>
 </div>

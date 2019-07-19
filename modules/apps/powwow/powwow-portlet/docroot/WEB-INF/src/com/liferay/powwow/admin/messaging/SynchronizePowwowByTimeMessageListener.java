@@ -17,11 +17,8 @@ package com.liferay.powwow.admin.messaging;
 import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.BaseMessageListener;
 import com.liferay.portal.kernel.messaging.Message;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowMeetingConstants;
 import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
@@ -36,11 +33,11 @@ import java.util.List;
  *
  * @author Tang Hieu Ha
  */
-public class SynchronizePowwowByTimeMessageListener extends BaseMessageListener {
+public class SynchronizePowwowByTimeMessageListener
+	extends BaseMessageListener {
 
 	@Override
 	protected void doReceive(Message message) throws Exception {
-
 		_processPassedMeetings();
 	}
 
@@ -70,18 +67,27 @@ public class SynchronizePowwowByTimeMessageListener extends BaseMessageListener 
 			}
 
 			for (PowwowMeeting powwowMeeting : powwowMeetings) {
+				calendarBooking =
+					CalendarBookingLocalServiceUtil.fetchCalendarBooking(
+						powwowMeeting.getCalendarBookingId());
 
-				calendarBooking = CalendarBookingLocalServiceUtil
-					.fetchCalendarBooking(powwowMeeting.getCalendarBookingId());
+				boolean nonRecurringPassed = false;
 
-				boolean nonRecurringPassed = !calendarBooking.isRecurring() &&
-					calendarBooking.getEndTime() < now;
+				if (!calendarBooking.isRecurring() &&
+					(calendarBooking.getEndTime() < now)) {
 
-				boolean noOccurrenceAvailable = calendarBooking.isRecurring() &&
-					Validator.isNull(powwowMeeting.findNextOccurrence());
+					nonRecurringPassed = true;
+				}
+
+				boolean noOccurrenceAvailable = false;
+
+				if (calendarBooking.isRecurring() &&
+					(powwowMeeting.findNextOccurrence() == null)) {
+
+					noOccurrenceAvailable = true;
+				}
 
 				if (nonRecurringPassed || noOccurrenceAvailable) {
-
 					PowwowMeetingLocalServiceUtil.updateStatus(
 						powwowMeeting.getPowwowMeetingId(),
 						PowwowMeetingConstants.STATUS_COMPLETED);
@@ -93,8 +99,6 @@ public class SynchronizePowwowByTimeMessageListener extends BaseMessageListener 
 		}
 	}
 
-	private static final Log _log =
-		LogFactoryUtil.getLog(SynchronizePowwowByTimeMessageListener.class);
-
 	private static final int _MAX_NUMBER_PROCESSED = 1000;
+
 }

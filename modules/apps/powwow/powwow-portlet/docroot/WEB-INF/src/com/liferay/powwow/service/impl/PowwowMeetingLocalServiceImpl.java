@@ -63,7 +63,8 @@ public class PowwowMeetingLocalServiceImpl
 	@Override
 	public PowwowMeeting addPowwowMeeting(
 			long userId, long groupId, long powwowServerId, String name,
-			String description, Map<String, Serializable> providerTypeMetadataMap,
+			String description,
+			Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,
 			ServiceContext serviceContext)
@@ -123,19 +124,19 @@ public class PowwowMeetingLocalServiceImpl
 				continue;
 			}
 
-			boolean isPowwowMeetingRunning = PowwowServiceProviderUtil.isPowwowMeetingRunning(
-				powwowMeeting.getPowwowMeetingId());
+			boolean powwowMeetingRunning =
+				PowwowServiceProviderUtil.isPowwowMeetingRunning(
+					powwowMeeting.getPowwowMeetingId());
 
-			if (isPowwowMeetingRunning) {
+			if (powwowMeetingRunning) {
 				continue;
 			}
 
-			boolean hasNextOccurrence =
-				Validator.isNotNull(powwowMeeting.findNextOccurrence());
+			int meetingStatus = PowwowMeetingConstants.STATUS_COMPLETED;
 
-			int meetingStatus = hasNextOccurrence
-				? PowwowMeetingConstants.STATUS_SCHEDULED
-				: PowwowMeetingConstants.STATUS_COMPLETED;
+			if (powwowMeeting.findNextOccurrence() != null) {
+				meetingStatus = PowwowMeetingConstants.STATUS_SCHEDULED;
+			}
 
 			updateStatus(powwowMeeting.getPowwowMeetingId(), meetingStatus);
 		}
@@ -278,7 +279,8 @@ public class PowwowMeetingLocalServiceImpl
 	@Override
 	public PowwowMeeting updatePowwowMeeting(
 			long powwowMeetingId, long powwowServerId, String name,
-			String description, Map<String, Serializable> providerTypeMetadataMap,
+			String description,
+			Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,
 			ServiceContext serviceContext)

@@ -19,7 +19,6 @@
 <%
 String backURL = ParamUtil.getString(request, "backURL");
 long powwowMeetingId = ParamUtil.getLong(request, "powwowMeetingId");
-TimeZone userTimeZone = TimeZone.getTimeZone(user.getTimeZoneId());
 
 PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(powwowMeetingId);
 
@@ -51,8 +50,7 @@ portletURL.setParameter("backURL", backURL);
 			<liferay-ui:message key="meeting-url" />
 		</dt>
 		<dd>
-			<input id="<portlet:namespace />meetingURL" readonly="readonly" type="text"
-				value="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, request) %>"/>
+			<input id="<portlet:namespace />meetingURL" readonly="readonly" type="text" value="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, request) %>" />
 
 			<button class="zeroclipboard-button" data-clipboard-text="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, request) %>" data-copied="<liferay-ui:message key="copied" />" data-hover="<liferay-ui:message key="copy-to-clipboard" />" id="<portlet:namespace />copyButton">
 				<i class="icon-copy"></i>
@@ -61,13 +59,18 @@ portletURL.setParameter("backURL", backURL);
 	</div>
 
 	<c:if test="<%= PowwowServiceProviderUtil.isSupportsOptionPassword() %>">
-		<c:if test="<%= Validator.isNotNull(PowwowServiceProviderUtil.getOptionPassword(powwowMeeting.getPowwowMeetingId())) %>">
+
+		<%
+		String optionPassword = PowwowServiceProviderUtil.getOptionPassword(powwowMeeting.getPowwowMeetingId());
+		%>
+
+		<c:if test="<%= Validator.isNotNull(optionPassword) %>">
 			<div class="meeting-password">
 				<dt>
 					<liferay-ui:message key="meeting-password" />
 				</dt>
 				<dd>
-					<%= PowwowServiceProviderUtil.getOptionPassword(powwowMeeting.getPowwowMeetingId()) %>
+					<%= HtmlUtil.escape(optionPassword) %>
 				</dd>
 			</div>
 		</c:if>
@@ -121,27 +124,30 @@ portletURL.setParameter("backURL", backURL);
 			<dd>
 				<span>
 					<%= PowwowUtil.getRecurrenceSummary(calendarBooking.getRecurrenceObj(), locale) %>
-					<br/>
+					<br />
+
 					<span><liferay-ui:message key="schedule-time" />:
 						<%= shortDateFormat.format(calendarBooking.getStartTime()) %>
 						<liferay-ui:message key="to" />
 						<%= shortDateFormat.format(calendarBooking.getEndTime()) %>
 					</span>
+
 					<c:if test="<%= !calendarBooking.getRecurrenceObj().getExceptionJCalendars().isEmpty() %>">
-						<br/><liferay-ui:message key="exception-occurrences" />:
+						<br /><liferay-ui:message key="exception-occurrences" />:
+
 						<%
 						List<Calendar> exceptionCalendars = calendarBooking.getRecurrenceObj().getExceptionJCalendars();
 						StringBuffer exceptions = new StringBuffer();
 
-						for (int i=0; i < exceptionCalendars.size(); i++) {
-
+						for (int i = 0; i < exceptionCalendars.size(); i++) {
 							exceptions.append(recurringDateFormat.format(exceptionCalendars.get(i).getTime()));
 
-							if (i < exceptionCalendars.size() - 1) {
+							if (i < (exceptionCalendars.size() - 1)) {
 								exceptions.append(StringPool.COMMA_AND_SPACE);
 							}
 						}
 						%>
+
 						<%= exceptions.toString() %>
 					</c:if>
 				</span>
@@ -155,14 +161,14 @@ portletURL.setParameter("backURL", backURL);
 		</dt>
 		<dd>
 			<liferay-ui:search-container
-				total="<%= PowwowParticipantLocalServiceUtil.getPowwowParticipantsCount(powwowMeetingId) %>"
 				iteratorURL="<%= portletURL %>"
+				total="<%= PowwowParticipantLocalServiceUtil.getPowwowParticipantsCount(powwowMeetingId) %>"
 			>
 				<liferay-ui:search-container-results>
 
 					<%
-						List<PowwowParticipant> powwowParticipants = PowwowParticipantLocalServiceUtil.getPowwowParticipants(powwowMeetingId);
-						searchContainer.setResults(ListUtil.subList(powwowParticipants, searchContainer.getStart(), searchContainer.getEnd()));
+					List<PowwowParticipant> powwowParticipants = PowwowParticipantLocalServiceUtil.getPowwowParticipants(powwowMeetingId);
+					searchContainer.setResults(ListUtil.subList(powwowParticipants, searchContainer.getStart(), searchContainer.getEnd()));
 					%>
 
 				</liferay-ui:search-container-results>

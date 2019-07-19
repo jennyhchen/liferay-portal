@@ -60,40 +60,43 @@ public class PowwowMeetingOccurrenceServiceImpl
 		PowwowMeetingPermission.check(
 			getPermissionChecker(), powwowMeetingId, ActionKeys.DELETE);
 
-		powwowMeetingOccurrenceLocalService.deleteByPowwowMeetingId(powwowMeetingId);
+		powwowMeetingOccurrenceLocalService.deleteByPowwowMeetingId(
+			powwowMeetingId);
 	}
 
 	public List<PowwowMeetingOccurrence> findByPowwowMeetingId(
 			long powwowMeetingId)
 		throws PortalException {
 
-		PowwowMeetingPermission.check(getPermissionChecker(), powwowMeetingId,
-			ActionKeys.VIEW);
+		PowwowMeetingPermission.check(
+			getPermissionChecker(), powwowMeetingId, ActionKeys.VIEW);
 
-		return powwowMeetingOccurrenceLocalService
-			.findByPowwowMeetingId(powwowMeetingId);
+		return powwowMeetingOccurrenceLocalService.findByPowwowMeetingId(
+			powwowMeetingId);
 	}
 
 	public PowwowMeetingOccurrence updateOccurrenceStatus(
-			long powwowMeetingId, long occurrenceId, OccurrenceStatus occurrenceStatus)
+			long powwowMeetingId, long occurrenceId,
+			OccurrenceStatus occurrenceStatus)
 		throws PortalException {
 
 		PowwowMeetingPermission.check(
 			getPermissionChecker(), powwowMeetingId, ActionKeys.UPDATE);
 
-		return powwowMeetingOccurrenceLocalService
-			.updateOccurrenceStatus(occurrenceId, occurrenceStatus);
+		return powwowMeetingOccurrenceLocalService.updateOccurrenceStatus(
+			occurrenceId, occurrenceStatus);
 	}
 
 	public PowwowMeetingOccurrence updateOccurrenceTime(
-			long powwowMeetingId, long occurrenceId, long startTime, long endTime,
-			long calendarBookingId)
+			long powwowMeetingId, long occurrenceId, long startTime,
+			long endTime, long calendarBookingId)
 		throws PortalException {
 
 		PowwowMeetingPermission.check(
 			getPermissionChecker(), powwowMeetingId, ActionKeys.UPDATE);
 
-		return powwowMeetingOccurrenceLocalService
-			.updateOccurrenceTime(occurrenceId, startTime, endTime, calendarBookingId);
+		return powwowMeetingOccurrenceLocalService.updateOccurrenceTime(
+			occurrenceId, startTime, endTime, calendarBookingId);
 	}
+
 }

@@ -150,11 +150,11 @@
 
 					if (actionName === 'delete') {
 						titleText = Liferay.Language.get('delete-recurring-event');
-						changeDeleteText = Liferay.Language.get('would-you-like-to-delete-only-this-event-all-events-in-the-series-or-this-and-all-future-events-in-the-series');
+						changeDeleteText = Liferay.Language.get('would-you-like-to-delete-only-this-event,-all-events-in-the-series,-or-this-and-all-future-events-in-the-series');
 					}
 					else {
 						titleText = Liferay.Language.get('change-recurring-event');
-						changeDeleteText = Liferay.Language.get('would-you-like-to-change-only-this-event-all-events-in-the-series-or-this-and-all-future-events-in-the-series');
+						changeDeleteText = Liferay.Language.get('would-you-like-to-change-only-this-event,-all-events-in-the-series,-or-this-and-all-future-events-in-the-series');
 					}
 
 					var getButtonConfig = function(label, callback) {

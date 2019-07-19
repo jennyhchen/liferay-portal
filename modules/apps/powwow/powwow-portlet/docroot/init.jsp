@@ -14,8 +14,7 @@
  */
 --%>
 
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %><%@
-taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
 
@@ -26,22 +25,19 @@ taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %><%@
 taglib uri="http://liferay.com/tld/util" prefix="liferay-util" %>
 
 <%@ page import="com.liferay.calendar.model.CalendarBooking" %><%@
-page import="com.liferay.calendar.recurrence.Recurrence" %><%@
 page import="com.liferay.calendar.recurrence.Frequency" %><%@
-page import="com.liferay.calendar.recurrence.Weekday" %><%@
 page import="com.liferay.calendar.recurrence.PositionalWeekday" %><%@
+page import="com.liferay.calendar.recurrence.Recurrence" %><%@
+page import="com.liferay.calendar.recurrence.Weekday" %><%@
 page import="com.liferay.calendar.service.CalendarBookingServiceUtil" %><%@
 page import="com.liferay.calendar.util.JCalendarUtil" %><%@
 page import="com.liferay.calendar.util.RecurrenceUtil" %><%@
 page import="com.liferay.petra.content.ContentUtil" %><%@
 page import="com.liferay.portal.kernel.bean.BeanPropertiesUtil" %><%@
 page import="com.liferay.portal.kernel.dao.search.ResultRow" %><%@
-page import="com.liferay.portal.kernel.json.JSONFactoryUtil" %><%@
-page import="com.liferay.portal.kernel.json.JSONSerializer" %><%@
 page import="com.liferay.portal.kernel.language.LanguageUtil" %><%@
 page import="com.liferay.portal.kernel.language.UnicodeLanguageUtil" %><%@
 page import="com.liferay.portal.kernel.model.User" %><%@
-page import="com.liferay.portal.kernel.portlet.LiferayWindowState" %><%@
 page import="com.liferay.portal.kernel.portlet.PortletURLFactoryUtil" %><%@
 page import="com.liferay.portal.kernel.search.Document" %><%@
 page import="com.liferay.portal.kernel.search.Field" %><%@
@@ -51,7 +47,6 @@ page import="com.liferay.portal.kernel.search.IndexerRegistryUtil" %><%@
 page import="com.liferay.portal.kernel.search.SearchContext" %><%@
 page import="com.liferay.portal.kernel.search.SearchContextFactory" %><%@
 page import="com.liferay.portal.kernel.service.UserLocalServiceUtil" %><%@
-page import="com.liferay.portal.kernel.util.ArrayUtil" %><%@
 page import="com.liferay.portal.kernel.util.CalendarFactoryUtil" %><%@
 page import="com.liferay.portal.kernel.util.Constants" %><%@
 page import="com.liferay.portal.kernel.util.FastDateFormatFactoryUtil" %><%@
@@ -69,29 +64,30 @@ page import="com.liferay.portal.kernel.util.StringPool" %><%@
 page import="com.liferay.portal.kernel.util.StringUtil" %><%@
 page import="com.liferay.portal.kernel.util.UnicodeFormatter" %><%@
 page import="com.liferay.portal.kernel.util.Validator" %><%@
-page import="com.liferay.portal.kernel.util.WebKeys" %>
-
-<%@ page import="com.liferay.powwow.model.PowwowMeeting" %><%@
+page import="com.liferay.portal.kernel.util.WebKeys" %><%@
+page import="com.liferay.powwow.model.PowwowMeeting" %><%@
 page import="com.liferay.powwow.model.PowwowMeetingConstants" %><%@
+page import="com.liferay.powwow.model.PowwowMeetingOccurrence" %><%@
 page import="com.liferay.powwow.model.PowwowParticipant" %><%@
 page import="com.liferay.powwow.model.PowwowParticipantConstants" %><%@
 page import="com.liferay.powwow.model.PowwowServer" %><%@
-page import="com.liferay.powwow.model.PowwowMeetingOccurrence" %><%@
 page import="com.liferay.powwow.occurrence.OccurrenceStatus" %><%@
 page import="com.liferay.powwow.provider.PowwowServiceProviderUtil" %><%@
 page import="com.liferay.powwow.service.PowwowMeetingLocalServiceUtil" %><%@
+page import="com.liferay.powwow.service.PowwowMeetingOccurrenceLocalServiceUtil" %><%@
 page import="com.liferay.powwow.service.PowwowParticipantLocalServiceUtil" %><%@
 page import="com.liferay.powwow.service.PowwowServerLocalServiceUtil" %><%@
-page import="com.liferay.powwow.service.PowwowMeetingOccurrenceLocalServiceUtil" %><%@
 page import="com.liferay.powwow.service.permission.MeetingsPermission" %><%@
 page import="com.liferay.powwow.service.permission.PowwowMeetingPermission" %><%@
 page import="com.liferay.powwow.util.ActionKeys" %><%@
 page import="com.liferay.powwow.util.PortletPropsValues" %><%@
 page import="com.liferay.powwow.util.PowwowUtil" %>
 
-<%@ page import="java.lang.StringBuilder" %><%@
-page import="java.text.Format" %><%@
-page import="java.util.ArrayList" %><%@
+<%@ page import="java.lang.StringBuilder" %>
+
+<%@ page import="java.text.Format" %>
+
+<%@ page import="java.util.ArrayList" %><%@
 page import="java.util.Arrays" %><%@
 page import="java.util.Calendar" %><%@
 page import="java.util.Collections" %><%@

@@ -29,6 +29,8 @@ public class PowwowMeetingConstants {
 
 	public static final String LABEL_SCHEDULED = "scheduled";
 
+	public static final String OCCURRENCE_ID = "occurrence_id";
+
 	public static final String OPTION_AUTO_START_VIDEO = "autoStartVideo";
 
 	public static final String OPTION_DURATION = "duration";
@@ -38,8 +40,6 @@ public class PowwowMeetingConstants {
 	public static final String OPTION_RECURRENCE = "recurrence";
 
 	public static final String OPTION_START_TIME = "start_time";
-
-	public static final String OCCURRENCE_ID = "occurrence_id";
 
 	public static final int POWWOW_SERVER_ID_DEFAULT = 0;
 

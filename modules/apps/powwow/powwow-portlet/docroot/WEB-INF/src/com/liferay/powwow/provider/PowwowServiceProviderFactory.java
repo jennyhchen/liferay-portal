@@ -22,10 +22,10 @@ import com.liferay.powwow.provider.zoom.ZoomPowwowServiceProvider;
 public class PowwowServiceProviderFactory {
 
 	public static PowwowServiceProvider getPowwowServiceProvider() {
-
-		return zoomPowwowServiceProvider;
+		return _zoomPowwowServiceProvider;
 	}
 
-	private static final PowwowServiceProvider zoomPowwowServiceProvider =
+	private static final PowwowServiceProvider _zoomPowwowServiceProvider =
 		new ZoomPowwowServiceProvider();
+
 }
