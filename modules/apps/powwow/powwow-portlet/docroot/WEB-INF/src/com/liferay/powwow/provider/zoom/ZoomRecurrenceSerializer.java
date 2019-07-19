@@ -21,12 +21,9 @@ import com.liferay.calendar.recurrence.Weekday;
 import com.liferay.calendar.util.JCalendarUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.powwow.provider.PowwowServiceProviderUtil;
 
 import java.util.ArrayList;
@@ -41,13 +38,16 @@ import java.util.TimeZone;
  */
 public class ZoomRecurrenceSerializer {
 
-	public static String toJSONString(Recurrence recurrence, Calendar startTime) {
+	public static String toJSONString(
+		Recurrence recurrence, Calendar startTime) {
 
-		if (Validator.isNull(recurrence)) {
+		if (recurrence == null) {
 			return StringPool.BLANK;
 		}
 
-		if (Validator.isNull(recurrence.getUntilJCalendar()) && recurrence.getCount() < 1) {
+		if ((recurrence.getUntilJCalendar() == null) &&
+			(recurrence.getCount() < 1)) {
+
 			return StringPool.BLANK;
 		}
 
@@ -57,7 +57,7 @@ public class ZoomRecurrenceSerializer {
 			return StringPool.BLANK;
 		}
 
-		if(Validator.isNull(startTime)) {
+		if (startTime == null) {
 			startTime = CalendarFactoryUtil.getCalendar();
 		}
 
@@ -65,11 +65,13 @@ public class ZoomRecurrenceSerializer {
 
 		List<Integer> weekdayNums = new ArrayList<>();
 
-		List<PositionalWeekday> positionalWeekdays = recurrence.getPositionalWeekdays();
+		List<PositionalWeekday> positionalWeekdays =
+			recurrence.getPositionalWeekdays();
 
-		if(Frequency.WEEKLY.equals(frequency)) {
+		if (Frequency.WEEKLY.equals(frequency)) {
 			for (PositionalWeekday positionalWeekday : positionalWeekdays) {
-				int zoomWeekday = _weekdayMap.get(positionalWeekday.getWeekday());
+				int zoomWeekday = _weekdayMap.get(
+					positionalWeekday.getWeekday());
 
 				weekdayNums.add(zoomWeekday);
 			}
@@ -81,15 +83,21 @@ public class ZoomRecurrenceSerializer {
 
 				// Zoom only supports one weekday in monthly recurrence
 
-				PositionalWeekday positiionWeekday = positionalWeekdays.get(0);
-				int zoomWeekday = _weekdayMap.get(positiionWeekday.getWeekday());
+				PositionalWeekday positionWeekday = positionalWeekdays.get(0);
+
+				int zoomWeekday = _weekdayMap.get(positionWeekday.getWeekday());
+
+				jsonRecurrence.put(
+					"monthly_week", positionWeekday.getPosition());
 
 				jsonRecurrence.put("monthly_week_day", zoomWeekday);
-				jsonRecurrence.put("monthly_week", positiionWeekday.getPosition());
 			}
 			else {
-				Calendar startTimeUTC = JCalendarUtil.getJCalendar(startTime, TimeZone.getTimeZone(StringPool.UTC));
-				jsonRecurrence.put("monthly_day", startTimeUTC.get(Calendar.DATE));
+				Calendar startTimeUTC = JCalendarUtil.getJCalendar(
+					startTime, TimeZone.getTimeZone(StringPool.UTC));
+
+				jsonRecurrence.put(
+					"monthly_day", startTimeUTC.get(Calendar.DATE));
 			}
 		}
 
@@ -99,14 +107,15 @@ public class ZoomRecurrenceSerializer {
 
 		Calendar untilJCalendar = recurrence.getUntilJCalendar();
 
-		if (Validator.isNotNull(untilJCalendar) && recurrence.getCount() < 1) {
-
+		if ((untilJCalendar != null) && (recurrence.getCount() < 1)) {
 			untilJCalendar.set(Calendar.HOUR, 23);
 			untilJCalendar.set(Calendar.MINUTE, 59);
 			untilJCalendar.set(Calendar.SECOND, 59);
 			untilJCalendar.set(Calendar.MILLISECOND, 990);
 
-			String zoomDateTimeUTC = PowwowServiceProviderUtil.toZoomDateTimeUTC(untilJCalendar);
+			String zoomDateTimeUTC =
+				PowwowServiceProviderUtil.toZoomDateTimeUTC(untilJCalendar);
+
 			jsonRecurrence.put("end_date_time", zoomDateTimeUTC);
 		}
 		else {
@@ -116,11 +125,8 @@ public class ZoomRecurrenceSerializer {
 		return jsonRecurrence.toString();
 	}
 
-	private static final Map<Frequency, Integer> _frequencyMap = new HashMap<>();
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ZoomRecurrenceSerializer.class);
-
+	private static final Map<Frequency, Integer> _frequencyMap =
+		new HashMap<>();
 	private static final Map<Weekday, Integer> _weekdayMap = new HashMap<>();
 
 	static {

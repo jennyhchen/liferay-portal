@@ -14,15 +14,15 @@
 
 package com.liferay.powwow.model.impl;
 
-import com.liferay.powwow.occurrence.OccurrenceStatus;
-
 import aQute.bnd.annotation.ProviderType;
+
+import com.liferay.powwow.occurrence.OccurrenceStatus;
 
 /**
  * The extended model implementation for the PowwowMeetingOccurrence service. Represents a row in the &quot;PowwowMeetingOccurrence&quot; database table, with each column mapped to a property of this class.
  *
  * <p>
- * Helper methods and all application logic should be put in this class. Whenever methods are added, rerun ServiceBuilder to copy their definitions into the <code>com.liferay.powwow.model.PowwowMeetingOccurrence<code> interface.
+ * Helper methods and all application logic should be put in this class. Whenever methods are added, rerun ServiceBuilder to copy their definitions into the <code>com.liferay.powwow.model.PowwowMeetingOccurrence</code> interface.
  * </p>
  *
  * @author Shinn Lok
@@ -35,12 +35,15 @@ public class PowwowMeetingOccurrenceImpl
 	}
 
 	public OccurrenceStatus getOccurrenceStatusEnum() {
-
 		return OccurrenceStatus.parse(getOccurrenceStatus());
 	}
 
 	public boolean isEndTimePassed() {
+		if (getEndTime() < System.currentTimeMillis()) {
+			return true;
+		}
 
-		return getEndTime() < System.currentTimeMillis();
+		return false;
 	}
+
 }

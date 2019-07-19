@@ -38,10 +38,11 @@ public interface PowwowServiceProvider {
 			Map<String, String> startOptions)
 		throws PortalException;
 
-	public PowwowMeeting deletePowwowMeeting(long powwowMeetingId)
+	public boolean deleteOccurrence(
+			long powwowMeetingId, String occurrenceApiId)
 		throws PortalException;
 
-	public boolean deleteOccurrence(long powwowMeetingId, String occurrenceApiId)
+	public PowwowMeeting deletePowwowMeeting(long powwowMeetingId)
 		throws PortalException;
 
 	public PowwowMeeting endPowwowMeeting(long powwowMeetingId)
@@ -67,6 +68,8 @@ public interface PowwowServiceProvider {
 	public String getJoinPowwowMeetingURL(
 		long powwowMeetingId, String name, int type);
 
+	public JSONObject getMeetingJSONObject(long powwowMeetingId);
+
 	public boolean getOptionAutoStartVideo(long powwowMeetingId)
 		throws PortalException;
 
@@ -78,8 +81,6 @@ public interface PowwowServiceProvider {
 	public String getPowwowServiceProviderKey();
 
 	public String getPowwowServiceProviderName();
-
-	public JSONObject getMeetingJSONObject(long powwowMeetingId);
 
 	public boolean isFieldAPIKeyRequired();
 
@@ -103,14 +104,14 @@ public interface PowwowServiceProvider {
 
 	public boolean isSupportsPresettingParticipantName();
 
-	public Map<String, Serializable> updatePowwowMeeting(
-			long powwowMeetingId, String name, long userId,
-			Map<String, String> startOptions)
-		throws PortalException;
-
 	public boolean updateOccurrence(
 			long powwowMeetingId, Map<String, String> options,
 			String occurrentApiId)
+		throws PortalException;
+
+	public Map<String, Serializable> updatePowwowMeeting(
+			long powwowMeetingId, String name, long userId,
+			Map<String, String> startOptions)
 		throws PortalException;
 
 }

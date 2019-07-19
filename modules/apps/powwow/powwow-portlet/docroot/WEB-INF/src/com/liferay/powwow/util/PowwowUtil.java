@@ -60,6 +60,7 @@ import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.powwow.meetings.portlet.MeetingsPortlet;
@@ -71,7 +72,9 @@ import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
 import com.liferay.powwow.service.PowwowParticipantLocalServiceUtil;
 
 import java.io.IOError;
+
 import java.text.Format;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -83,6 +86,7 @@ import java.util.stream.Collectors;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletPreferences;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
@@ -192,7 +196,8 @@ public class PowwowUtil {
 
 		if (orderByCol.equals("next-scheduled-time")) {
 			return new Sort[] {
-				SortFactoryUtil.create("nextScheduleTime", Sort.LONG_TYPE, reverse)
+				SortFactoryUtil.create(
+					"nextScheduleTime", Sort.LONG_TYPE, reverse)
 			};
 		}
 		else if (orderByCol.equals("created-by")) {
@@ -261,8 +266,8 @@ public class PowwowUtil {
 		PowwowMeeting powwowMeeting =
 			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
 
-		return _getSubcriptionSender(powwowMeeting, calendarBookingId,
-			serviceContext);
+		return _getSubcriptionSender(
+			powwowMeeting, calendarBookingId, serviceContext);
 	}
 
 	public static PowwowSubscriptionSender getPowwowSubscriptionSender(
@@ -274,15 +279,16 @@ public class PowwowUtil {
 
 		long calendarBookingId = powwowMeeting.getCalendarBookingId();
 
-		return _getSubcriptionSender(powwowMeeting, calendarBookingId,
-			serviceContext);
+		return _getSubcriptionSender(
+			powwowMeeting, calendarBookingId, serviceContext);
 	}
 
-	public static String getRecurrenceSummary(Recurrence recurrence, Locale locale) {
+	public static String getRecurrenceSummary(
+		Recurrence recurrence, Locale locale) {
 
 		String recurrenceSummary = StringPool.BLANK;
 
-		if (Validator.isNull(locale)) {
+		if (locale == null) {
 			locale = LocaleThreadLocal.getDefaultLocale();
 		}
 
@@ -295,41 +301,65 @@ public class PowwowUtil {
 		String weekDays = StringPool.BLANK;
 
 		if (recurrence.getInterval() == 1) {
-			String recurrenceLabel = StringUtils.capitalize(
-				StringUtils.lowerCase(recurrence.getFrequency().getValue()));
+			Frequency frequency = recurrence.getFrequency();
+
+			String frequencyValue = StringUtil.lowerCase(frequency.getValue());
+
+			String recurrenceLabel = StringUtils.capitalize(frequencyValue);
 
 			sb.append(recurrenceLabel);
 		}
 		else {
-			sb.append(LanguageUtil.get(locale, "every") + " ${interval} ${frequencyLabel}");
+			sb.append(
+				LanguageUtil.get(locale, "every") +
+					" ${interval} ${frequencyLabel}");
 
-			String frequencyLabel = LanguageUtil.get(locale, _frequencyMapLabel.get(recurrence.getFrequency()));
+			String frequencyLabel = LanguageUtil.get(
+				locale, _frequencyMapLabel.get(recurrence.getFrequency()));
+
+			valuesMap.put("frequencyLabel", frequencyLabel);
 
 			valuesMap.put("interval", recurrence.getInterval());
-			valuesMap.put("frequencyLabel", frequencyLabel);
 		}
 
-		if (Validator.isNotNull(recurrence.getPositionalWeekday()) && recurrence.getFrequency() == Frequency.MONTHLY) {
-			PositionalWeekday positionalWeekday = recurrence.getPositionalWeekday();
+		List<Weekday> weekdaysList = recurrence.getWeekdays();
 
-			sb.append(STR_SPACE + LanguageUtil.get(locale, "on") + " ${position} ${weekDay}");
+		if ((recurrence.getPositionalWeekday() != null) &&
+			(recurrence.getFrequency() == Frequency.MONTHLY)) {
 
-			position = LanguageUtil.get(locale, _positionMapLabel.get(positionalWeekday.getPosition()));
-			weekDay = LanguageUtil.get(locale, _weekDayMapLabel.get(positionalWeekday.getWeekday()));
+			PositionalWeekday positionalWeekday =
+				recurrence.getPositionalWeekday();
+
+			sb.append(
+				StringPool.SPACE + LanguageUtil.get(locale, "on") +
+					" ${position} ${weekDay}");
+
+			position = LanguageUtil.get(
+				locale, _positionMapLabel.get(positionalWeekday.getPosition()));
+			weekDay = LanguageUtil.get(
+				locale, _weekDayMapLabel.get(positionalWeekday.getWeekday()));
 
 			valuesMap.put("position", position);
 			valuesMap.put("weekDay", weekDay);
 		}
-		else if (recurrence.getFrequency() == Frequency.WEEKLY && recurrence.getWeekdays().size() > 0) {
-			sb.append(STR_SPACE + LanguageUtil.get(locale, "on") + " ${weekDays}");
+		else if ((recurrence.getFrequency() == Frequency.WEEKLY) &&
+				 !weekdaysList.isEmpty()) {
+
+			sb.append(
+				StringPool.SPACE + LanguageUtil.get(locale, "on") +
+					" ${weekDays}");
 
 			List<String> weekdayList = new ArrayList<>();
 
-			for (Weekday day : recurrence.getWeekdays()) {
-				weekdayList.add(LanguageUtil.get(locale, _weekDayMapLabel.get(day)));
+			for (Weekday day : weekdaysList) {
+				weekdayList.add(
+					LanguageUtil.get(locale, _weekDayMapLabel.get(day)));
 			}
 
-			weekDays = weekdayList.stream().collect(Collectors.joining(","));
+			weekDays = weekdayList.stream(
+			).collect(
+				Collectors.joining(",")
+			);
 
 			valuesMap.put("weekDays", weekDays);
 		}
@@ -339,40 +369,44 @@ public class PowwowUtil {
 
 			valuesMap.put("count", recurrence.getCount());
 		}
-		else if (Validator.isNotNull(recurrence.getUntilJCalendar())) {
+		else if (recurrence.getUntilJCalendar() != null) {
 			Calendar untilDateJCalendar = recurrence.getUntilJCalendar();
 
 			sb.append(StringPool.COMMA_AND_SPACE);
 			sb.append(LanguageUtil.get(locale, "until"));
-			sb.append(STR_SPACE);
+			sb.append(StringPool.SPACE);
 			sb.append("${untilMonthLabel}");
-			sb.append(STR_SPACE);
+			sb.append(StringPool.SPACE);
 			sb.append("${untilDay}");
-			sb.append(STR_SPACE + ", ");
+			sb.append(StringPool.SPACE + ", ");
 			sb.append("${untilYear}");
 
-			String untilMonthLabel = _monthMapLabel.get(untilDateJCalendar.get(Calendar.MONTH));
+			String untilMonthLabel = _monthMapLabel.get(
+				untilDateJCalendar.get(Calendar.MONTH));
 
-			valuesMap.put("untilMonthLabel", LanguageUtil.get(locale, untilMonthLabel));
-			valuesMap.put("untilDay", untilDateJCalendar.get(Calendar.DAY_OF_MONTH));
+			valuesMap.put(
+				"untilDay", untilDateJCalendar.get(Calendar.DAY_OF_MONTH));
+			valuesMap.put(
+				"untilMonthLabel", LanguageUtil.get(locale, untilMonthLabel));
 			valuesMap.put("untilYear", untilDateJCalendar.get(Calendar.YEAR));
 		}
 
 		StrSubstitutor sub = new StrSubstitutor(valuesMap);
+
 		recurrenceSummary = sub.replace(sb.toString());
 
 		return recurrenceSummary;
 	}
 
 	public static void reindexPowwowMeeting(PowwowMeeting powwowMeeting) {
-		Indexer<PowwowMeeting> index =
-			IndexerRegistryUtil.nullSafeGetIndexer(PowwowMeeting.class);
+		Indexer<PowwowMeeting> index = IndexerRegistryUtil.nullSafeGetIndexer(
+			PowwowMeeting.class);
 
 		try {
 			index.reindex(powwowMeeting);
 		}
-		catch (SearchException e) {
-			throw new IOError(e);
+		catch (SearchException se) {
+			throw new IOError(se);
 		}
 	}
 
@@ -409,16 +443,19 @@ public class PowwowUtil {
 	}
 
 	public static void sendNotificationsToPowwowParticipants(
-			long powwowMeetingId, long calendarBookingId, ServiceContext serviceContext)
+			long powwowMeetingId, long calendarBookingId,
+			ServiceContext serviceContext)
 		throws Exception {
+
 		PowwowSubscriptionSender powwowSubscriptionSender =
-			getPowwowSubscriptionSender(powwowMeetingId, calendarBookingId, serviceContext);
+			getPowwowSubscriptionSender(
+				powwowMeetingId, calendarBookingId, serviceContext);
 
 		List<PowwowParticipant> powwowParticipants =
-			PowwowParticipantLocalServiceUtil.getPowwowParticipants(powwowMeetingId);
+			PowwowParticipantLocalServiceUtil.getPowwowParticipants(
+				powwowMeetingId);
 
 		for (PowwowParticipant powwowParticipant : powwowParticipants) {
-
 			powwowSubscriptionSender.addRuntimeSubscribers(
 				powwowParticipant.getEmailAddress(),
 				powwowParticipant.getName());
@@ -494,9 +531,11 @@ public class PowwowUtil {
 			timeZoneDisplayName = timeZone.getDisplayName();
 
 			if (calendarBooking.isRecurring()) {
-				recurrenceSumary = "Repeat: " +
-					getRecurrenceSummary(calendarBooking.getRecurrenceObj(),
-						serviceContext.getLocale());
+				recurrenceSumary =
+					"Repeat: " +
+						getRecurrenceSummary(
+							calendarBooking.getRecurrenceObj(),
+							serviceContext.getLocale());
 			}
 		}
 
@@ -512,8 +551,9 @@ public class PowwowUtil {
 
 		if (calendarBookingId > 0) {
 			powwowSubscriptionSender.addFileAttachment(
-				FileUtil.createTempFile(exportPowwowMeetingCalendar(
-					powwowMeeting.getPowwowMeetingId())),
+				FileUtil.createTempFile(
+					exportPowwowMeetingCalendar(
+						powwowMeeting.getPowwowMeetingId())),
 				"invite.ics");
 		}
 
@@ -523,17 +563,18 @@ public class PowwowUtil {
 			"[$MEETING_DATE$]", startDateString, "[$MEETING_DESCRIPTION$]",
 			powwowMeeting.getDescription(),
 			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE$]",
-			PowwowServiceProviderUtil
-				.getJoinByPhoneAccessCode(powwowMeeting.getPowwowMeetingId()),
+			PowwowServiceProviderUtil.getJoinByPhoneAccessCode(
+				powwowMeeting.getPowwowMeetingId()),
 			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE_LABEL$]",
-			LanguageUtil.get(serviceContext.getLocale(),
+			LanguageUtil.get(
+				serviceContext.getLocale(),
 				PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel()),
 			"[$MEETING_NAME$]", powwowMeeting.getName(), "[$MEETING_PASSWORD$]",
 			PowwowServiceProviderUtil.getOptionPassword(
 				powwowMeeting.getPowwowMeetingId()),
-			"[$RECURRENCE_SUMMARY$]", recurrenceSumary,
-			"[$MEETING_TIME$]", startTimeString, "[$MEETING_TIME_ZONE$]",
-			timeZoneDisplayName, "[$MEETING_URL$]",
+			"[$RECURRENCE_SUMMARY$]", recurrenceSumary, "[$MEETING_TIME$]",
+			startTimeString, "[$MEETING_TIME_ZONE$]", timeZoneDisplayName,
+			"[$MEETING_URL$]",
 			getInvitationURL(
 				powwowMeeting.getPowwowMeetingId(), null,
 				serviceContext.getRequest()));
@@ -568,8 +609,10 @@ public class PowwowUtil {
 		powwowSubscriptionSender.setScopeGroupId(powwowMeeting.getGroupId());
 		powwowSubscriptionSender.setServiceContext(serviceContext);
 		powwowSubscriptionSender.setUserId(powwowMeeting.getUserId());
-		powwowSubscriptionSender.setNotificationType(PowwowParticipantConstants.STATUS_INVITED);
-		powwowSubscriptionSender.addPersistedSubscribers(MeetingsPortlet.class.getName(),0);
+		powwowSubscriptionSender.setNotificationType(
+			PowwowParticipantConstants.STATUS_INVITED);
+		powwowSubscriptionSender.addPersistedSubscribers(
+			MeetingsPortlet.class.getName(), 0);
 		powwowSubscriptionSender.setClassPK(powwowMeeting.getPowwowMeetingId());
 
 		return powwowSubscriptionSender;
@@ -611,15 +654,13 @@ public class PowwowUtil {
 			powwowParticipant.getParticipantUserId(), notificationEvent);
 	}
 
-	private static final String STR_SPACE = StringPool.SPACE;
-
-	private static final Map<Frequency, String> _frequencyMapLabel = new HashMap<>();
-
+	private static final Map<Frequency, String> _frequencyMapLabel =
+		new HashMap<>();
 	private static final Map<Integer, String> _monthMapLabel = new HashMap<>();
-
-	private static final Map<Integer, String> _positionMapLabel = new HashMap<>();
-
-	private static final Map<Weekday, String> _weekDayMapLabel = new HashMap<>();
+	private static final Map<Integer, String> _positionMapLabel =
+		new HashMap<>();
+	private static final Map<Weekday, String> _weekDayMapLabel =
+		new HashMap<>();
 
 	static {
 		_frequencyMapLabel.put(Frequency.DAILY, "days");
@@ -653,4 +694,5 @@ public class PowwowUtil {
 		_weekDayMapLabel.put(Weekday.FRIDAY, "weekday.FR");
 		_weekDayMapLabel.put(Weekday.SATURDAY, "weekday.SA");
 	}
+
 }

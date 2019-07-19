@@ -38,10 +38,11 @@ if (powwowMeeting != null) {
 
 CalendarBooking calendarBooking = null;
 boolean recurring = false;
+
 if (calendarBookingId > 0) {
 	calendarBooking = CalendarBookingServiceUtil.fetchCalendarBooking(calendarBookingId);
 
-	if (calendarBooking != null && calendarBooking.isRecurring()) {
+	if ((calendarBooking != null) && calendarBooking.isRecurring()) {
 		recurring = true;
 	}
 }
@@ -57,7 +58,7 @@ if (calendarBookingId > 0) {
 
 <liferay-portlet:actionURL name="updatePowwowMeeting" var="editPowwowMeetingURL" />
 
-<portlet:resourceURL var="checkMaxOccurrenceURL" id="checkMaxOccurrence"/>
+<portlet:resourceURL id="checkMaxOccurrence" var="checkMaxOccurrenceURL" />
 
 <aui:form action="<%= editPowwowMeetingURL %>" cssClass="edit-meeting" id="fm" method="post" name="fm" onSubmit="event.preventDefault();">
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
@@ -73,7 +74,6 @@ if (calendarBookingId > 0) {
 	<div class="control-group meeting-event-date" id="<portlet:namespace />meetingEventDate">
 
 		<%
-
 		Calendar startCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 		Calendar endCalendar = CalendarFactoryUtil.getCalendar(timeZone, locale);
 
@@ -307,20 +307,20 @@ if (calendarBookingId > 0) {
 		A.one('#<portlet:namespace />optionPassword').hide();
 
 		<%
-			StringBundler sb = new StringBundler();
+		StringBundler sb = new StringBundler();
 
-			sb.append("<strong>");
-			sb.append(LanguageUtil.get(request, "features"));
-			sb.append("</strong>");
-			sb.append("<ul>");
+		sb.append("<strong>");
+		sb.append(LanguageUtil.get(request, "features"));
+		sb.append("</strong>");
+		sb.append("<ul>");
 
-			for (String brandingFeature : PowwowServiceProviderUtil.getBrandingFeatures()) {
-				sb.append("<li>");
-				sb.append(UnicodeLanguageUtil.get(request, brandingFeature));
-				sb.append("</li>");
-			}
+		for (String brandingFeature : PowwowServiceProviderUtil.getBrandingFeatures()) {
+			sb.append("<li>");
+			sb.append(UnicodeLanguageUtil.get(request, brandingFeature));
+			sb.append("</li>");
+		}
 
-			sb.append("</ul>");
+		sb.append("</ul>");
 		%>
 
 			A.one('#<portlet:namespace />providerBrandingFeaturesIcon').attr('data-title', '<%= sb %>');
@@ -348,13 +348,13 @@ if (calendarBookingId > 0) {
 	}
 
 	<%
-		if (PowwowServerLocalServiceUtil.getPowwowServersCount(true) > 0) {
+	if (PowwowServerLocalServiceUtil.getPowwowServersCount(true) > 0) {
 	%>
 
 		<portlet:namespace />loadFeatures();
 
 	<%
-		}
+	}
 	%>
 
 	new A.FormValidator(

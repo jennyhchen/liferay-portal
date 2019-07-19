@@ -17,12 +17,12 @@ package com.liferay.powwow.model.impl;
 import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.powwow.model.PowwowMeetingOccurrence;
 import com.liferay.powwow.occurrence.OccurrenceStatus;
 import com.liferay.powwow.service.PowwowMeetingOccurrenceLocalServiceUtil;
 
 import java.io.Serializable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +32,20 @@ import java.util.Map;
 public class PowwowMeetingImpl extends PowwowMeetingBaseImpl {
 
 	public PowwowMeetingImpl() {
+	}
+
+	public PowwowMeetingOccurrence findNextOccurrence() {
+		List<PowwowMeetingOccurrence> occurrences =
+			PowwowMeetingOccurrenceLocalServiceUtil.
+				findByPowwowMeetingIdAndStatusAndEndTimeGE(
+					getPowwowMeetingId(), OccurrenceStatus.AVAILABLE,
+					System.currentTimeMillis(), 0, 1);
+
+		if (!occurrences.isEmpty()) {
+			return occurrences.get(0);
+		}
+
+		return null;
 	}
 
 	@Override
@@ -49,28 +63,16 @@ public class PowwowMeetingImpl extends PowwowMeetingBaseImpl {
 		return _providerTypeMetadataMap;
 	}
 
-	public PowwowMeetingOccurrence findNextOccurrence() {
+	public boolean isRecurring() {
+		CalendarBooking calendarBooking =
+			CalendarBookingLocalServiceUtil.fetchCalendarBooking(
+				getCalendarBookingId());
 
-		List<PowwowMeetingOccurrence> occurrences =
-			PowwowMeetingOccurrenceLocalServiceUtil
-				.findByPowwowMeetingIdAndStatusAndEndTimeGE(
-					getPowwowMeetingId(), OccurrenceStatus.AVAILABLE,
-					System.currentTimeMillis(), 0, 1);
-
-		if (!occurrences.isEmpty()) {
-			return occurrences.get(0);
+		if ((calendarBooking != null) && calendarBooking.isRecurring()) {
+			return true;
 		}
 
-		return null;
-	}
-
-	public boolean isRecurring() {
-
-		CalendarBooking calendarBooking = CalendarBookingLocalServiceUtil
-			.fetchCalendarBooking(getCalendarBookingId());
-
-		return Validator.isNotNull(calendarBooking) &&
-			calendarBooking.isRecurring();
+		return false;
 	}
 
 	private Map<String, Serializable> _providerTypeMetadataMap;

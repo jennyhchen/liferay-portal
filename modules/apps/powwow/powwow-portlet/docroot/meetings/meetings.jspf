@@ -40,7 +40,7 @@ portletURL.setParameter("tabs1", tabs1);
 			<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
 		</portlet:renderURL>
 
-		<aui:button onClick="<%= addPowwowMeetingURL.toString() %>" value="add-meeting" />
+		<aui:button onClick="<%= addPowwowMeetingURL %>" value="add-meeting" />
 	</aui:button-row>
 
 	<liferay-ui:tabs
@@ -135,24 +135,25 @@ portletURL.setParameter("tabs1", tabs1);
 				<%
 				String recurrenceLabel = StringPool.BLANK;
 
-				if(calendarBooking != null && calendarBooking.isRecurring()){
+				if ((calendarBooking != null) && calendarBooking.isRecurring()) {
 					Recurrence recurrence = calendarBooking.getRecurrenceObj();
 
 					StringBuilder sb = new StringBuilder();
-					sb.append(LanguageUtil.get(locale, "recurring"));
+
+					sb.append(LanguageUtil.get(request, "recurring"));
 					sb.append(StringPool.COMMA_AND_SPACE);
 
-					if(recurrence.getCount() > 1){
+					if (recurrence.getCount() > 1) {
 						int count = recurrence.getCount();
 
 						sb.append(count);
 						sb.append(StringPool.SPACE);
-						sb.append(LanguageUtil.get(locale, "times"));
+						sb.append(LanguageUtil.get(request, "times"));
 					}
-					else if(Validator.isNotNull(recurrence.getUntilJCalendar())){
+					else if (recurrence.getUntilJCalendar() != null) {
 						Calendar untilCalendar = recurrence.getUntilJCalendar();
 
-						sb.append(LanguageUtil.get(locale, "until"));
+						sb.append(LanguageUtil.get(request, "until"));
 						sb.append(StringPool.SPACE);
 						sb.append(recurringDateFormat.format(untilCalendar.getTime()));
 					}
@@ -162,24 +163,27 @@ portletURL.setParameter("tabs1", tabs1);
 				%>
 
 				<c:if test="<%= calendarBooking.isRecurring() %>">
-					<br/>
+					<br />
 					<%= recurrenceLabel %>
 				</c:if>
 			</liferay-ui:search-container-column-text>
 
-			<c:if test="<%= tabs1.equals("current") %>">
+			<c:if test='<%= tabs1.equals("current") %>'>
 				<liferay-ui:search-container-column-text
-					name="next-scheduled-time" orderable="<%= true %>">
-
+					name="next-scheduled-time"
+					orderable="<%= true %>"
+				>
 					<c:if test="<%= !calendarBooking.isRecurring() %>">
 						<%= occurrenceTimeFormat.format(startCalendar.getTime()) %>
 					</c:if>
 
 					<c:if test="<%= calendarBooking.isRecurring() %>">
+
 						<%
 						PowwowMeetingOccurrence nextOccurrence = powwowMeeting.findNextOccurrence();
 						%>
-						<%= Validator.isNull(nextOccurrence) ? "N/A" : occurrenceTimeFormat.format(new Date(nextOccurrence.getStartTime())) %>
+
+						<%= (nextOccurrence == null) ? "N/A" : occurrenceTimeFormat.format(new Date(nextOccurrence.getStartTime())) %>
 					</c:if>
 				</liferay-ui:search-container-column-text>
 			</c:if>

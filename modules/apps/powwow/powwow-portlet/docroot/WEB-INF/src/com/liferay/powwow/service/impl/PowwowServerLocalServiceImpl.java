@@ -34,8 +34,8 @@ public class PowwowServerLocalServiceImpl
 
 	@Override
 	public PowwowServer addPowwowServer(
-			long userId, String name, String apiKey,
-			String secret, ServiceContext serviceContext)
+			long userId, String name, String apiKey, String secret,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		User user = userLocalService.getUser(userId);
@@ -92,16 +92,15 @@ public class PowwowServerLocalServiceImpl
 	}
 
 	@Override
+	public List<PowwowServer> getPowwowServers(boolean active) {
+		return powwowServerPersistence.findByActive(active);
+	}
+
+	@Override
 	public List<PowwowServer> getPowwowServers(
 		int start, int end, OrderByComparator obc) {
 
 		return powwowServerPersistence.findAll(start, end, obc);
-	}
-
-	@Override
-	public List<PowwowServer> getPowwowServers(boolean active) {
-
-		return powwowServerPersistence.findByActive(active);
 	}
 
 	@Override
@@ -116,8 +115,8 @@ public class PowwowServerLocalServiceImpl
 
 	@Override
 	public PowwowServer updatePowwowServer(
-			long powwowServerId, String name, String apiKey,
-			String secret, ServiceContext serviceContext)
+			long powwowServerId, String name, String apiKey, String secret,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		PowwowServer powwowServer = powwowServerPersistence.findByPrimaryKey(

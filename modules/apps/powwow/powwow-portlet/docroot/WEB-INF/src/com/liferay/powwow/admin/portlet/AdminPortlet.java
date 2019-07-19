@@ -60,13 +60,11 @@ public class AdminPortlet extends MVCPortlet {
 
 		if (powwowServerId <= 0) {
 			PowwowServerLocalServiceUtil.addPowwowServer(
-				themeDisplay.getUserId(), name, apiKey,
-				secret, serviceContext);
+				themeDisplay.getUserId(), name, apiKey, secret, serviceContext);
 		}
 		else {
 			PowwowServerLocalServiceUtil.updatePowwowServer(
-				powwowServerId, name, apiKey, secret,
-				serviceContext);
+				powwowServerId, name, apiKey, secret, serviceContext);
 		}
 	}
 

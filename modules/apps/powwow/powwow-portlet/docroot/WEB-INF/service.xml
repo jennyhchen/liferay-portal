@@ -59,6 +59,7 @@
 		</finder>
 	</entity>
 	<entity local-service="true" name="PowwowMeetingOccurrence" remote-service="true">
+
 		<!-- PK fields -->
 
 		<column name="occurrenceId" primary="true" type="long" />
@@ -82,21 +83,21 @@
 		<column name="endTime" type="long" />
 
 		<!-- Finder methods -->
-        <order>
-            <order-column name="startTime" order-by="asc"></order-column>
-        </order>
 
+		<order>
+			<order-column name="startTime" order-by="asc"></order-column>
+		</order>
 		<finder name="PowwowMeetingId" return-type="Collection">
 			<finder-column name="powwowMeetingId" />
+		</finder>
+		<finder name="OS_ET" return-type="Collection">
+			<finder-column name="occurrenceStatus" />
+			<finder-column comparator="&lt;" name="endTime" />
 		</finder>
 		<finder name="PMI_OS_ET" return-type="Collection">
 			<finder-column name="powwowMeetingId" />
 			<finder-column name="occurrenceStatus" />
-			<finder-column name="endTime" comparator="&gt;=" />
-		</finder>
-		<finder name="OS_ET" return-type="Collection">
-			<finder-column name="occurrenceStatus" />
-			<finder-column name="endTime" comparator="&lt;" />
+			<finder-column comparator="&gt;=" name="endTime" />
 		</finder>
 	</entity>
 	<entity local-service="true" name="PowwowParticipant" remote-service="true">

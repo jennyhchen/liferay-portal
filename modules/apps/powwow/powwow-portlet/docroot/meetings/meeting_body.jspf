@@ -42,12 +42,14 @@
 
 		<%
 		CalendarBooking calendarBooking = CalendarBookingServiceUtil.fetchCalendarBooking(powwowMeeting.getCalendarBookingId());
+
 		long meetingStartTime = calendarBooking.getStartTime();
 		long meetingEndTime = calendarBooking.getEndTime();
+
 		if (calendarBooking.isRecurring()) {
 			PowwowMeetingOccurrence nextOccurrence = powwowMeeting.findNextOccurrence();
 
-			if (Validator.isNotNull(nextOccurrence)) {
+			if (nextOccurrence != null) {
 				meetingStartTime = nextOccurrence.getStartTime();
 				meetingEndTime = nextOccurrence.getEndTime();
 			}

@@ -19,16 +19,14 @@
 <%
 ResultRow row = (ResultRow)request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_ROW);
 
-PowwowMeetingOccurrence powwowMeetingOccurrence = (PowwowMeetingOccurrence) row.getObject();
+PowwowMeetingOccurrence powwowMeetingOccurrence = (PowwowMeetingOccurrence)row.getObject();
 
-long powwowMeetingId = powwowMeetingOccurrence.getPowwowMeetingId();
-boolean isCompleted = powwowMeetingOccurrence.isEndTimePassed();
-boolean isDeleted = OccurrenceStatus.DELETE.equals(powwowMeetingOccurrence.getOccurrenceStatusEnum());
+boolean completed = powwowMeetingOccurrence.isEndTimePassed();
+boolean deleted = OccurrenceStatus.DELETE.equals(powwowMeetingOccurrence.getOccurrenceStatusEnum());
 %>
 
 <liferay-ui:icon-menu>
-
-	<c:if test="<%= !isCompleted && !isDeleted %>">
+	<c:if test="<%= !completed && !deleted %>">
 		<portlet:renderURL var="editOccurrenceURL">
 			<portlet:param name="mvcPath" value="/meetings/edit_occurrence.jsp" />
 			<portlet:param name="backURL" value="<%= currentURL %>" />
@@ -38,16 +36,16 @@ boolean isDeleted = OccurrenceStatus.DELETE.equals(powwowMeetingOccurrence.getOc
 		<liferay-ui:icon
 			iconCssClass="icon-edit"
 			label="<%= true %>"
-			message='edit'
+			message="edit"
 			url="<%= editOccurrenceURL %>"
 		/>
 	</c:if>
 
-	<c:if test="<%= !isDeleted %>">
+	<c:if test="<%= !deleted %>">
 		<liferay-ui:icon
 			iconCssClass="icon-remove"
 			label="<%= true %>"
-			message='delete'
+			message="delete"
 			onClick='<%= renderResponse.getNamespace() + "deleteOccurrence(" + String.valueOf(powwowMeetingOccurrence.getOccurrenceId()) + ");" %>'
 			url="javascript:;"
 		/>
@@ -68,7 +66,7 @@ boolean isDeleted = OccurrenceStatus.DELETE.equals(powwowMeetingOccurrence.getOc
 
 	window
 		.<portlet:namespace/>deleteOccurrence =
-			function(occurrenceId){
+			function(occurrenceId) {
 				if (confirm('<%= UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-delete-the-selected-occurrence") %>')) {
 					var uri = '<portlet:actionURL name="deleteOccurrence"></portlet:actionURL>';
 
