@@ -68,7 +68,6 @@ public class PowwowMeetingWrapper
 		attributes.put("powwowServerId", getPowwowServerId());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
-		attributes.put("providerType", getProviderType());
 		attributes.put("providerTypeMetadata", getProviderTypeMetadata());
 		attributes.put("languageId", getLanguageId());
 		attributes.put("calendarBookingId", getCalendarBookingId());
@@ -139,12 +138,6 @@ public class PowwowMeetingWrapper
 			setDescription(description);
 		}
 
-		String providerType = (String)attributes.get("providerType");
-
-		if (providerType != null) {
-			setProviderType(providerType);
-		}
-
 		String providerTypeMetadata = (String)attributes.get(
 			"providerTypeMetadata");
 
@@ -179,6 +172,11 @@ public class PowwowMeetingWrapper
 	@Override
 	public int compareTo(PowwowMeeting powwowMeeting) {
 		return _powwowMeeting.compareTo(powwowMeeting);
+	}
+
+	@Override
+	public PowwowMeetingOccurrence findNextOccurrence() {
+		return _powwowMeeting.findNextOccurrence();
 	}
 
 	/**
@@ -302,16 +300,6 @@ public class PowwowMeetingWrapper
 	}
 
 	/**
-	 * Returns the provider type of this powwow meeting.
-	 *
-	 * @return the provider type of this powwow meeting
-	 */
-	@Override
-	public String getProviderType() {
-		return _powwowMeeting.getProviderType();
-	}
-
-	/**
 	 * Returns the provider type metadata of this powwow meeting.
 	 *
 	 * @return the provider type metadata of this powwow meeting
@@ -384,6 +372,11 @@ public class PowwowMeetingWrapper
 	@Override
 	public boolean isNew() {
 		return _powwowMeeting.isNew();
+	}
+
+	@Override
+	public boolean isRecurring() {
+		return _powwowMeeting.isRecurring();
 	}
 
 	@Override
@@ -531,16 +524,6 @@ public class PowwowMeetingWrapper
 	@Override
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		_powwowMeeting.setPrimaryKeyObj(primaryKeyObj);
-	}
-
-	/**
-	 * Sets the provider type of this powwow meeting.
-	 *
-	 * @param providerType the provider type of this powwow meeting
-	 */
-	@Override
-	public void setProviderType(String providerType) {
-		_powwowMeeting.setProviderType(providerType);
 	}
 
 	/**

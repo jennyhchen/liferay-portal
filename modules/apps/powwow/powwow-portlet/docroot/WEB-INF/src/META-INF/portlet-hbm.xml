@@ -3,6 +3,7 @@
 
 <hibernate-mapping auto-import="false" default-lazy="false">
 	<import class="com.liferay.powwow.model.PowwowMeeting" />
+	<import class="com.liferay.powwow.model.PowwowMeetingOccurrence" />
 	<import class="com.liferay.powwow.model.PowwowParticipant" />
 	<import class="com.liferay.powwow.model.PowwowServer" />
 	<class name="com.liferay.powwow.model.impl.PowwowMeetingImpl" table="PowwowMeeting">
@@ -18,11 +19,27 @@
 		<property name="powwowServerId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="name" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="description" type="com.liferay.portal.dao.orm.hibernate.StringType" />
-		<property name="providerType" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="providerTypeMetadata" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="languageId" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="calendarBookingId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property name="status" type="com.liferay.portal.dao.orm.hibernate.IntegerType" />
+	</class>
+	<class name="com.liferay.powwow.model.impl.PowwowMeetingOccurrenceImpl" table="PowwowMeetingOccurrence">
+		<id name="occurrenceId" type="long">
+			<generator class="assigned" />
+		</id>
+		<property name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="userName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="createDate" type="org.hibernate.type.TimestampType" />
+		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
+		<property name="calendarBookingId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="powwowMeetingId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="zoomOriginalData" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="occurrenceStatus" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="occurrenceApiId" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property name="startTime" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property name="endTime" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 	</class>
 	<class name="com.liferay.powwow.model.impl.PowwowParticipantImpl" table="PowwowParticipant">
 		<id name="powwowParticipantId" type="long">
@@ -51,8 +68,6 @@
 		<property name="createDate" type="org.hibernate.type.TimestampType" />
 		<property name="modifiedDate" type="org.hibernate.type.TimestampType" />
 		<property name="name" type="com.liferay.portal.dao.orm.hibernate.StringType" />
-		<property name="providerType" type="com.liferay.portal.dao.orm.hibernate.StringType" />
-		<property name="url" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="apiKey" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property name="secret" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property column="active_" name="active" type="com.liferay.portal.dao.orm.hibernate.BooleanType" />

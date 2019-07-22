@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.powwow.model.PowwowParticipant;
 import com.liferay.powwow.service.PowwowParticipantLocalService;
 import com.liferay.powwow.service.persistence.PowwowMeetingFinder;
+import com.liferay.powwow.service.persistence.PowwowMeetingOccurrencePersistence;
 import com.liferay.powwow.service.persistence.PowwowMeetingPersistence;
 import com.liferay.powwow.service.persistence.PowwowParticipantPersistence;
 import com.liferay.powwow.service.persistence.PowwowServerPersistence;
@@ -406,6 +407,53 @@ public abstract class PowwowParticipantLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the powwow meeting occurrence local service.
+	 *
+	 * @return the powwow meeting occurrence local service
+	 */
+	public com.liferay.powwow.service.PowwowMeetingOccurrenceLocalService
+		getPowwowMeetingOccurrenceLocalService() {
+
+		return powwowMeetingOccurrenceLocalService;
+	}
+
+	/**
+	 * Sets the powwow meeting occurrence local service.
+	 *
+	 * @param powwowMeetingOccurrenceLocalService the powwow meeting occurrence local service
+	 */
+	public void setPowwowMeetingOccurrenceLocalService(
+		com.liferay.powwow.service.PowwowMeetingOccurrenceLocalService
+			powwowMeetingOccurrenceLocalService) {
+
+		this.powwowMeetingOccurrenceLocalService =
+			powwowMeetingOccurrenceLocalService;
+	}
+
+	/**
+	 * Returns the powwow meeting occurrence persistence.
+	 *
+	 * @return the powwow meeting occurrence persistence
+	 */
+	public PowwowMeetingOccurrencePersistence
+		getPowwowMeetingOccurrencePersistence() {
+
+		return powwowMeetingOccurrencePersistence;
+	}
+
+	/**
+	 * Sets the powwow meeting occurrence persistence.
+	 *
+	 * @param powwowMeetingOccurrencePersistence the powwow meeting occurrence persistence
+	 */
+	public void setPowwowMeetingOccurrencePersistence(
+		PowwowMeetingOccurrencePersistence powwowMeetingOccurrencePersistence) {
+
+		this.powwowMeetingOccurrencePersistence =
+			powwowMeetingOccurrencePersistence;
+	}
+
+	/**
 	 * Returns the powwow participant local service.
 	 *
 	 * @return the powwow participant local service
@@ -682,6 +730,16 @@ public abstract class PowwowParticipantLocalServiceBaseImpl
 
 	@BeanReference(type = PowwowMeetingFinder.class)
 	protected PowwowMeetingFinder powwowMeetingFinder;
+
+	@BeanReference(
+		type = com.liferay.powwow.service.PowwowMeetingOccurrenceLocalService.class
+	)
+	protected com.liferay.powwow.service.PowwowMeetingOccurrenceLocalService
+		powwowMeetingOccurrenceLocalService;
+
+	@BeanReference(type = PowwowMeetingOccurrencePersistence.class)
+	protected PowwowMeetingOccurrencePersistence
+		powwowMeetingOccurrencePersistence;
 
 	@BeanReference(type = PowwowParticipantLocalService.class)
 	protected PowwowParticipantLocalService powwowParticipantLocalService;

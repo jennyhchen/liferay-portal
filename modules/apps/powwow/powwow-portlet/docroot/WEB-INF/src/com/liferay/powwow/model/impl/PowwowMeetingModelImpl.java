@@ -81,7 +81,6 @@ public class PowwowMeetingModelImpl
 		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
 		{"modifiedDate", Types.TIMESTAMP}, {"powwowServerId", Types.BIGINT},
 		{"name", Types.VARCHAR}, {"description", Types.VARCHAR},
-		{"providerType", Types.VARCHAR},
 		{"providerTypeMetadata", Types.VARCHAR}, {"languageId", Types.VARCHAR},
 		{"calendarBookingId", Types.BIGINT}, {"status", Types.INTEGER}
 	};
@@ -100,7 +99,6 @@ public class PowwowMeetingModelImpl
 		TABLE_COLUMNS_MAP.put("powwowServerId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("name", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("description", Types.VARCHAR);
-		TABLE_COLUMNS_MAP.put("providerType", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("providerTypeMetadata", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("languageId", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("calendarBookingId", Types.BIGINT);
@@ -108,7 +106,7 @@ public class PowwowMeetingModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table PowwowMeeting (powwowMeetingId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,powwowServerId LONG,name VARCHAR(75) null,description STRING null,providerType VARCHAR(75) null,providerTypeMetadata STRING null,languageId VARCHAR(75) null,calendarBookingId LONG,status INTEGER)";
+		"create table PowwowMeeting (powwowMeetingId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,powwowServerId LONG,name VARCHAR(75) null,description STRING null,providerTypeMetadata STRING null,languageId VARCHAR(75) null,calendarBookingId LONG,status INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table PowwowMeeting";
 
@@ -172,7 +170,6 @@ public class PowwowMeetingModelImpl
 		model.setPowwowServerId(soapModel.getPowwowServerId());
 		model.setName(soapModel.getName());
 		model.setDescription(soapModel.getDescription());
-		model.setProviderType(soapModel.getProviderType());
 		model.setProviderTypeMetadata(soapModel.getProviderTypeMetadata());
 		model.setLanguageId(soapModel.getLanguageId());
 		model.setCalendarBookingId(soapModel.getCalendarBookingId());
@@ -548,28 +545,6 @@ public class PowwowMeetingModelImpl
 
 			});
 		attributeGetterFunctions.put(
-			"providerType",
-			new Function<PowwowMeeting, Object>() {
-
-				@Override
-				public Object apply(PowwowMeeting powwowMeeting) {
-					return powwowMeeting.getProviderType();
-				}
-
-			});
-		attributeSetterBiConsumers.put(
-			"providerType",
-			new BiConsumer<PowwowMeeting, Object>() {
-
-				@Override
-				public void accept(
-					PowwowMeeting powwowMeeting, Object providerType) {
-
-					powwowMeeting.setProviderType((String)providerType);
-				}
-
-			});
-		attributeGetterFunctions.put(
 			"providerTypeMetadata",
 			new Function<PowwowMeeting, Object>() {
 
@@ -850,22 +825,6 @@ public class PowwowMeetingModelImpl
 
 	@JSON
 	@Override
-	public String getProviderType() {
-		if (_providerType == null) {
-			return "";
-		}
-		else {
-			return _providerType;
-		}
-	}
-
-	@Override
-	public void setProviderType(String providerType) {
-		_providerType = providerType;
-	}
-
-	@JSON
-	@Override
 	public String getProviderTypeMetadata() {
 		if (_providerTypeMetadata == null) {
 			return "";
@@ -976,7 +935,6 @@ public class PowwowMeetingModelImpl
 		powwowMeetingImpl.setPowwowServerId(getPowwowServerId());
 		powwowMeetingImpl.setName(getName());
 		powwowMeetingImpl.setDescription(getDescription());
-		powwowMeetingImpl.setProviderType(getProviderType());
 		powwowMeetingImpl.setProviderTypeMetadata(getProviderTypeMetadata());
 		powwowMeetingImpl.setLanguageId(getLanguageId());
 		powwowMeetingImpl.setCalendarBookingId(getCalendarBookingId());
@@ -1124,14 +1082,6 @@ public class PowwowMeetingModelImpl
 			powwowMeetingCacheModel.description = null;
 		}
 
-		powwowMeetingCacheModel.providerType = getProviderType();
-
-		String providerType = powwowMeetingCacheModel.providerType;
-
-		if ((providerType != null) && (providerType.length() == 0)) {
-			powwowMeetingCacheModel.providerType = null;
-		}
-
 		powwowMeetingCacheModel.providerTypeMetadata =
 			getProviderTypeMetadata();
 
@@ -1246,7 +1196,6 @@ public class PowwowMeetingModelImpl
 	private boolean _setOriginalPowwowServerId;
 	private String _name;
 	private String _description;
-	private String _providerType;
 	private String _providerTypeMetadata;
 	private String _languageId;
 	private long _calendarBookingId;

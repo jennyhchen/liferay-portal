@@ -62,8 +62,8 @@ public interface PowwowServerLocalService
 	 * Never modify or reference this interface directly. Always use {@link PowwowServerLocalServiceUtil} to access the powwow server local service. Add custom service methods to <code>com.liferay.powwow.service.impl.PowwowServerLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public PowwowServer addPowwowServer(
-			long userId, String name, String providerType, String url,
-			String apiKey, String secret, ServiceContext serviceContext)
+			long userId, String name, String apiKey, String secret,
+			ServiceContext serviceContext)
 		throws PortalException;
 
 	/**
@@ -211,6 +211,9 @@ public interface PowwowServerLocalService
 	public PowwowServer getPowwowServer(long powwowServerId)
 		throws PortalException;
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<PowwowServer> getPowwowServers(boolean active);
+
 	/**
 	 * Returns a range of all the powwow servers.
 	 *
@@ -229,10 +232,6 @@ public interface PowwowServerLocalService
 	public List<PowwowServer> getPowwowServers(
 		int start, int end, OrderByComparator obc);
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<PowwowServer> getPowwowServers(
-		String providerType, boolean active);
-
 	/**
 	 * Returns the number of powwow servers.
 	 *
@@ -242,11 +241,11 @@ public interface PowwowServerLocalService
 	public int getPowwowServersCount();
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getPowwowServersCount(String providerType, boolean active);
+	public int getPowwowServersCount(boolean active);
 
 	public PowwowServer updatePowwowServer(
-			long powwowServerId, String name, String providerType, String url,
-			String apiKey, String secret, ServiceContext serviceContext)
+			long powwowServerId, String name, String apiKey, String secret,
+			ServiceContext serviceContext)
 		throws PortalException;
 
 	/**

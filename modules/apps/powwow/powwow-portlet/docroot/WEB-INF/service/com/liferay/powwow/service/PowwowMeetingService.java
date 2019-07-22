@@ -59,7 +59,7 @@ public interface PowwowMeetingService extends BaseService {
 	 */
 	public PowwowMeeting addPowwowMeeting(
 			long groupId, String portletId, long powwowServerId, String name,
-			String description, String providerType,
+			String description,
 			Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,
@@ -89,7 +89,7 @@ public interface PowwowMeetingService extends BaseService {
 
 	public PowwowMeeting updatePowwowMeeting(
 			long powwowMeetingId, long powwowServerId, String name,
-			String description, String providerType,
+			String description,
 			Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,

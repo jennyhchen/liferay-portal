@@ -65,7 +65,7 @@ public class PowwowMeetingCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(31);
+		StringBundler sb = new StringBundler(29);
 
 		sb.append("{powwowMeetingId=");
 		sb.append(powwowMeetingId);
@@ -87,8 +87,6 @@ public class PowwowMeetingCacheModel
 		sb.append(name);
 		sb.append(", description=");
 		sb.append(description);
-		sb.append(", providerType=");
-		sb.append(providerType);
 		sb.append(", providerTypeMetadata=");
 		sb.append(providerTypeMetadata);
 		sb.append(", languageId=");
@@ -148,13 +146,6 @@ public class PowwowMeetingCacheModel
 			powwowMeetingImpl.setDescription(description);
 		}
 
-		if (providerType == null) {
-			powwowMeetingImpl.setProviderType("");
-		}
-		else {
-			powwowMeetingImpl.setProviderType(providerType);
-		}
-
 		if (providerTypeMetadata == null) {
 			powwowMeetingImpl.setProviderTypeMetadata("");
 		}
@@ -193,7 +184,6 @@ public class PowwowMeetingCacheModel
 		powwowServerId = objectInput.readLong();
 		name = objectInput.readUTF();
 		description = objectInput.readUTF();
-		providerType = objectInput.readUTF();
 		providerTypeMetadata = objectInput.readUTF();
 		languageId = objectInput.readUTF();
 
@@ -238,13 +228,6 @@ public class PowwowMeetingCacheModel
 			objectOutput.writeUTF(description);
 		}
 
-		if (providerType == null) {
-			objectOutput.writeUTF("");
-		}
-		else {
-			objectOutput.writeUTF(providerType);
-		}
-
 		if (providerTypeMetadata == null) {
 			objectOutput.writeUTF("");
 		}
@@ -274,7 +257,6 @@ public class PowwowMeetingCacheModel
 	public long powwowServerId;
 	public String name;
 	public String description;
-	public String providerType;
 	public String providerTypeMetadata;
 	public String languageId;
 	public long calendarBookingId;

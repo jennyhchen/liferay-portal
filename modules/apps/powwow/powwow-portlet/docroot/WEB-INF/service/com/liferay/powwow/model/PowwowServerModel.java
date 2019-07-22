@@ -190,36 +190,6 @@ public interface PowwowServerModel
 	public void setName(String name);
 
 	/**
-	 * Returns the provider type of this powwow server.
-	 *
-	 * @return the provider type of this powwow server
-	 */
-	@AutoEscape
-	public String getProviderType();
-
-	/**
-	 * Sets the provider type of this powwow server.
-	 *
-	 * @param providerType the provider type of this powwow server
-	 */
-	public void setProviderType(String providerType);
-
-	/**
-	 * Returns the url of this powwow server.
-	 *
-	 * @return the url of this powwow server
-	 */
-	@AutoEscape
-	public String getUrl();
-
-	/**
-	 * Sets the url of this powwow server.
-	 *
-	 * @param url the url of this powwow server
-	 */
-	public void setUrl(String url);
-
-	/**
 	 * Returns the api key of this powwow server.
 	 *
 	 * @return the api key of this powwow server

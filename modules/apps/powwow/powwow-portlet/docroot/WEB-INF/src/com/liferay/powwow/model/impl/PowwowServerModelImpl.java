@@ -73,8 +73,7 @@ public class PowwowServerModelImpl
 		{"powwowServerId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"name", Types.VARCHAR}, {"providerType", Types.VARCHAR},
-		{"url", Types.VARCHAR}, {"apiKey", Types.VARCHAR},
+		{"name", Types.VARCHAR}, {"apiKey", Types.VARCHAR},
 		{"secret", Types.VARCHAR}, {"active_", Types.BOOLEAN}
 	};
 
@@ -89,15 +88,13 @@ public class PowwowServerModelImpl
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("name", Types.VARCHAR);
-		TABLE_COLUMNS_MAP.put("providerType", Types.VARCHAR);
-		TABLE_COLUMNS_MAP.put("url", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("apiKey", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("secret", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("active_", Types.BOOLEAN);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table PowwowServer (powwowServerId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name VARCHAR(75) null,providerType VARCHAR(75) null,url STRING null,apiKey VARCHAR(75) null,secret VARCHAR(75) null,active_ BOOLEAN)";
+		"create table PowwowServer (powwowServerId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name VARCHAR(75) null,apiKey VARCHAR(75) null,secret VARCHAR(75) null,active_ BOOLEAN)";
 
 	public static final String TABLE_SQL_DROP = "drop table PowwowServer";
 
@@ -129,9 +126,7 @@ public class PowwowServerModelImpl
 
 	public static final long ACTIVE_COLUMN_BITMASK = 1L;
 
-	public static final long PROVIDERTYPE_COLUMN_BITMASK = 2L;
-
-	public static final long NAME_COLUMN_BITMASK = 4L;
+	public static final long NAME_COLUMN_BITMASK = 2L;
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
 		com.liferay.util.service.ServiceProps.get(
@@ -411,48 +406,6 @@ public class PowwowServerModelImpl
 
 			});
 		attributeGetterFunctions.put(
-			"providerType",
-			new Function<PowwowServer, Object>() {
-
-				@Override
-				public Object apply(PowwowServer powwowServer) {
-					return powwowServer.getProviderType();
-				}
-
-			});
-		attributeSetterBiConsumers.put(
-			"providerType",
-			new BiConsumer<PowwowServer, Object>() {
-
-				@Override
-				public void accept(
-					PowwowServer powwowServer, Object providerType) {
-
-					powwowServer.setProviderType((String)providerType);
-				}
-
-			});
-		attributeGetterFunctions.put(
-			"url",
-			new Function<PowwowServer, Object>() {
-
-				@Override
-				public Object apply(PowwowServer powwowServer) {
-					return powwowServer.getUrl();
-				}
-
-			});
-		attributeSetterBiConsumers.put(
-			"url",
-			new BiConsumer<PowwowServer, Object>() {
-
-				@Override
-				public void accept(PowwowServer powwowServer, Object url) {
-					powwowServer.setUrl((String)url);
-				}
-
-			});
-		attributeGetterFunctions.put(
 			"apiKey",
 			new Function<PowwowServer, Object>() {
 
@@ -624,46 +577,6 @@ public class PowwowServerModelImpl
 	}
 
 	@Override
-	public String getProviderType() {
-		if (_providerType == null) {
-			return "";
-		}
-		else {
-			return _providerType;
-		}
-	}
-
-	@Override
-	public void setProviderType(String providerType) {
-		_columnBitmask |= PROVIDERTYPE_COLUMN_BITMASK;
-
-		if (_originalProviderType == null) {
-			_originalProviderType = _providerType;
-		}
-
-		_providerType = providerType;
-	}
-
-	public String getOriginalProviderType() {
-		return GetterUtil.getString(_originalProviderType);
-	}
-
-	@Override
-	public String getUrl() {
-		if (_url == null) {
-			return "";
-		}
-		else {
-			return _url;
-		}
-	}
-
-	@Override
-	public void setUrl(String url) {
-		_url = url;
-	}
-
-	@Override
 	public String getApiKey() {
 		if (_apiKey == null) {
 			return "";
@@ -763,8 +676,6 @@ public class PowwowServerModelImpl
 		powwowServerImpl.setCreateDate(getCreateDate());
 		powwowServerImpl.setModifiedDate(getModifiedDate());
 		powwowServerImpl.setName(getName());
-		powwowServerImpl.setProviderType(getProviderType());
-		powwowServerImpl.setUrl(getUrl());
 		powwowServerImpl.setApiKey(getApiKey());
 		powwowServerImpl.setSecret(getSecret());
 		powwowServerImpl.setActive(isActive());
@@ -830,9 +741,6 @@ public class PowwowServerModelImpl
 
 		powwowServerModelImpl._setModifiedDate = false;
 
-		powwowServerModelImpl._originalProviderType =
-			powwowServerModelImpl._providerType;
-
 		powwowServerModelImpl._originalActive = powwowServerModelImpl._active;
 
 		powwowServerModelImpl._setOriginalActive = false;
@@ -883,22 +791,6 @@ public class PowwowServerModelImpl
 
 		if ((name != null) && (name.length() == 0)) {
 			powwowServerCacheModel.name = null;
-		}
-
-		powwowServerCacheModel.providerType = getProviderType();
-
-		String providerType = powwowServerCacheModel.providerType;
-
-		if ((providerType != null) && (providerType.length() == 0)) {
-			powwowServerCacheModel.providerType = null;
-		}
-
-		powwowServerCacheModel.url = getUrl();
-
-		String url = powwowServerCacheModel.url;
-
-		if ((url != null) && (url.length() == 0)) {
-			powwowServerCacheModel.url = null;
 		}
 
 		powwowServerCacheModel.apiKey = getApiKey();
@@ -1000,9 +892,6 @@ public class PowwowServerModelImpl
 	private Date _modifiedDate;
 	private boolean _setModifiedDate;
 	private String _name;
-	private String _providerType;
-	private String _originalProviderType;
-	private String _url;
 	private String _apiKey;
 	private String _secret;
 	private boolean _active;

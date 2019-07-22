@@ -41,8 +41,6 @@ public class PowwowServerSoap implements Serializable {
 		soapModel.setCreateDate(model.getCreateDate());
 		soapModel.setModifiedDate(model.getModifiedDate());
 		soapModel.setName(model.getName());
-		soapModel.setProviderType(model.getProviderType());
-		soapModel.setUrl(model.getUrl());
 		soapModel.setApiKey(model.getApiKey());
 		soapModel.setSecret(model.getSecret());
 		soapModel.setActive(model.isActive());
@@ -155,22 +153,6 @@ public class PowwowServerSoap implements Serializable {
 		_name = name;
 	}
 
-	public String getProviderType() {
-		return _providerType;
-	}
-
-	public void setProviderType(String providerType) {
-		_providerType = providerType;
-	}
-
-	public String getUrl() {
-		return _url;
-	}
-
-	public void setUrl(String url) {
-		_url = url;
-	}
-
 	public String getApiKey() {
 		return _apiKey;
 	}
@@ -206,8 +188,6 @@ public class PowwowServerSoap implements Serializable {
 	private Date _createDate;
 	private Date _modifiedDate;
 	private String _name;
-	private String _providerType;
-	private String _url;
 	private String _apiKey;
 	private String _secret;
 	private boolean _active;
