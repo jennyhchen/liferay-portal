@@ -39,17 +39,7 @@ if (!showAll) {
 
 	// filter only available occurrences
 
-	powwowMeetingOccurrences = ListUtil.filter(
-		powwowMeetingOccurrences,
-		new PredicateFilter<PowwowMeetingOccurrence>() {
-
-			@Override
-			public boolean filter(PowwowMeetingOccurrence t) {
-
-				return OccurrenceStatus.AVAILABLE.equals(t.getOccurrenceStatusEnum()) && !t.isEndTimePassed();
-			}
-
-		});
+	powwowMeetingOccurrences = PowwowUtil.filterAvailableOccurrences(powwowMeetingOccurrences);
 }
 
 request.setAttribute("OccurrenceStatus_AVAILABLE", OccurrenceStatus.AVAILABLE);
