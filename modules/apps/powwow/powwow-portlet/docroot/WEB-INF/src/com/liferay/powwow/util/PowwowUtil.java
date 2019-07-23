@@ -65,8 +65,10 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.powwow.meetings.portlet.MeetingsPortlet;
 import com.liferay.powwow.model.PowwowMeeting;
+import com.liferay.powwow.model.PowwowMeetingOccurrence;
 import com.liferay.powwow.model.PowwowParticipant;
 import com.liferay.powwow.model.PowwowParticipantConstants;
+import com.liferay.powwow.occurrence.OccurrenceStatus;
 import com.liferay.powwow.provider.PowwowServiceProviderUtil;
 import com.liferay.powwow.service.PowwowMeetingLocalServiceUtil;
 import com.liferay.powwow.service.PowwowParticipantLocalServiceUtil;
@@ -109,6 +111,19 @@ public class PowwowUtil {
 				CalendarUtil.ICAL_EXTENSION);
 
 		return calendarBookingString.getBytes();
+	}
+
+	public static List<PowwowMeetingOccurrence> filterAvailableOccurrences(
+		List<PowwowMeetingOccurrence> powwowMeetingOccurrences) {
+
+		List<PowwowMeetingOccurrence> powwowMeetingOccurrencesFiltered =
+			powwowMeetingOccurrences.stream()
+				.filter( t ->
+					OccurrenceStatus.AVAILABLE.getValue().equals(t.getOccurrenceStatus())
+					&& !t.isEndTimePassed())
+				.collect(Collectors.toList());
+
+		return powwowMeetingOccurrencesFiltered;
 	}
 
 	public static String getHash(long powwowMeetingId) throws Exception {
