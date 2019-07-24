@@ -1119,7 +1119,7 @@ public class MeetingsPortlet extends MVCPortlet {
 			String newReccurrenceHash = _getRecurrenceHash(
 				recurrence, startTime, endTime, timeZone);
 
-			if (!oldReccurrenceHash.equals(newReccurrenceHash)) {
+			if (recurrence != null && !oldReccurrenceHash.equals(newReccurrenceHash)) {
 				recurrence.setExceptionJCalendars(new ArrayList<>());
 			}
 		}
