@@ -818,7 +818,8 @@ public class MeetingsPortlet extends MVCPortlet {
 
 			PowwowSubscriptionSender powwowSubscriptionSender =
 				PowwowUtil.getPowwowSubscriptionSender(
-					powwowMeetingId, serviceContext);
+					powwowMeetingId, serviceContext.getLocale(),
+					serviceContext.getRequest());
 
 			powwowSubscriptionSender.initialize();
 
@@ -1483,7 +1484,8 @@ public class MeetingsPortlet extends MVCPortlet {
 			powwowMeeting, occurrenceId, startTime, endTime, calendarBookingId);
 
 		PowwowUtil.sendNotificationsToPowwowParticipants(
-			powwowMeetingId, calendarBookingId, serviceContext);
+			powwowMeetingId, calendarBookingId, serviceContext.getLocale(),
+			serviceContext.getRequest());
 	}
 
 	private void _updateOccurenceZoomApi(

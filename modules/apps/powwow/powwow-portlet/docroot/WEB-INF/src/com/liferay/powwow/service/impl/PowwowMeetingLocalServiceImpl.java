@@ -437,7 +437,9 @@ public class PowwowMeetingLocalServiceImpl
 		}
 
 		try {
-			PowwowUtil.sendNotifications(powwowMeetingId, serviceContext);
+			PowwowUtil.sendNotifications(
+				powwowMeetingId, serviceContext.getLocale(),
+				serviceContext.getRequest());
 		}
 		catch (Exception e) {
 			throw new SystemException(e);

@@ -43,7 +43,6 @@ import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalServiceUtil;
-import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserNotificationEventLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -275,18 +274,18 @@ public class PowwowUtil {
 
 	public static PowwowSubscriptionSender getPowwowSubscriptionSender(
 			long powwowMeetingId, long calendarBookingId,
-			ServiceContext serviceContext)
+			Locale locale ,HttpServletRequest request)
 		throws Exception {
 
 		PowwowMeeting powwowMeeting =
 			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
 
 		return _getSubcriptionSender(
-			powwowMeeting, calendarBookingId, serviceContext);
+			powwowMeeting, calendarBookingId, locale, request);
 	}
 
 	public static PowwowSubscriptionSender getPowwowSubscriptionSender(
-			long powwowMeetingId, ServiceContext serviceContext)
+			long powwowMeetingId, Locale locale ,HttpServletRequest request)
 		throws Exception {
 
 		PowwowMeeting powwowMeeting =
@@ -295,7 +294,7 @@ public class PowwowUtil {
 		long calendarBookingId = powwowMeeting.getCalendarBookingId();
 
 		return _getSubcriptionSender(
-			powwowMeeting, calendarBookingId, serviceContext);
+			powwowMeeting, calendarBookingId, locale, request);
 	}
 
 	public static String getRecurrenceSummary(
@@ -426,11 +425,11 @@ public class PowwowUtil {
 	}
 
 	public static void sendNotifications(
-			long powwowMeetingId, ServiceContext serviceContext)
+			long powwowMeetingId, Locale locale ,HttpServletRequest request)
 		throws Exception {
 
 		PowwowSubscriptionSender powwowSubscriptionSender =
-			getPowwowSubscriptionSender(powwowMeetingId, serviceContext);
+			getPowwowSubscriptionSender(powwowMeetingId, locale, request);
 
 		List<PowwowParticipant> powwowParticipants =
 			PowwowParticipantLocalServiceUtil.getPowwowParticipants(
@@ -459,12 +458,12 @@ public class PowwowUtil {
 
 	public static void sendNotificationsToPowwowParticipants(
 			long powwowMeetingId, long calendarBookingId,
-			ServiceContext serviceContext)
+			Locale locale ,HttpServletRequest request)
 		throws Exception {
 
 		PowwowSubscriptionSender powwowSubscriptionSender =
 			getPowwowSubscriptionSender(
-				powwowMeetingId, calendarBookingId, serviceContext);
+				powwowMeetingId, calendarBookingId, locale, request);
 
 		List<PowwowParticipant> powwowParticipants =
 			PowwowParticipantLocalServiceUtil.getPowwowParticipants(
@@ -515,7 +514,7 @@ public class PowwowUtil {
 
 	private static PowwowSubscriptionSender _getSubcriptionSender(
 			PowwowMeeting powwowMeeting, long calendarBookingId,
-			ServiceContext serviceContext)
+			Locale locale ,HttpServletRequest request)
 		throws Exception {
 
 		String startDateString = StringPool.BLANK;
@@ -550,7 +549,7 @@ public class PowwowUtil {
 					"Repeat: " +
 						getRecurrenceSummary(
 							calendarBooking.getRecurrenceObj(),
-							serviceContext.getLocale());
+							locale);
 			}
 		}
 
@@ -582,7 +581,7 @@ public class PowwowUtil {
 				powwowMeeting.getPowwowMeetingId()),
 			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE_LABEL$]",
 			LanguageUtil.get(
-				serviceContext.getLocale(),
+				locale,
 				PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel()),
 			"[$MEETING_NAME$]", powwowMeeting.getName(), "[$MEETING_PASSWORD$]",
 			PowwowServiceProviderUtil.getOptionPassword(
@@ -592,7 +591,7 @@ public class PowwowUtil {
 			"[$MEETING_URL$]",
 			getInvitationURL(
 				powwowMeeting.getPowwowMeetingId(), null,
-				serviceContext.getRequest()));
+				request));
 
 		powwowSubscriptionSender.setContextCreatorUserPrefix("MEETING");
 
@@ -622,7 +621,6 @@ public class PowwowUtil {
 			PowwowPortletKeys.POWWOW_MEETINGS);
 		powwowSubscriptionSender.setReplyToAddress(fromAddress);
 		powwowSubscriptionSender.setScopeGroupId(powwowMeeting.getGroupId());
-		powwowSubscriptionSender.setServiceContext(serviceContext);
 		powwowSubscriptionSender.setUserId(powwowMeeting.getUserId());
 		powwowSubscriptionSender.setNotificationType(
 			PowwowParticipantConstants.STATUS_INVITED);
