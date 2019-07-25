@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -713,6 +714,9 @@ public class MeetingsPortlet extends MVCPortlet {
 			ServiceContext serviceContext)
 		throws Exception {
 
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
 		if (powwowMeeting == null) {
 			return StringPool.BLANK;
 		}
@@ -720,7 +724,7 @@ public class MeetingsPortlet extends MVCPortlet {
 		String description = ParamUtil.getString(actionRequest, "description");
 
 		String invitationURLMarkup = getInvitationURLMarkup(
-			powwowMeeting.getPowwowMeetingId(), serviceContext);
+			powwowMeeting.getPowwowMeetingId(), themeDisplay, serviceContext);
 
 		return invitationURLMarkup + description;
 	}
@@ -816,9 +820,15 @@ public class MeetingsPortlet extends MVCPortlet {
 			ServiceContext serviceContext = ServiceContextFactory.getInstance(
 				PowwowMeeting.class.getName(), resourceRequest);
 
+			ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+			String layoutUrl = _getLayoutUrl(serviceContext, themeDisplay);
+
 			PowwowSubscriptionSender powwowSubscriptionSender =
 				PowwowUtil.getPowwowSubscriptionSender(
-					powwowMeetingId, serviceContext);
+					powwowMeetingId, serviceContext.getLocale(),
+					layoutUrl);
 
 			powwowSubscriptionSender.initialize();
 
@@ -861,11 +871,14 @@ public class MeetingsPortlet extends MVCPortlet {
 	}
 
 	protected String getInvitationURLMarkup(
-			long powwowMeetingId, ServiceContext serviceContext)
+			long powwowMeetingId, ThemeDisplay themeDisplay,
+			ServiceContext serviceContext)
 		throws Exception {
 
+		String layoutUrl = _getLayoutUrl(serviceContext, themeDisplay);
+
 		String meetingURL = PowwowUtil.getInvitationURL(
-			powwowMeetingId, null, serviceContext.getRequest());
+			powwowMeetingId, null, layoutUrl);
 
 		StringBundler sb = new StringBundler(5);
 
@@ -1313,6 +1326,19 @@ public class MeetingsPortlet extends MVCPortlet {
 		return abs.toMinutes();
 	}
 
+	private String _getLayoutUrl(
+			ServiceContext serviceContext, ThemeDisplay themeDisplay)
+		throws PortalException {
+
+		Layout layout = PowwowUtil.getPowwowLayout(
+			serviceContext.getCompanyId());
+
+		String layoutUrl = PortalUtil.getLayoutURL(
+			layout, themeDisplay);
+
+		return layoutUrl;
+	}
+
 	private String _getRecurrenceHash(CalendarBooking calendarBooking) {
 		if ((calendarBooking == null) || !calendarBooking.isRecurring()) {
 			return StringPool.BLANK;
@@ -1482,8 +1508,11 @@ public class MeetingsPortlet extends MVCPortlet {
 		_updateOccurrenceTime(
 			powwowMeeting, occurrenceId, startTime, endTime, calendarBookingId);
 
+		String layoutUrl = _getLayoutUrl(serviceContext, themeDisplay);
+
 		PowwowUtil.sendNotificationsToPowwowParticipants(
-			powwowMeetingId, calendarBookingId, serviceContext);
+			powwowMeetingId, calendarBookingId,
+			serviceContext.getLocale(), layoutUrl);
 	}
 
 	private void _updateOccurenceZoomApi(

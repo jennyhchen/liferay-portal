@@ -21,6 +21,7 @@ import com.liferay.calendar.recurrence.Recurrence;
 import com.liferay.calendar.recurrence.Weekday;
 import com.liferay.calendar.service.CalendarBookingLocalServiceUtil;
 import com.liferay.petra.content.ContentUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -43,10 +44,8 @@ import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalServiceUtil;
-import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserNotificationEventLocalServiceUtil;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.CalendarUtil;
 import com.liferay.portal.kernel.util.Digester;
 import com.liferay.portal.kernel.util.DigesterUtil;
@@ -55,14 +54,12 @@ import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.powwow.meetings.portlet.MeetingsPortlet;
 import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowMeetingOccurrence;
@@ -88,8 +85,6 @@ import java.util.stream.Collectors;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletPreferences;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -138,36 +133,12 @@ public class PowwowUtil {
 
 	public static String getInvitationURL(
 			long powwowMeetingId, PowwowParticipant powwowParticipant,
-			HttpServletRequest request)
+			String layoutURL)
 		throws Exception {
 
 		StringBundler sb = new StringBundler(9);
 
-		Layout layout = null;
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		Group group = GroupLocalServiceUtil.fetchGroup(
-			themeDisplay.getCompanyId(),
-			PortletPropsValues.POWWOW_INVITATION_GROUP_NAME);
-
-		if (group != null) {
-			layout = LayoutLocalServiceUtil.fetchLayoutByFriendlyURL(
-				group.getGroupId(),
-				PortletPropsValues.POWWOW_INVITATION_LAYOUT_PRIVATE,
-				PortletPropsValues.POWWOW_INVITATION_LAYOUT_FRIENDLY_URL);
-		}
-
-		if (layout == null) {
-			group = GroupLocalServiceUtil.getGroup(
-				themeDisplay.getCompanyId(), GroupConstants.GUEST);
-
-			layout = LayoutLocalServiceUtil.getLayout(
-				group.getDefaultPublicPlid());
-		}
-
-		sb.append(PortalUtil.getLayoutURL(layout, themeDisplay));
+		sb.append(layoutURL);
 
 		sb.append(Portal.FRIENDLY_URL_SEPARATOR);
 		sb.append("meetings");
@@ -274,19 +245,19 @@ public class PowwowUtil {
 	}
 
 	public static PowwowSubscriptionSender getPowwowSubscriptionSender(
-			long powwowMeetingId, long calendarBookingId,
-			ServiceContext serviceContext)
+			long powwowMeetingId, long calendarBookingId, Locale locale,
+			String layoutURL)
 		throws Exception {
 
 		PowwowMeeting powwowMeeting =
 			PowwowMeetingLocalServiceUtil.getPowwowMeeting(powwowMeetingId);
 
 		return _getSubcriptionSender(
-			powwowMeeting, calendarBookingId, serviceContext);
+			powwowMeeting, calendarBookingId, locale, layoutURL);
 	}
 
 	public static PowwowSubscriptionSender getPowwowSubscriptionSender(
-			long powwowMeetingId, ServiceContext serviceContext)
+			long powwowMeetingId, Locale locale, String layoutURL)
 		throws Exception {
 
 		PowwowMeeting powwowMeeting =
@@ -295,7 +266,33 @@ public class PowwowUtil {
 		long calendarBookingId = powwowMeeting.getCalendarBookingId();
 
 		return _getSubcriptionSender(
-			powwowMeeting, calendarBookingId, serviceContext);
+			powwowMeeting, calendarBookingId, locale, layoutURL);
+	}
+
+
+	public static Layout getPowwowLayout(long companyId) throws PortalException {
+
+		Layout layout = null;
+
+		Group group = GroupLocalServiceUtil.fetchGroup(
+			companyId, PortletPropsValues.POWWOW_INVITATION_GROUP_NAME);
+
+		if (group != null) {
+			layout = LayoutLocalServiceUtil.fetchLayoutByFriendlyURL(
+				group.getGroupId(),
+				PortletPropsValues.POWWOW_INVITATION_LAYOUT_PRIVATE,
+				PortletPropsValues.POWWOW_INVITATION_LAYOUT_FRIENDLY_URL);
+		}
+
+		if (layout == null) {
+			group = GroupLocalServiceUtil.getGroup(
+				companyId, GroupConstants.GUEST);
+
+			layout = LayoutLocalServiceUtil.getLayout(
+				group.getDefaultPublicPlid());
+		}
+
+		return layout;
 	}
 
 	public static String getRecurrenceSummary(
@@ -426,11 +423,13 @@ public class PowwowUtil {
 	}
 
 	public static void sendNotifications(
-			long powwowMeetingId, ServiceContext serviceContext)
+			long powwowMeetingId, Locale locale,
+			String layoutURL)
 		throws Exception {
 
 		PowwowSubscriptionSender powwowSubscriptionSender =
-			getPowwowSubscriptionSender(powwowMeetingId, serviceContext);
+			getPowwowSubscriptionSender(
+				powwowMeetingId, locale, layoutURL);
 
 		List<PowwowParticipant> powwowParticipants =
 			PowwowParticipantLocalServiceUtil.getPowwowParticipants(
@@ -458,13 +457,13 @@ public class PowwowUtil {
 	}
 
 	public static void sendNotificationsToPowwowParticipants(
-			long powwowMeetingId, long calendarBookingId,
-			ServiceContext serviceContext)
+			long powwowMeetingId, long calendarBookingId, Locale locale,
+			String layoutURL)
 		throws Exception {
 
 		PowwowSubscriptionSender powwowSubscriptionSender =
 			getPowwowSubscriptionSender(
-				powwowMeetingId, calendarBookingId, serviceContext);
+				powwowMeetingId, calendarBookingId, locale, layoutURL);
 
 		List<PowwowParticipant> powwowParticipants =
 			PowwowParticipantLocalServiceUtil.getPowwowParticipants(
@@ -515,7 +514,7 @@ public class PowwowUtil {
 
 	private static PowwowSubscriptionSender _getSubcriptionSender(
 			PowwowMeeting powwowMeeting, long calendarBookingId,
-			ServiceContext serviceContext)
+			Locale locale, String layoutURL)
 		throws Exception {
 
 		String startDateString = StringPool.BLANK;
@@ -550,7 +549,7 @@ public class PowwowUtil {
 					"Repeat: " +
 						getRecurrenceSummary(
 							calendarBooking.getRecurrenceObj(),
-							serviceContext.getLocale());
+							locale);
 			}
 		}
 
@@ -582,7 +581,7 @@ public class PowwowUtil {
 				powwowMeeting.getPowwowMeetingId()),
 			"[$MEETING_JOIN_BY_PHONE_ACCESS_CODE_LABEL$]",
 			LanguageUtil.get(
-				serviceContext.getLocale(),
+				locale,
 				PowwowServiceProviderUtil.getJoinByPhoneAccessCodeLabel()),
 			"[$MEETING_NAME$]", powwowMeeting.getName(), "[$MEETING_PASSWORD$]",
 			PowwowServiceProviderUtil.getOptionPassword(
@@ -592,7 +591,7 @@ public class PowwowUtil {
 			"[$MEETING_URL$]",
 			getInvitationURL(
 				powwowMeeting.getPowwowMeetingId(), null,
-				serviceContext.getRequest()));
+				layoutURL));
 
 		powwowSubscriptionSender.setContextCreatorUserPrefix("MEETING");
 
@@ -622,7 +621,6 @@ public class PowwowUtil {
 			PowwowPortletKeys.POWWOW_MEETINGS);
 		powwowSubscriptionSender.setReplyToAddress(fromAddress);
 		powwowSubscriptionSender.setScopeGroupId(powwowMeeting.getGroupId());
-		powwowSubscriptionSender.setServiceContext(serviceContext);
 		powwowSubscriptionSender.setUserId(powwowMeeting.getUserId());
 		powwowSubscriptionSender.setNotificationType(
 			PowwowParticipantConstants.STATUS_INVITED);

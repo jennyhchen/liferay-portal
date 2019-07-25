@@ -26,15 +26,19 @@ import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.powwow.model.PowwowMeeting;
 import com.liferay.powwow.model.PowwowMeetingConstants;
 import com.liferay.powwow.model.PowwowParticipant;
@@ -437,7 +441,18 @@ public class PowwowMeetingLocalServiceImpl
 		}
 
 		try {
-			PowwowUtil.sendNotifications(powwowMeetingId, serviceContext);
+			ThemeDisplay themeDisplay = (ThemeDisplay)serviceContext.getRequest().getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+			Layout layout = PowwowUtil.getPowwowLayout(
+				serviceContext.getCompanyId());
+
+			String layoutUrl = PortalUtil.getLayoutURL(
+				layout, themeDisplay);
+
+			PowwowUtil.sendNotifications(
+				powwowMeetingId, serviceContext.getLocale(),
+				layoutUrl);
 		}
 		catch (Exception e) {
 			throw new SystemException(e);
