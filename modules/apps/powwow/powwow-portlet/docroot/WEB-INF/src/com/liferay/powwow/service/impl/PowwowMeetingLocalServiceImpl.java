@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Shinn Lok
  * @author Marco Calderon
@@ -441,18 +443,18 @@ public class PowwowMeetingLocalServiceImpl
 		}
 
 		try {
-			ThemeDisplay themeDisplay = (ThemeDisplay)serviceContext.getRequest().getAttribute(
+			HttpServletRequest request = serviceContext.getRequest();
+
+			ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
 			Layout layout = PowwowUtil.getPowwowLayout(
 				serviceContext.getCompanyId());
 
-			String layoutUrl = PortalUtil.getLayoutURL(
-				layout, themeDisplay);
+			String layoutUrl = PortalUtil.getLayoutURL(layout, themeDisplay);
 
 			PowwowUtil.sendNotifications(
-				powwowMeetingId, serviceContext.getLocale(),
-				layoutUrl);
+				powwowMeetingId, serviceContext.getLocale(), layoutUrl);
 		}
 		catch (Exception e) {
 			throw new SystemException(e);

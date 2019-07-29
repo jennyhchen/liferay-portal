@@ -820,15 +820,15 @@ public class MeetingsPortlet extends MVCPortlet {
 			ServiceContext serviceContext = ServiceContextFactory.getInstance(
 				PowwowMeeting.class.getName(), resourceRequest);
 
-			ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)resourceRequest.getAttribute(
+					WebKeys.THEME_DISPLAY);
 
 			String layoutUrl = _getLayoutUrl(serviceContext, themeDisplay);
 
 			PowwowSubscriptionSender powwowSubscriptionSender =
 				PowwowUtil.getPowwowSubscriptionSender(
-					powwowMeetingId, serviceContext.getLocale(),
-					layoutUrl);
+					powwowMeetingId, serviceContext.getLocale(), layoutUrl);
 
 			powwowSubscriptionSender.initialize();
 
@@ -1132,7 +1132,9 @@ public class MeetingsPortlet extends MVCPortlet {
 			String newReccurrenceHash = _getRecurrenceHash(
 				recurrence, startTime, endTime, timeZone);
 
-			if (recurrence != null && !oldReccurrenceHash.equals(newReccurrenceHash)) {
+			if ((recurrence != null) &&
+				!oldReccurrenceHash.equals(newReccurrenceHash)) {
+
 				recurrence.setExceptionJCalendars(new ArrayList<>());
 			}
 		}
@@ -1333,10 +1335,7 @@ public class MeetingsPortlet extends MVCPortlet {
 		Layout layout = PowwowUtil.getPowwowLayout(
 			serviceContext.getCompanyId());
 
-		String layoutUrl = PortalUtil.getLayoutURL(
-			layout, themeDisplay);
-
-		return layoutUrl;
+		return PortalUtil.getLayoutURL(layout, themeDisplay);
 	}
 
 	private String _getRecurrenceHash(CalendarBooking calendarBooking) {
@@ -1511,8 +1510,8 @@ public class MeetingsPortlet extends MVCPortlet {
 		String layoutUrl = _getLayoutUrl(serviceContext, themeDisplay);
 
 		PowwowUtil.sendNotificationsToPowwowParticipants(
-			powwowMeetingId, calendarBookingId,
-			serviceContext.getLocale(), layoutUrl);
+			powwowMeetingId, calendarBookingId, serviceContext.getLocale(),
+			layoutUrl);
 	}
 
 	private void _updateOccurenceZoomApi(
