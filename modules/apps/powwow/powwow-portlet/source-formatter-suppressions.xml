@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<suppressions>
+	<checkstyle>
+		<suppress checks="ChainingCheck" files="docroot/WEB-INF/src/com/liferay/powwow/provider/zoom/ZoomPowwowServiceProvider\.java" />
+	</checkstyle>
+</suppressions>

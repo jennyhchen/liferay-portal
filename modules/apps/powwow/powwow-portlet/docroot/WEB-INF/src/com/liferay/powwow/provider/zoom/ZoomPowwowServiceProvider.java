@@ -15,7 +15,7 @@
 package com.liferay.powwow.provider.zoom;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTCreator.Builder;
+import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 
@@ -605,20 +605,23 @@ public class ZoomPowwowServiceProvider extends BasePowwowServiceProvider {
 			Algorithm algorithm = Algorithm.HMAC256(zoomApiSecret);
 
 			ZonedDateTime now = ZonedDateTime.now();
+
 			ZonedDateTime toliveDateTime = now.plusSeconds(timeToLive);
+
 			Date expirationDate = Date.from(toliveDateTime.toInstant());
 
 			Date issuedAt = Date.from(now.toInstant());
 
-			Builder token =
-				JWT.create()
-					.withIssuedAt(issuedAt)
-					.withExpiresAt(expirationDate)
-					.withIssuer(zoomApiKey);
+			JWTCreator.Builder token = JWT.create(
+			).withIssuedAt(
+				issuedAt
+			).withExpiresAt(
+				expirationDate
+			).withIssuer(
+				zoomApiKey
+			);
 
-			String tokenGenerated = token.sign(algorithm);
-
-			return tokenGenerated;
+			return token.sign(algorithm);
 		}
 		catch (JWTCreationException jwtce) {
 			_log.error("Error while generating token", jwtce);

@@ -14,14 +14,16 @@
  */
 --%>
 
-<%@page import="com.liferay.portal.kernel.util.PortalUtil"%>
 <%
 PowwowParticipant userPowwowParticipant = PowwowParticipantLocalServiceUtil.fetchPowwowParticipant(powwowMeeting.getPowwowMeetingId(), user.getEmailAddress());
-boolean isEditable = PowwowMeetingPermission.contains(permissionChecker, powwowMeeting, userPowwowParticipant, ActionKeys.UPDATE)
-						&& (powwowMeeting.getStatus() != PowwowMeetingConstants.STATUS_IN_PROGRESS);
 
- String layoutUrl = PortalUtil.getLayoutURL(
-	 PowwowUtil.getPowwowLayout(themeDisplay.getCompanyId()), themeDisplay);
+boolean isEditable = false;
+
+if (PowwowMeetingPermission.contains(permissionChecker, powwowMeeting, userPowwowParticipant, ActionKeys.UPDATE) && (powwowMeeting.getStatus() != PowwowMeetingConstants.STATUS_IN_PROGRESS)) {
+	isEditable = true;
+}
+
+String layoutUrl = PortalUtil.getLayoutURL(PowwowUtil.getPowwowLayout(themeDisplay.getCompanyId()), themeDisplay);
 %>
 
 <c:if test="<%= isEditable %>">

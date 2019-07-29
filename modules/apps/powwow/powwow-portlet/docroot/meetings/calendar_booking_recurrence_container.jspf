@@ -328,19 +328,26 @@ if (recurrence != null) {
 		);
 	};
 
-	A.one('body').on('key', function(event) {
-		if (window.<portlet:namespace />meetingRecurrenceDialog) {
-			window.<portlet:namespace />meetingRecurrenceDialog.once('visibleChange', function(event) {
-				var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
+	A.one('body').on(
+		'key',
+		function(event) {
+			if (window.<portlet:namespace />meetingRecurrenceDialog) {
+				window.<portlet:namespace />meetingRecurrenceDialog.once(
+					'visibleChange',
+					function(event) {
+						var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
 
-				if (limitCountInputValue < 2 || limitCountInputValue > 50) {
-					if (event.prevVal === true) {
-						event.newVal = true;
+						if (limitCountInputValue < 2 || limitCountInputValue > 50) {
+							if (event.prevVal === true) {
+								event.newVal = true;
+							}
+						}
 					}
-				}
-			});
-		};
-	}, 'esc');
+				);
+			};
+		},
+		'esc'
+	);
 
 	meetingRepeatCheckboxNode.on(
 		'change',
@@ -398,13 +405,20 @@ if (recurrence != null) {
 		window.<portlet:namespace />updateSummaries();
 	</c:if>
 
-	A.one('body').on('key', function(event) {
-		window.<portlet:namespace />closeDialogKey();
-	}, 'esc');
+	A.one('body').on(
+		'key',
+		function(event) {
+			window.<portlet:namespace />closeDialogKey();
+		},
+		'esc'
+	);
 
-	untilDateDatePicker.after('selectionChange', function(event) {
-		window.<portlet:namespace />validateUntilDate();
-	});
+	untilDateDatePicker.after(
+		'selectionChange',
+		function(event) {
+			window.<portlet:namespace />validateUntilDate();
+		}
+	);
 
 	window.<portlet:namespace />validateUntilDate = function() {
 		A.io.request(
@@ -454,24 +468,26 @@ if (recurrence != null) {
 
 	window.<portlet:namespace />closeDialogKey = function() {
 		if (window.<portlet:namespace />meetingRecurrenceDialog) {
-			window.<portlet:namespace />meetingRecurrenceDialog.once('visibleChange', function(event) {
-				var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
-				var limitType = meetingRecurrenceDialogController.get('limitType');
+			window.<portlet:namespace />meetingRecurrenceDialog.once(
+				'visibleChange',
+				function(event) {
+					var limitCountInputValue = meetingRecurrenceDialogController.get('limitCountInput').val();
+					var limitType = meetingRecurrenceDialogController.get('limitType');
 
-				if (limitType === 'after') {
-					if (limitCountInputValue < 2 || limitCountInputValue > 50) {
+					if (limitType === 'after') {
+						if (limitCountInputValue < 2 || limitCountInputValue > 50) {
+							if (event.prevVal === true) {
+								event.newVal = true;
+							}
+						}
+					}
+					else if (untilDateExceededMaxOccurrences) {
 						if (event.prevVal === true) {
 							event.newVal = true;
 						}
 					}
 				}
-				else if (untilDateExceededMaxOccurrences) {
-					if (event.prevVal === true) {
-						event.newVal = true;
-					}
-				}
-
-			});
+			);
 		};
 	}
 
