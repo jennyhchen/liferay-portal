@@ -25,9 +25,6 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 portletURL.setParameter("jspPage", "/meetings/view_meeting.jsp");
 portletURL.setParameter("powwowMeetingId", String.valueOf(powwowMeetingId));
 portletURL.setParameter("backURL", backURL);
-
-String powwowLayoutUrl = PortalUtil.getLayoutURL(PowwowUtil.getPowwowLayout(themeDisplay.getCompanyId()), themeDisplay);
-
 %>
 
 <liferay-util:html-bottom>
@@ -53,6 +50,11 @@ String powwowLayoutUrl = PortalUtil.getLayoutURL(PowwowUtil.getPowwowLayout(them
 			<liferay-ui:message key="meeting-url" />
 		</dt>
 		<dd>
+
+			<%
+			String powwowLayoutUrl = PortalUtil.getLayoutURL(PowwowUtil.getPowwowLayout(themeDisplay.getCompanyId()), themeDisplay);
+			%>
+
 			<input id="<portlet:namespace />meetingURL" readonly="readonly" type="text" value="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, powwowLayoutUrl) %>" />
 
 			<button class="zeroclipboard-button" data-clipboard-text="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, powwowLayoutUrl) %>" data-copied="<liferay-ui:message key="copied" />" data-hover="<liferay-ui:message key="copy-to-clipboard" />" id="<portlet:namespace />copyButton">
