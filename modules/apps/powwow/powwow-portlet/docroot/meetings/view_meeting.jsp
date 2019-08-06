@@ -25,6 +25,9 @@ PowwowMeeting powwowMeeting = PowwowMeetingLocalServiceUtil.fetchPowwowMeeting(p
 portletURL.setParameter("jspPage", "/meetings/view_meeting.jsp");
 portletURL.setParameter("powwowMeetingId", String.valueOf(powwowMeetingId));
 portletURL.setParameter("backURL", backURL);
+
+String powwowLayoutUrl = PortalUtil.getLayoutURL(PowwowUtil.getPowwowLayout(themeDisplay.getCompanyId()), themeDisplay);
+
 %>
 
 <liferay-util:html-bottom>
@@ -50,9 +53,9 @@ portletURL.setParameter("backURL", backURL);
 			<liferay-ui:message key="meeting-url" />
 		</dt>
 		<dd>
-			<input id="<portlet:namespace />meetingURL" readonly="readonly" type="text" value="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, request) %>" />
+			<input id="<portlet:namespace />meetingURL" readonly="readonly" type="text" value="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, powwowLayoutUrl) %>" />
 
-			<button class="zeroclipboard-button" data-clipboard-text="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, request) %>" data-copied="<liferay-ui:message key="copied" />" data-hover="<liferay-ui:message key="copy-to-clipboard" />" id="<portlet:namespace />copyButton">
+			<button class="zeroclipboard-button" data-clipboard-text="<%= PowwowUtil.getInvitationURL(powwowMeetingId, null, powwowLayoutUrl) %>" data-copied="<liferay-ui:message key="copied" />" data-hover="<liferay-ui:message key="copy-to-clipboard" />" id="<portlet:namespace />copyButton">
 				<i class="icon-copy"></i>
 			</button>
 		</dd>
