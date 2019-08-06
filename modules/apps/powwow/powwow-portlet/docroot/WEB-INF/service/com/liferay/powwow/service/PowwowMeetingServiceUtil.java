@@ -40,7 +40,7 @@ public class PowwowMeetingServiceUtil {
 	 */
 	public static com.liferay.powwow.model.PowwowMeeting addPowwowMeeting(
 			long groupId, String portletId, long powwowServerId, String name,
-			String description, String providerType,
+			String description,
 			java.util.Map<String, java.io.Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			java.util.List<com.liferay.powwow.model.PowwowParticipant>
@@ -49,7 +49,7 @@ public class PowwowMeetingServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().addPowwowMeeting(
-			groupId, portletId, powwowServerId, name, description, providerType,
+			groupId, portletId, powwowServerId, name, description,
 			providerTypeMetadataMap, languageId, calendarBookingId, status,
 			powwowParticipants, serviceContext);
 	}
@@ -91,7 +91,7 @@ public class PowwowMeetingServiceUtil {
 
 	public static com.liferay.powwow.model.PowwowMeeting updatePowwowMeeting(
 			long powwowMeetingId, long powwowServerId, String name,
-			String description, String providerType,
+			String description,
 			java.util.Map<String, java.io.Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			java.util.List<com.liferay.powwow.model.PowwowParticipant>
@@ -100,7 +100,7 @@ public class PowwowMeetingServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().updatePowwowMeeting(
-			powwowMeetingId, powwowServerId, name, description, providerType,
+			powwowMeetingId, powwowServerId, name, description,
 			providerTypeMetadataMap, languageId, calendarBookingId, status,
 			powwowParticipants, serviceContext);
 	}

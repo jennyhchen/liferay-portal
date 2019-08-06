@@ -235,21 +235,6 @@ public interface PowwowMeetingModel
 	public void setDescription(String description);
 
 	/**
-	 * Returns the provider type of this powwow meeting.
-	 *
-	 * @return the provider type of this powwow meeting
-	 */
-	@AutoEscape
-	public String getProviderType();
-
-	/**
-	 * Sets the provider type of this powwow meeting.
-	 *
-	 * @param providerType the provider type of this powwow meeting
-	 */
-	public void setProviderType(String providerType);
-
-	/**
 	 * Returns the provider type metadata of this powwow meeting.
 	 *
 	 * @return the provider type metadata of this powwow meeting

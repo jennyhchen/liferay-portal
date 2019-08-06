@@ -155,14 +155,14 @@ public class PowwowParticipantPersistenceImpl
 	 * @param start the lower bound of the range of powwow participants
 	 * @param end the upper bound of the range of powwow participants (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow participants
 	 */
 	@Override
 	public List<PowwowParticipant> findByPowwowMeetingId(
 		long powwowMeetingId, int start, int end,
 		OrderByComparator<PowwowParticipant> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		boolean pagination = true;
 		FinderPath finderPath = null;
@@ -172,13 +172,10 @@ public class PowwowParticipantPersistenceImpl
 			(orderByComparator == null)) {
 
 			pagination = false;
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByPowwowMeetingId;
-				finderArgs = new Object[] {powwowMeetingId};
-			}
+			finderPath = _finderPathWithoutPaginationFindByPowwowMeetingId;
+			finderArgs = new Object[] {powwowMeetingId};
 		}
-		else if (useFinderCache) {
+		else {
 			finderPath = _finderPathWithPaginationFindByPowwowMeetingId;
 			finderArgs = new Object[] {
 				powwowMeetingId, start, end, orderByComparator
@@ -187,7 +184,7 @@ public class PowwowParticipantPersistenceImpl
 
 		List<PowwowParticipant> list = null;
 
-		if (useFinderCache) {
+		if (retrieveFromCache) {
 			list = (List<PowwowParticipant>)FinderCacheUtil.getResult(
 				finderPath, finderArgs, this);
 
@@ -255,14 +252,10 @@ public class PowwowParticipantPersistenceImpl
 
 				cacheResult(list);
 
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
+				FinderCacheUtil.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				if (useFinderCache) {
-					FinderCacheUtil.removeResult(finderPath, finderArgs);
-				}
+				FinderCacheUtil.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -679,22 +672,19 @@ public class PowwowParticipantPersistenceImpl
 	 *
 	 * @param powwowMeetingId the powwow meeting ID
 	 * @param participantUserId the participant user ID
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching powwow participant, or <code>null</code> if a matching powwow participant could not be found
 	 */
 	@Override
 	public PowwowParticipant fetchByPMI_PUI(
-		long powwowMeetingId, long participantUserId, boolean useFinderCache) {
+		long powwowMeetingId, long participantUserId,
+		boolean retrieveFromCache) {
 
-		Object[] finderArgs = null;
-
-		if (useFinderCache) {
-			finderArgs = new Object[] {powwowMeetingId, participantUserId};
-		}
+		Object[] finderArgs = new Object[] {powwowMeetingId, participantUserId};
 
 		Object result = null;
 
-		if (useFinderCache) {
+		if (retrieveFromCache) {
 			result = FinderCacheUtil.getResult(
 				_finderPathFetchByPMI_PUI, finderArgs, this);
 		}
@@ -737,22 +727,14 @@ public class PowwowParticipantPersistenceImpl
 				List<PowwowParticipant> list = q.list();
 
 				if (list.isEmpty()) {
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(
-							_finderPathFetchByPMI_PUI, finderArgs, list);
-					}
+					FinderCacheUtil.putResult(
+						_finderPathFetchByPMI_PUI, finderArgs, list);
 				}
 				else {
 					if (list.size() > 1) {
 						Collections.sort(list, Collections.reverseOrder());
 
 						if (_log.isWarnEnabled()) {
-							if (!useFinderCache) {
-								finderArgs = new Object[] {
-									powwowMeetingId, participantUserId
-								};
-							}
-
 							_log.warn(
 								"PowwowParticipantPersistenceImpl.fetchByPMI_PUI(long, long, boolean) with parameters (" +
 									StringUtil.merge(finderArgs) +
@@ -768,10 +750,8 @@ public class PowwowParticipantPersistenceImpl
 				}
 			}
 			catch (Exception e) {
-				if (useFinderCache) {
-					FinderCacheUtil.removeResult(
-						_finderPathFetchByPMI_PUI, finderArgs);
-				}
+				FinderCacheUtil.removeResult(
+					_finderPathFetchByPMI_PUI, finderArgs);
 
 				throw processException(e);
 			}
@@ -930,24 +910,20 @@ public class PowwowParticipantPersistenceImpl
 	 *
 	 * @param powwowMeetingId the powwow meeting ID
 	 * @param emailAddress the email address
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching powwow participant, or <code>null</code> if a matching powwow participant could not be found
 	 */
 	@Override
 	public PowwowParticipant fetchByPMI_EA(
-		long powwowMeetingId, String emailAddress, boolean useFinderCache) {
+		long powwowMeetingId, String emailAddress, boolean retrieveFromCache) {
 
 		emailAddress = Objects.toString(emailAddress, "");
 
-		Object[] finderArgs = null;
-
-		if (useFinderCache) {
-			finderArgs = new Object[] {powwowMeetingId, emailAddress};
-		}
+		Object[] finderArgs = new Object[] {powwowMeetingId, emailAddress};
 
 		Object result = null;
 
-		if (useFinderCache) {
+		if (retrieveFromCache) {
 			result = FinderCacheUtil.getResult(
 				_finderPathFetchByPMI_EA, finderArgs, this);
 		}
@@ -1001,10 +977,8 @@ public class PowwowParticipantPersistenceImpl
 				List<PowwowParticipant> list = q.list();
 
 				if (list.isEmpty()) {
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(
-							_finderPathFetchByPMI_EA, finderArgs, list);
-					}
+					FinderCacheUtil.putResult(
+						_finderPathFetchByPMI_EA, finderArgs, list);
 				}
 				else {
 					PowwowParticipant powwowParticipant = list.get(0);
@@ -1015,10 +989,8 @@ public class PowwowParticipantPersistenceImpl
 				}
 			}
 			catch (Exception e) {
-				if (useFinderCache) {
-					FinderCacheUtil.removeResult(
-						_finderPathFetchByPMI_EA, finderArgs);
-				}
+				FinderCacheUtil.removeResult(
+					_finderPathFetchByPMI_EA, finderArgs);
 
 				throw processException(e);
 			}
@@ -1204,14 +1176,14 @@ public class PowwowParticipantPersistenceImpl
 	 * @param start the lower bound of the range of powwow participants
 	 * @param end the upper bound of the range of powwow participants (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow participants
 	 */
 	@Override
 	public List<PowwowParticipant> findByPMI_T(
 		long powwowMeetingId, int type, int start, int end,
 		OrderByComparator<PowwowParticipant> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		boolean pagination = true;
 		FinderPath finderPath = null;
@@ -1221,13 +1193,10 @@ public class PowwowParticipantPersistenceImpl
 			(orderByComparator == null)) {
 
 			pagination = false;
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByPMI_T;
-				finderArgs = new Object[] {powwowMeetingId, type};
-			}
+			finderPath = _finderPathWithoutPaginationFindByPMI_T;
+			finderArgs = new Object[] {powwowMeetingId, type};
 		}
-		else if (useFinderCache) {
+		else {
 			finderPath = _finderPathWithPaginationFindByPMI_T;
 			finderArgs = new Object[] {
 				powwowMeetingId, type, start, end, orderByComparator
@@ -1236,7 +1205,7 @@ public class PowwowParticipantPersistenceImpl
 
 		List<PowwowParticipant> list = null;
 
-		if (useFinderCache) {
+		if (retrieveFromCache) {
 			list = (List<PowwowParticipant>)FinderCacheUtil.getResult(
 				finderPath, finderArgs, this);
 
@@ -1309,14 +1278,10 @@ public class PowwowParticipantPersistenceImpl
 
 				cacheResult(list);
 
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
+				FinderCacheUtil.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				if (useFinderCache) {
-					FinderCacheUtil.removeResult(finderPath, finderArgs);
-				}
+				FinderCacheUtil.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -2421,14 +2386,14 @@ public class PowwowParticipantPersistenceImpl
 	 * @param start the lower bound of the range of powwow participants
 	 * @param end the upper bound of the range of powwow participants (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of powwow participants
 	 */
 	@Override
 	public List<PowwowParticipant> findAll(
 		int start, int end,
 		OrderByComparator<PowwowParticipant> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		boolean pagination = true;
 		FinderPath finderPath = null;
@@ -2438,20 +2403,17 @@ public class PowwowParticipantPersistenceImpl
 			(orderByComparator == null)) {
 
 			pagination = false;
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
+			finderPath = _finderPathWithoutPaginationFindAll;
+			finderArgs = FINDER_ARGS_EMPTY;
 		}
-		else if (useFinderCache) {
+		else {
 			finderPath = _finderPathWithPaginationFindAll;
 			finderArgs = new Object[] {start, end, orderByComparator};
 		}
 
 		List<PowwowParticipant> list = null;
 
-		if (useFinderCache) {
+		if (retrieveFromCache) {
 			list = (List<PowwowParticipant>)FinderCacheUtil.getResult(
 				finderPath, finderArgs, this);
 		}
@@ -2501,14 +2463,10 @@ public class PowwowParticipantPersistenceImpl
 
 				cacheResult(list);
 
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
+				FinderCacheUtil.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				if (useFinderCache) {
-					FinderCacheUtil.removeResult(finderPath, finderArgs);
-				}
+				FinderCacheUtil.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}

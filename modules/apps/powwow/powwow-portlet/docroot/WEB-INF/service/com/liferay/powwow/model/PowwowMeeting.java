@@ -56,7 +56,11 @@ public interface PowwowMeeting extends PersistedModel, PowwowMeetingModel {
 
 		};
 
+	public PowwowMeetingOccurrence findNextOccurrence();
+
 	public java.util.Map<String, java.io.Serializable>
 		getProviderTypeMetadataMap();
+
+	public boolean isRecurring();
 
 }

@@ -102,14 +102,14 @@ public interface PowwowParticipantPersistence
 	 * @param start the lower bound of the range of powwow participants
 	 * @param end the upper bound of the range of powwow participants (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow participants
 	 */
 	public java.util.List<PowwowParticipant> findByPowwowMeetingId(
 		long powwowMeetingId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<PowwowParticipant>
 			orderByComparator,
-		boolean useFinderCache);
+		boolean retrieveFromCache);
 
 	/**
 	 * Returns the first powwow participant in the ordered set where powwowMeetingId = &#63;.
@@ -220,11 +220,12 @@ public interface PowwowParticipantPersistence
 	 *
 	 * @param powwowMeetingId the powwow meeting ID
 	 * @param participantUserId the participant user ID
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching powwow participant, or <code>null</code> if a matching powwow participant could not be found
 	 */
 	public PowwowParticipant fetchByPMI_PUI(
-		long powwowMeetingId, long participantUserId, boolean useFinderCache);
+		long powwowMeetingId, long participantUserId,
+		boolean retrieveFromCache);
 
 	/**
 	 * Removes the powwow participant where powwowMeetingId = &#63; and participantUserId = &#63; from the database.
@@ -273,11 +274,11 @@ public interface PowwowParticipantPersistence
 	 *
 	 * @param powwowMeetingId the powwow meeting ID
 	 * @param emailAddress the email address
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching powwow participant, or <code>null</code> if a matching powwow participant could not be found
 	 */
 	public PowwowParticipant fetchByPMI_EA(
-		long powwowMeetingId, String emailAddress, boolean useFinderCache);
+		long powwowMeetingId, String emailAddress, boolean retrieveFromCache);
 
 	/**
 	 * Removes the powwow participant where powwowMeetingId = &#63; and emailAddress = &#63; from the database.
@@ -356,14 +357,14 @@ public interface PowwowParticipantPersistence
 	 * @param start the lower bound of the range of powwow participants
 	 * @param end the upper bound of the range of powwow participants (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow participants
 	 */
 	public java.util.List<PowwowParticipant> findByPMI_T(
 		long powwowMeetingId, int type, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<PowwowParticipant>
 			orderByComparator,
-		boolean useFinderCache);
+		boolean retrieveFromCache);
 
 	/**
 	 * Returns the first powwow participant in the ordered set where powwowMeetingId = &#63; and type = &#63;.
@@ -554,14 +555,14 @@ public interface PowwowParticipantPersistence
 	 * @param start the lower bound of the range of powwow participants
 	 * @param end the upper bound of the range of powwow participants (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of powwow participants
 	 */
 	public java.util.List<PowwowParticipant> findAll(
 		int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<PowwowParticipant>
 			orderByComparator,
-		boolean useFinderCache);
+		boolean retrieveFromCache);
 
 	/**
 	 * Removes all the powwow participants from the database.

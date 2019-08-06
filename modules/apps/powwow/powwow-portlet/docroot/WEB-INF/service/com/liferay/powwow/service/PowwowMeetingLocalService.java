@@ -66,7 +66,7 @@ public interface PowwowMeetingLocalService
 	@Indexable(type = IndexableType.REINDEX)
 	public PowwowMeeting addPowwowMeeting(
 			long userId, long groupId, long powwowServerId, String name,
-			String description, String providerType,
+			String description,
 			Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,
@@ -247,6 +247,10 @@ public interface PowwowMeetingLocalService
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<PowwowMeeting> getPowwowMeetings(
+		int status, int start, int end);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<PowwowMeeting> getPowwowMeetings(
 		long groupId, int start, int end, OrderByComparator obc);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
@@ -280,7 +284,7 @@ public interface PowwowMeetingLocalService
 	@Indexable(type = IndexableType.REINDEX)
 	public PowwowMeeting updatePowwowMeeting(
 			long powwowMeetingId, long powwowServerId, String name,
-			String description, String providerType,
+			String description,
 			Map<String, Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			List<PowwowParticipant> powwowParticipants,

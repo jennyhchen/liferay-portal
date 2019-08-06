@@ -65,8 +65,6 @@ public class PowwowServerWrapper
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("name", getName());
-		attributes.put("providerType", getProviderType());
-		attributes.put("url", getUrl());
 		attributes.put("apiKey", getApiKey());
 		attributes.put("secret", getSecret());
 		attributes.put("active", isActive());
@@ -116,18 +114,6 @@ public class PowwowServerWrapper
 
 		if (name != null) {
 			setName(name);
-		}
-
-		String providerType = (String)attributes.get("providerType");
-
-		if (providerType != null) {
-			setProviderType(providerType);
-		}
-
-		String url = (String)attributes.get("url");
-
-		if (url != null) {
-			setUrl(url);
 		}
 
 		String apiKey = (String)attributes.get("apiKey");
@@ -250,16 +236,6 @@ public class PowwowServerWrapper
 	}
 
 	/**
-	 * Returns the provider type of this powwow server.
-	 *
-	 * @return the provider type of this powwow server
-	 */
-	@Override
-	public String getProviderType() {
-		return _powwowServer.getProviderType();
-	}
-
-	/**
 	 * Returns the secret of this powwow server.
 	 *
 	 * @return the secret of this powwow server
@@ -267,16 +243,6 @@ public class PowwowServerWrapper
 	@Override
 	public String getSecret() {
 		return _powwowServer.getSecret();
-	}
-
-	/**
-	 * Returns the url of this powwow server.
-	 *
-	 * @return the url of this powwow server
-	 */
-	@Override
-	public String getUrl() {
-		return _powwowServer.getUrl();
 	}
 
 	/**
@@ -457,16 +423,6 @@ public class PowwowServerWrapper
 	}
 
 	/**
-	 * Sets the provider type of this powwow server.
-	 *
-	 * @param providerType the provider type of this powwow server
-	 */
-	@Override
-	public void setProviderType(String providerType) {
-		_powwowServer.setProviderType(providerType);
-	}
-
-	/**
 	 * Sets the secret of this powwow server.
 	 *
 	 * @param secret the secret of this powwow server
@@ -474,16 +430,6 @@ public class PowwowServerWrapper
 	@Override
 	public void setSecret(String secret) {
 		_powwowServer.setSecret(secret);
-	}
-
-	/**
-	 * Sets the url of this powwow server.
-	 *
-	 * @param url the url of this powwow server
-	 */
-	@Override
-	public void setUrl(String url) {
-		_powwowServer.setUrl(url);
 	}
 
 	/**

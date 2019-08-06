@@ -51,7 +51,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -86,51 +85,45 @@ public class PowwowServerPersistenceImpl
 	private FinderPath _finderPathWithPaginationFindAll;
 	private FinderPath _finderPathWithoutPaginationFindAll;
 	private FinderPath _finderPathCountAll;
-	private FinderPath _finderPathWithPaginationFindByPT_A;
-	private FinderPath _finderPathWithoutPaginationFindByPT_A;
-	private FinderPath _finderPathCountByPT_A;
+	private FinderPath _finderPathWithPaginationFindByActive;
+	private FinderPath _finderPathWithoutPaginationFindByActive;
+	private FinderPath _finderPathCountByActive;
 
 	/**
-	 * Returns all the powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns all the powwow servers where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @return the matching powwow servers
 	 */
 	@Override
-	public List<PowwowServer> findByPT_A(String providerType, boolean active) {
-		return findByPT_A(
-			providerType, active, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+	public List<PowwowServer> findByActive(boolean active) {
+		return findByActive(active, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 	}
 
 	/**
-	 * Returns a range of all the powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns a range of all the powwow servers where active = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>PowwowServerModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param start the lower bound of the range of powwow servers
 	 * @param end the upper bound of the range of powwow servers (not inclusive)
 	 * @return the range of matching powwow servers
 	 */
 	@Override
-	public List<PowwowServer> findByPT_A(
-		String providerType, boolean active, int start, int end) {
-
-		return findByPT_A(providerType, active, start, end, null);
+	public List<PowwowServer> findByActive(boolean active, int start, int end) {
+		return findByActive(active, start, end, null);
 	}
 
 	/**
-	 * Returns an ordered range of all the powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns an ordered range of all the powwow servers where active = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>PowwowServerModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param start the lower bound of the range of powwow servers
 	 * @param end the upper bound of the range of powwow servers (not inclusive)
@@ -138,36 +131,32 @@ public class PowwowServerPersistenceImpl
 	 * @return the ordered range of matching powwow servers
 	 */
 	@Override
-	public List<PowwowServer> findByPT_A(
-		String providerType, boolean active, int start, int end,
+	public List<PowwowServer> findByActive(
+		boolean active, int start, int end,
 		OrderByComparator<PowwowServer> orderByComparator) {
 
-		return findByPT_A(
-			providerType, active, start, end, orderByComparator, true);
+		return findByActive(active, start, end, orderByComparator, true);
 	}
 
 	/**
-	 * Returns an ordered range of all the powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns an ordered range of all the powwow servers where active = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>PowwowServerModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param start the lower bound of the range of powwow servers
 	 * @param end the upper bound of the range of powwow servers (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow servers
 	 */
 	@Override
-	public List<PowwowServer> findByPT_A(
-		String providerType, boolean active, int start, int end,
+	public List<PowwowServer> findByActive(
+		boolean active, int start, int end,
 		OrderByComparator<PowwowServer> orderByComparator,
-		boolean useFinderCache) {
-
-		providerType = Objects.toString(providerType, "");
+		boolean retrieveFromCache) {
 
 		boolean pagination = true;
 		FinderPath finderPath = null;
@@ -177,30 +166,23 @@ public class PowwowServerPersistenceImpl
 			(orderByComparator == null)) {
 
 			pagination = false;
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByPT_A;
-				finderArgs = new Object[] {providerType, active};
-			}
+			finderPath = _finderPathWithoutPaginationFindByActive;
+			finderArgs = new Object[] {active};
 		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindByPT_A;
-			finderArgs = new Object[] {
-				providerType, active, start, end, orderByComparator
-			};
+		else {
+			finderPath = _finderPathWithPaginationFindByActive;
+			finderArgs = new Object[] {active, start, end, orderByComparator};
 		}
 
 		List<PowwowServer> list = null;
 
-		if (useFinderCache) {
+		if (retrieveFromCache) {
 			list = (List<PowwowServer>)FinderCacheUtil.getResult(
 				finderPath, finderArgs, this);
 
 			if ((list != null) && !list.isEmpty()) {
 				for (PowwowServer powwowServer : list) {
-					if (!providerType.equals(powwowServer.getProviderType()) ||
-						(active != powwowServer.isActive())) {
-
+					if ((active != powwowServer.isActive())) {
 						list = null;
 
 						break;
@@ -214,26 +196,15 @@ public class PowwowServerPersistenceImpl
 
 			if (orderByComparator != null) {
 				query = new StringBundler(
-					4 + (orderByComparator.getOrderByFields().length * 2));
+					3 + (orderByComparator.getOrderByFields().length * 2));
 			}
 			else {
-				query = new StringBundler(4);
+				query = new StringBundler(3);
 			}
 
 			query.append(_SQL_SELECT_POWWOWSERVER_WHERE);
 
-			boolean bindProviderType = false;
-
-			if (providerType.isEmpty()) {
-				query.append(_FINDER_COLUMN_PT_A_PROVIDERTYPE_3);
-			}
-			else {
-				bindProviderType = true;
-
-				query.append(_FINDER_COLUMN_PT_A_PROVIDERTYPE_2);
-			}
-
-			query.append(_FINDER_COLUMN_PT_A_ACTIVE_2);
+			query.append(_FINDER_COLUMN_ACTIVE_ACTIVE_2);
 
 			if (orderByComparator != null) {
 				appendOrderByComparator(
@@ -254,10 +225,6 @@ public class PowwowServerPersistenceImpl
 
 				QueryPos qPos = QueryPos.getInstance(q);
 
-				if (bindProviderType) {
-					qPos.add(providerType);
-				}
-
 				qPos.add(active);
 
 				if (!pagination) {
@@ -275,14 +242,10 @@ public class PowwowServerPersistenceImpl
 
 				cacheResult(list);
 
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
+				FinderCacheUtil.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				if (useFinderCache) {
-					FinderCacheUtil.removeResult(finderPath, finderArgs);
-				}
+				FinderCacheUtil.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -295,35 +258,30 @@ public class PowwowServerPersistenceImpl
 	}
 
 	/**
-	 * Returns the first powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the first powwow server in the ordered set where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching powwow server
 	 * @throws NoSuchServerException if a matching powwow server could not be found
 	 */
 	@Override
-	public PowwowServer findByPT_A_First(
-			String providerType, boolean active,
-			OrderByComparator<PowwowServer> orderByComparator)
+	public PowwowServer findByActive_First(
+			boolean active, OrderByComparator<PowwowServer> orderByComparator)
 		throws NoSuchServerException {
 
-		PowwowServer powwowServer = fetchByPT_A_First(
-			providerType, active, orderByComparator);
+		PowwowServer powwowServer = fetchByActive_First(
+			active, orderByComparator);
 
 		if (powwowServer != null) {
 			return powwowServer;
 		}
 
-		StringBundler msg = new StringBundler(6);
+		StringBundler msg = new StringBundler(4);
 
 		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
 
-		msg.append("providerType=");
-		msg.append(providerType);
-
-		msg.append(", active=");
+		msg.append("active=");
 		msg.append(active);
 
 		msg.append("}");
@@ -332,20 +290,17 @@ public class PowwowServerPersistenceImpl
 	}
 
 	/**
-	 * Returns the first powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the first powwow server in the ordered set where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching powwow server, or <code>null</code> if a matching powwow server could not be found
 	 */
 	@Override
-	public PowwowServer fetchByPT_A_First(
-		String providerType, boolean active,
-		OrderByComparator<PowwowServer> orderByComparator) {
+	public PowwowServer fetchByActive_First(
+		boolean active, OrderByComparator<PowwowServer> orderByComparator) {
 
-		List<PowwowServer> list = findByPT_A(
-			providerType, active, 0, 1, orderByComparator);
+		List<PowwowServer> list = findByActive(active, 0, 1, orderByComparator);
 
 		if (!list.isEmpty()) {
 			return list.get(0);
@@ -355,35 +310,30 @@ public class PowwowServerPersistenceImpl
 	}
 
 	/**
-	 * Returns the last powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the last powwow server in the ordered set where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching powwow server
 	 * @throws NoSuchServerException if a matching powwow server could not be found
 	 */
 	@Override
-	public PowwowServer findByPT_A_Last(
-			String providerType, boolean active,
-			OrderByComparator<PowwowServer> orderByComparator)
+	public PowwowServer findByActive_Last(
+			boolean active, OrderByComparator<PowwowServer> orderByComparator)
 		throws NoSuchServerException {
 
-		PowwowServer powwowServer = fetchByPT_A_Last(
-			providerType, active, orderByComparator);
+		PowwowServer powwowServer = fetchByActive_Last(
+			active, orderByComparator);
 
 		if (powwowServer != null) {
 			return powwowServer;
 		}
 
-		StringBundler msg = new StringBundler(6);
+		StringBundler msg = new StringBundler(4);
 
 		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
 
-		msg.append("providerType=");
-		msg.append(providerType);
-
-		msg.append(", active=");
+		msg.append("active=");
 		msg.append(active);
 
 		msg.append("}");
@@ -392,26 +342,24 @@ public class PowwowServerPersistenceImpl
 	}
 
 	/**
-	 * Returns the last powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the last powwow server in the ordered set where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching powwow server, or <code>null</code> if a matching powwow server could not be found
 	 */
 	@Override
-	public PowwowServer fetchByPT_A_Last(
-		String providerType, boolean active,
-		OrderByComparator<PowwowServer> orderByComparator) {
+	public PowwowServer fetchByActive_Last(
+		boolean active, OrderByComparator<PowwowServer> orderByComparator) {
 
-		int count = countByPT_A(providerType, active);
+		int count = countByActive(active);
 
 		if (count == 0) {
 			return null;
 		}
 
-		List<PowwowServer> list = findByPT_A(
-			providerType, active, count - 1, count, orderByComparator);
+		List<PowwowServer> list = findByActive(
+			active, count - 1, count, orderByComparator);
 
 		if (!list.isEmpty()) {
 			return list.get(0);
@@ -421,22 +369,19 @@ public class PowwowServerPersistenceImpl
 	}
 
 	/**
-	 * Returns the powwow servers before and after the current powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the powwow servers before and after the current powwow server in the ordered set where active = &#63;.
 	 *
 	 * @param powwowServerId the primary key of the current powwow server
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next powwow server
 	 * @throws NoSuchServerException if a powwow server with the primary key could not be found
 	 */
 	@Override
-	public PowwowServer[] findByPT_A_PrevAndNext(
-			long powwowServerId, String providerType, boolean active,
+	public PowwowServer[] findByActive_PrevAndNext(
+			long powwowServerId, boolean active,
 			OrderByComparator<PowwowServer> orderByComparator)
 		throws NoSuchServerException {
-
-		providerType = Objects.toString(providerType, "");
 
 		PowwowServer powwowServer = findByPrimaryKey(powwowServerId);
 
@@ -447,15 +392,13 @@ public class PowwowServerPersistenceImpl
 
 			PowwowServer[] array = new PowwowServerImpl[3];
 
-			array[0] = getByPT_A_PrevAndNext(
-				session, powwowServer, providerType, active, orderByComparator,
-				true);
+			array[0] = getByActive_PrevAndNext(
+				session, powwowServer, active, orderByComparator, true);
 
 			array[1] = powwowServer;
 
-			array[2] = getByPT_A_PrevAndNext(
-				session, powwowServer, providerType, active, orderByComparator,
-				false);
+			array[2] = getByActive_PrevAndNext(
+				session, powwowServer, active, orderByComparator, false);
 
 			return array;
 		}
@@ -467,36 +410,24 @@ public class PowwowServerPersistenceImpl
 		}
 	}
 
-	protected PowwowServer getByPT_A_PrevAndNext(
-		Session session, PowwowServer powwowServer, String providerType,
-		boolean active, OrderByComparator<PowwowServer> orderByComparator,
-		boolean previous) {
+	protected PowwowServer getByActive_PrevAndNext(
+		Session session, PowwowServer powwowServer, boolean active,
+		OrderByComparator<PowwowServer> orderByComparator, boolean previous) {
 
 		StringBundler query = null;
 
 		if (orderByComparator != null) {
 			query = new StringBundler(
-				5 + (orderByComparator.getOrderByConditionFields().length * 3) +
+				4 + (orderByComparator.getOrderByConditionFields().length * 3) +
 					(orderByComparator.getOrderByFields().length * 3));
 		}
 		else {
-			query = new StringBundler(4);
+			query = new StringBundler(3);
 		}
 
 		query.append(_SQL_SELECT_POWWOWSERVER_WHERE);
 
-		boolean bindProviderType = false;
-
-		if (providerType.isEmpty()) {
-			query.append(_FINDER_COLUMN_PT_A_PROVIDERTYPE_3);
-		}
-		else {
-			bindProviderType = true;
-
-			query.append(_FINDER_COLUMN_PT_A_PROVIDERTYPE_2);
-		}
-
-		query.append(_FINDER_COLUMN_PT_A_ACTIVE_2);
+		query.append(_FINDER_COLUMN_ACTIVE_ACTIVE_2);
 
 		if (orderByComparator != null) {
 			String[] orderByConditionFields =
@@ -567,10 +498,6 @@ public class PowwowServerPersistenceImpl
 
 		QueryPos qPos = QueryPos.getInstance(q);
 
-		if (bindProviderType) {
-			qPos.add(providerType);
-		}
-
 		qPos.add(active);
 
 		if (orderByComparator != null) {
@@ -592,57 +519,41 @@ public class PowwowServerPersistenceImpl
 	}
 
 	/**
-	 * Removes all the powwow servers where providerType = &#63; and active = &#63; from the database.
+	 * Removes all the powwow servers where active = &#63; from the database.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 */
 	@Override
-	public void removeByPT_A(String providerType, boolean active) {
+	public void removeByActive(boolean active) {
 		for (PowwowServer powwowServer :
-				findByPT_A(
-					providerType, active, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					null)) {
+				findByActive(
+					active, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
 
 			remove(powwowServer);
 		}
 	}
 
 	/**
-	 * Returns the number of powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns the number of powwow servers where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @return the number of matching powwow servers
 	 */
 	@Override
-	public int countByPT_A(String providerType, boolean active) {
-		providerType = Objects.toString(providerType, "");
+	public int countByActive(boolean active) {
+		FinderPath finderPath = _finderPathCountByActive;
 
-		FinderPath finderPath = _finderPathCountByPT_A;
-
-		Object[] finderArgs = new Object[] {providerType, active};
+		Object[] finderArgs = new Object[] {active};
 
 		Long count = (Long)FinderCacheUtil.getResult(
 			finderPath, finderArgs, this);
 
 		if (count == null) {
-			StringBundler query = new StringBundler(3);
+			StringBundler query = new StringBundler(2);
 
 			query.append(_SQL_COUNT_POWWOWSERVER_WHERE);
 
-			boolean bindProviderType = false;
-
-			if (providerType.isEmpty()) {
-				query.append(_FINDER_COLUMN_PT_A_PROVIDERTYPE_3);
-			}
-			else {
-				bindProviderType = true;
-
-				query.append(_FINDER_COLUMN_PT_A_PROVIDERTYPE_2);
-			}
-
-			query.append(_FINDER_COLUMN_PT_A_ACTIVE_2);
+			query.append(_FINDER_COLUMN_ACTIVE_ACTIVE_2);
 
 			String sql = query.toString();
 
@@ -654,10 +565,6 @@ public class PowwowServerPersistenceImpl
 				Query q = session.createQuery(sql);
 
 				QueryPos qPos = QueryPos.getInstance(q);
-
-				if (bindProviderType) {
-					qPos.add(providerType);
-				}
 
 				qPos.add(active);
 
@@ -678,13 +585,7 @@ public class PowwowServerPersistenceImpl
 		return count.intValue();
 	}
 
-	private static final String _FINDER_COLUMN_PT_A_PROVIDERTYPE_2 =
-		"powwowServer.providerType = ? AND ";
-
-	private static final String _FINDER_COLUMN_PT_A_PROVIDERTYPE_3 =
-		"(powwowServer.providerType IS NULL OR powwowServer.providerType = '') AND ";
-
-	private static final String _FINDER_COLUMN_PT_A_ACTIVE_2 =
+	private static final String _FINDER_COLUMN_ACTIVE_ACTIVE_2 =
 		"powwowServer.active = ?";
 
 	public PowwowServerPersistenceImpl() {
@@ -968,14 +869,11 @@ public class PowwowServerPersistenceImpl
 				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 		}
 		else if (isNew) {
-			Object[] args = new Object[] {
-				powwowServerModelImpl.getProviderType(),
-				powwowServerModelImpl.isActive()
-			};
+			Object[] args = new Object[] {powwowServerModelImpl.isActive()};
 
-			FinderCacheUtil.removeResult(_finderPathCountByPT_A, args);
+			FinderCacheUtil.removeResult(_finderPathCountByActive, args);
 			FinderCacheUtil.removeResult(
-				_finderPathWithoutPaginationFindByPT_A, args);
+				_finderPathWithoutPaginationFindByActive, args);
 
 			FinderCacheUtil.removeResult(
 				_finderPathCountAll, FINDER_ARGS_EMPTY);
@@ -984,26 +882,22 @@ public class PowwowServerPersistenceImpl
 		}
 		else {
 			if ((powwowServerModelImpl.getColumnBitmask() &
-				 _finderPathWithoutPaginationFindByPT_A.getColumnBitmask()) !=
+				 _finderPathWithoutPaginationFindByActive.getColumnBitmask()) !=
 					 0) {
 
 				Object[] args = new Object[] {
-					powwowServerModelImpl.getOriginalProviderType(),
 					powwowServerModelImpl.getOriginalActive()
 				};
 
-				FinderCacheUtil.removeResult(_finderPathCountByPT_A, args);
+				FinderCacheUtil.removeResult(_finderPathCountByActive, args);
 				FinderCacheUtil.removeResult(
-					_finderPathWithoutPaginationFindByPT_A, args);
+					_finderPathWithoutPaginationFindByActive, args);
 
-				args = new Object[] {
-					powwowServerModelImpl.getProviderType(),
-					powwowServerModelImpl.isActive()
-				};
+				args = new Object[] {powwowServerModelImpl.isActive()};
 
-				FinderCacheUtil.removeResult(_finderPathCountByPT_A, args);
+				FinderCacheUtil.removeResult(_finderPathCountByActive, args);
 				FinderCacheUtil.removeResult(
-					_finderPathWithoutPaginationFindByPT_A, args);
+					_finderPathWithoutPaginationFindByActive, args);
 			}
 		}
 
@@ -1270,13 +1164,13 @@ public class PowwowServerPersistenceImpl
 	 * @param start the lower bound of the range of powwow servers
 	 * @param end the upper bound of the range of powwow servers (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of powwow servers
 	 */
 	@Override
 	public List<PowwowServer> findAll(
 		int start, int end, OrderByComparator<PowwowServer> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		boolean pagination = true;
 		FinderPath finderPath = null;
@@ -1286,20 +1180,17 @@ public class PowwowServerPersistenceImpl
 			(orderByComparator == null)) {
 
 			pagination = false;
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
+			finderPath = _finderPathWithoutPaginationFindAll;
+			finderArgs = FINDER_ARGS_EMPTY;
 		}
-		else if (useFinderCache) {
+		else {
 			finderPath = _finderPathWithPaginationFindAll;
 			finderArgs = new Object[] {start, end, orderByComparator};
 		}
 
 		List<PowwowServer> list = null;
 
-		if (useFinderCache) {
+		if (retrieveFromCache) {
 			list = (List<PowwowServer>)FinderCacheUtil.getResult(
 				finderPath, finderArgs, this);
 		}
@@ -1349,14 +1240,10 @@ public class PowwowServerPersistenceImpl
 
 				cacheResult(list);
 
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
+				FinderCacheUtil.putResult(finderPath, finderArgs, list);
 			}
 			catch (Exception e) {
-				if (useFinderCache) {
-					FinderCacheUtil.removeResult(finderPath, finderArgs);
-				}
+				FinderCacheUtil.removeResult(finderPath, finderArgs);
 
 				throw processException(e);
 			}
@@ -1447,30 +1334,28 @@ public class PowwowServerPersistenceImpl
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
 			new String[0]);
 
-		_finderPathWithPaginationFindByPT_A = new FinderPath(
+		_finderPathWithPaginationFindByActive = new FinderPath(
 			PowwowServerModelImpl.ENTITY_CACHE_ENABLED,
 			PowwowServerModelImpl.FINDER_CACHE_ENABLED, PowwowServerImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByPT_A",
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByActive",
 			new String[] {
-				String.class.getName(), Boolean.class.getName(),
-				Integer.class.getName(), Integer.class.getName(),
-				OrderByComparator.class.getName()
+				Boolean.class.getName(), Integer.class.getName(),
+				Integer.class.getName(), OrderByComparator.class.getName()
 			});
 
-		_finderPathWithoutPaginationFindByPT_A = new FinderPath(
+		_finderPathWithoutPaginationFindByActive = new FinderPath(
 			PowwowServerModelImpl.ENTITY_CACHE_ENABLED,
 			PowwowServerModelImpl.FINDER_CACHE_ENABLED, PowwowServerImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByPT_A",
-			new String[] {String.class.getName(), Boolean.class.getName()},
-			PowwowServerModelImpl.PROVIDERTYPE_COLUMN_BITMASK |
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByActive",
+			new String[] {Boolean.class.getName()},
 			PowwowServerModelImpl.ACTIVE_COLUMN_BITMASK |
 			PowwowServerModelImpl.NAME_COLUMN_BITMASK);
 
-		_finderPathCountByPT_A = new FinderPath(
+		_finderPathCountByActive = new FinderPath(
 			PowwowServerModelImpl.ENTITY_CACHE_ENABLED,
 			PowwowServerModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByPT_A",
-			new String[] {String.class.getName(), Boolean.class.getName()});
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByActive",
+			new String[] {Boolean.class.getName()});
 	}
 
 	public void destroy() {

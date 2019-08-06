@@ -44,7 +44,6 @@ public class PowwowMeetingSoap implements Serializable {
 		soapModel.setPowwowServerId(model.getPowwowServerId());
 		soapModel.setName(model.getName());
 		soapModel.setDescription(model.getDescription());
-		soapModel.setProviderType(model.getProviderType());
 		soapModel.setProviderTypeMetadata(model.getProviderTypeMetadata());
 		soapModel.setLanguageId(model.getLanguageId());
 		soapModel.setCalendarBookingId(model.getCalendarBookingId());
@@ -182,14 +181,6 @@ public class PowwowMeetingSoap implements Serializable {
 		_description = description;
 	}
 
-	public String getProviderType() {
-		return _providerType;
-	}
-
-	public void setProviderType(String providerType) {
-		_providerType = providerType;
-	}
-
 	public String getProviderTypeMetadata() {
 		return _providerTypeMetadata;
 	}
@@ -232,7 +223,6 @@ public class PowwowMeetingSoap implements Serializable {
 	private long _powwowServerId;
 	private String _name;
 	private String _description;
-	private String _providerType;
 	private String _providerTypeMetadata;
 	private String _languageId;
 	private long _calendarBookingId;

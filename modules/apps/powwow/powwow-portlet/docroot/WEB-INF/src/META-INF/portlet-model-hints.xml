@@ -16,7 +16,6 @@
 		<field name="description" type="String">
 			<hint-collection name="TEXTAREA" />
 		</field>
-		<field name="providerType" type="String" />
 		<field name="providerTypeMetadata" type="String">
 			<hint-collection name="TEXTAREA" />
 		</field>
@@ -25,7 +24,7 @@
 		<field name="status" type="int" />
 	</model>
 	<model name="com.liferay.powwow.model.PowwowMeetingOccurrence">
-		<field name="occurrenceId" type="String" />
+		<field name="occurrenceId" type="long" />
 		<field name="companyId" type="long" />
 		<field name="userId" type="long" />
 		<field name="userName" type="String" />
@@ -37,6 +36,7 @@
 			<hint-collection name="TEXTAREA" />
 		</field>
 		<field name="occurrenceStatus" type="String" />
+		<field name="occurrenceApiId" type="String" />
 		<field name="startTime" type="long" />
 		<field name="endTime" type="long" />
 	</model>
@@ -69,11 +69,6 @@
 		<field name="modifiedDate" type="Date" />
 		<field name="name" type="String">
 			<validator name="required" />
-		</field>
-		<field name="providerType" type="String" />
-		<field name="url" type="String">
-			<hint-collection name="URL" />
-			<validator name="url" />
 		</field>
 		<field name="apiKey" type="String" />
 		<field name="secret" type="String" />

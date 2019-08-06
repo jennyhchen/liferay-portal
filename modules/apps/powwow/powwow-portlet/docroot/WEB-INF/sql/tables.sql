@@ -9,11 +9,26 @@ create table PowwowMeeting (
 	powwowServerId LONG,
 	name VARCHAR(75) null,
 	description STRING null,
-	providerType VARCHAR(75) null,
 	providerTypeMetadata STRING null,
 	languageId VARCHAR(75) null,
 	calendarBookingId LONG,
 	status INTEGER
+);
+
+create table PowwowMeetingOccurrence (
+	occurrenceId LONG not null primary key,
+	companyId LONG,
+	userId LONG,
+	userName VARCHAR(75) null,
+	createDate DATE null,
+	modifiedDate DATE null,
+	calendarBookingId LONG,
+	powwowMeetingId LONG,
+	zoomOriginalData STRING null,
+	occurrenceStatus VARCHAR(75) null,
+	occurrenceApiId VARCHAR(75) null,
+	startTime LONG,
+	endTime LONG
 );
 
 create table PowwowParticipant (
@@ -40,8 +55,6 @@ create table PowwowServer (
 	createDate DATE null,
 	modifiedDate DATE null,
 	name VARCHAR(75) null,
-	providerType VARCHAR(75) null,
-	url STRING null,
 	apiKey VARCHAR(75) null,
 	secret VARCHAR(75) null,
 	active_ BOOLEAN

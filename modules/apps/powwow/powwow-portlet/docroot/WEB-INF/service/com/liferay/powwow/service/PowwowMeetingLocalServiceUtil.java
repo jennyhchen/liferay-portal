@@ -40,7 +40,7 @@ public class PowwowMeetingLocalServiceUtil {
 	 */
 	public static com.liferay.powwow.model.PowwowMeeting addPowwowMeeting(
 			long userId, long groupId, long powwowServerId, String name,
-			String description, String providerType,
+			String description,
 			java.util.Map<String, java.io.Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			java.util.List<com.liferay.powwow.model.PowwowParticipant>
@@ -49,7 +49,7 @@ public class PowwowMeetingLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().addPowwowMeeting(
-			userId, groupId, powwowServerId, name, description, providerType,
+			userId, groupId, powwowServerId, name, description,
 			providerTypeMetadataMap, languageId, calendarBookingId, status,
 			powwowParticipants, serviceContext);
 	}
@@ -297,6 +297,12 @@ public class PowwowMeetingLocalServiceUtil {
 	}
 
 	public static java.util.List<com.liferay.powwow.model.PowwowMeeting>
+		getPowwowMeetings(int status, int start, int end) {
+
+		return getService().getPowwowMeetings(status, start, end);
+	}
+
+	public static java.util.List<com.liferay.powwow.model.PowwowMeeting>
 		getPowwowMeetings(
 			long groupId, int start, int end,
 			com.liferay.portal.kernel.util.OrderByComparator obc) {
@@ -346,7 +352,7 @@ public class PowwowMeetingLocalServiceUtil {
 
 	public static com.liferay.powwow.model.PowwowMeeting updatePowwowMeeting(
 			long powwowMeetingId, long powwowServerId, String name,
-			String description, String providerType,
+			String description,
 			java.util.Map<String, java.io.Serializable> providerTypeMetadataMap,
 			String languageId, long calendarBookingId, int status,
 			java.util.List<com.liferay.powwow.model.PowwowParticipant>
@@ -355,7 +361,7 @@ public class PowwowMeetingLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().updatePowwowMeeting(
-			powwowMeetingId, powwowServerId, name, description, providerType,
+			powwowMeetingId, powwowServerId, name, description,
 			providerTypeMetadataMap, languageId, calendarBookingId, status,
 			powwowParticipants, serviceContext);
 	}

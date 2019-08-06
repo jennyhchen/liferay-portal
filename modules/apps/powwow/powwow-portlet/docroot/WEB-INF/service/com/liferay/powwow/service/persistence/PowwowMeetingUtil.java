@@ -183,16 +183,16 @@ public class PowwowMeetingUtil {
 	 * @param start the lower bound of the range of powwow meetings
 	 * @param end the upper bound of the range of powwow meetings (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow meetings
 	 */
 	public static List<PowwowMeeting> findByGroupId(
 		long groupId, int start, int end,
 		OrderByComparator<PowwowMeeting> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		return getPersistence().findByGroupId(
-			groupId, start, end, orderByComparator, useFinderCache);
+			groupId, start, end, orderByComparator, retrieveFromCache);
 	}
 
 	/**
@@ -429,16 +429,16 @@ public class PowwowMeetingUtil {
 	 * @param start the lower bound of the range of powwow meetings
 	 * @param end the upper bound of the range of powwow meetings (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow meetings
 	 */
 	public static List<PowwowMeeting> findByPowwowServerId(
 		long powwowServerId, int start, int end,
 		OrderByComparator<PowwowMeeting> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		return getPersistence().findByPowwowServerId(
-			powwowServerId, start, end, orderByComparator, useFinderCache);
+			powwowServerId, start, end, orderByComparator, retrieveFromCache);
 	}
 
 	/**
@@ -602,16 +602,16 @@ public class PowwowMeetingUtil {
 	 * @param start the lower bound of the range of powwow meetings
 	 * @param end the upper bound of the range of powwow meetings (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow meetings
 	 */
 	public static List<PowwowMeeting> findByStatus(
 		int status, int start, int end,
 		OrderByComparator<PowwowMeeting> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		return getPersistence().findByStatus(
-			status, start, end, orderByComparator, useFinderCache);
+			status, start, end, orderByComparator, retrieveFromCache);
 	}
 
 	/**
@@ -771,16 +771,16 @@ public class PowwowMeetingUtil {
 	 * @param start the lower bound of the range of powwow meetings
 	 * @param end the upper bound of the range of powwow meetings (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow meetings
 	 */
 	public static List<PowwowMeeting> findByU_S(
 		long userId, int status, int start, int end,
 		OrderByComparator<PowwowMeeting> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		return getPersistence().findByU_S(
-			userId, status, start, end, orderByComparator, useFinderCache);
+			userId, status, start, end, orderByComparator, retrieveFromCache);
 	}
 
 	/**
@@ -957,17 +957,17 @@ public class PowwowMeetingUtil {
 	 * @param start the lower bound of the range of powwow meetings
 	 * @param end the upper bound of the range of powwow meetings (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow meetings
 	 */
 	public static List<PowwowMeeting> findByPSI_S(
 		long powwowServerId, int status, int start, int end,
 		OrderByComparator<PowwowMeeting> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		return getPersistence().findByPSI_S(
 			powwowServerId, status, start, end, orderByComparator,
-			useFinderCache);
+			retrieveFromCache);
 	}
 
 	/**
@@ -1199,15 +1199,15 @@ public class PowwowMeetingUtil {
 	 * @param start the lower bound of the range of powwow meetings
 	 * @param end the upper bound of the range of powwow meetings (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of powwow meetings
 	 */
 	public static List<PowwowMeeting> findAll(
 		int start, int end, OrderByComparator<PowwowMeeting> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
+			start, end, orderByComparator, retrieveFromCache);
 	}
 
 	/**

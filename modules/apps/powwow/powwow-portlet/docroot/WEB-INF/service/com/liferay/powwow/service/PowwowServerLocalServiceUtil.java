@@ -39,13 +39,12 @@ public class PowwowServerLocalServiceUtil {
 	 * Never modify this class directly. Add custom service methods to <code>com.liferay.powwow.service.impl.PowwowServerLocalServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.powwow.model.PowwowServer addPowwowServer(
-			long userId, String name, String providerType, String url,
-			String apiKey, String secret,
+			long userId, String name, String apiKey, String secret,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().addPowwowServer(
-			userId, name, providerType, url, apiKey, secret, serviceContext);
+			userId, name, apiKey, secret, serviceContext);
 	}
 
 	/**
@@ -247,6 +246,12 @@ public class PowwowServerLocalServiceUtil {
 		return getService().getPowwowServer(powwowServerId);
 	}
 
+	public static java.util.List<com.liferay.powwow.model.PowwowServer>
+		getPowwowServers(boolean active) {
+
+		return getService().getPowwowServers(active);
+	}
+
 	/**
 	 * Returns a range of all the powwow servers.
 	 *
@@ -272,12 +277,6 @@ public class PowwowServerLocalServiceUtil {
 		return getService().getPowwowServers(start, end, obc);
 	}
 
-	public static java.util.List<com.liferay.powwow.model.PowwowServer>
-		getPowwowServers(String providerType, boolean active) {
-
-		return getService().getPowwowServers(providerType, active);
-	}
-
 	/**
 	 * Returns the number of powwow servers.
 	 *
@@ -287,21 +286,17 @@ public class PowwowServerLocalServiceUtil {
 		return getService().getPowwowServersCount();
 	}
 
-	public static int getPowwowServersCount(
-		String providerType, boolean active) {
-
-		return getService().getPowwowServersCount(providerType, active);
+	public static int getPowwowServersCount(boolean active) {
+		return getService().getPowwowServersCount(active);
 	}
 
 	public static com.liferay.powwow.model.PowwowServer updatePowwowServer(
-			long powwowServerId, String name, String providerType, String url,
-			String apiKey, String secret,
+			long powwowServerId, String name, String apiKey, String secret,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().updatePowwowServer(
-			powwowServerId, name, providerType, url, apiKey, secret,
-			serviceContext);
+			powwowServerId, name, apiKey, secret, serviceContext);
 	}
 
 	/**

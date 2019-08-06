@@ -124,190 +124,168 @@ public class PowwowServerUtil {
 	}
 
 	/**
-	 * Returns all the powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns all the powwow servers where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @return the matching powwow servers
 	 */
-	public static List<PowwowServer> findByPT_A(
-		String providerType, boolean active) {
-
-		return getPersistence().findByPT_A(providerType, active);
+	public static List<PowwowServer> findByActive(boolean active) {
+		return getPersistence().findByActive(active);
 	}
 
 	/**
-	 * Returns a range of all the powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns a range of all the powwow servers where active = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>PowwowServerModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param start the lower bound of the range of powwow servers
 	 * @param end the upper bound of the range of powwow servers (not inclusive)
 	 * @return the range of matching powwow servers
 	 */
-	public static List<PowwowServer> findByPT_A(
-		String providerType, boolean active, int start, int end) {
+	public static List<PowwowServer> findByActive(
+		boolean active, int start, int end) {
 
-		return getPersistence().findByPT_A(providerType, active, start, end);
+		return getPersistence().findByActive(active, start, end);
 	}
 
 	/**
-	 * Returns an ordered range of all the powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns an ordered range of all the powwow servers where active = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>PowwowServerModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param start the lower bound of the range of powwow servers
 	 * @param end the upper bound of the range of powwow servers (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching powwow servers
 	 */
-	public static List<PowwowServer> findByPT_A(
-		String providerType, boolean active, int start, int end,
+	public static List<PowwowServer> findByActive(
+		boolean active, int start, int end,
 		OrderByComparator<PowwowServer> orderByComparator) {
 
-		return getPersistence().findByPT_A(
-			providerType, active, start, end, orderByComparator);
+		return getPersistence().findByActive(
+			active, start, end, orderByComparator);
 	}
 
 	/**
-	 * Returns an ordered range of all the powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns an ordered range of all the powwow servers where active = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>PowwowServerModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param start the lower bound of the range of powwow servers
 	 * @param end the upper bound of the range of powwow servers (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching powwow servers
 	 */
-	public static List<PowwowServer> findByPT_A(
-		String providerType, boolean active, int start, int end,
+	public static List<PowwowServer> findByActive(
+		boolean active, int start, int end,
 		OrderByComparator<PowwowServer> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
-		return getPersistence().findByPT_A(
-			providerType, active, start, end, orderByComparator,
-			useFinderCache);
+		return getPersistence().findByActive(
+			active, start, end, orderByComparator, retrieveFromCache);
 	}
 
 	/**
-	 * Returns the first powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the first powwow server in the ordered set where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching powwow server
 	 * @throws NoSuchServerException if a matching powwow server could not be found
 	 */
-	public static PowwowServer findByPT_A_First(
-			String providerType, boolean active,
-			OrderByComparator<PowwowServer> orderByComparator)
+	public static PowwowServer findByActive_First(
+			boolean active, OrderByComparator<PowwowServer> orderByComparator)
 		throws com.liferay.powwow.exception.NoSuchServerException {
 
-		return getPersistence().findByPT_A_First(
-			providerType, active, orderByComparator);
+		return getPersistence().findByActive_First(active, orderByComparator);
 	}
 
 	/**
-	 * Returns the first powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the first powwow server in the ordered set where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching powwow server, or <code>null</code> if a matching powwow server could not be found
 	 */
-	public static PowwowServer fetchByPT_A_First(
-		String providerType, boolean active,
-		OrderByComparator<PowwowServer> orderByComparator) {
+	public static PowwowServer fetchByActive_First(
+		boolean active, OrderByComparator<PowwowServer> orderByComparator) {
 
-		return getPersistence().fetchByPT_A_First(
-			providerType, active, orderByComparator);
+		return getPersistence().fetchByActive_First(active, orderByComparator);
 	}
 
 	/**
-	 * Returns the last powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the last powwow server in the ordered set where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching powwow server
 	 * @throws NoSuchServerException if a matching powwow server could not be found
 	 */
-	public static PowwowServer findByPT_A_Last(
-			String providerType, boolean active,
-			OrderByComparator<PowwowServer> orderByComparator)
+	public static PowwowServer findByActive_Last(
+			boolean active, OrderByComparator<PowwowServer> orderByComparator)
 		throws com.liferay.powwow.exception.NoSuchServerException {
 
-		return getPersistence().findByPT_A_Last(
-			providerType, active, orderByComparator);
+		return getPersistence().findByActive_Last(active, orderByComparator);
 	}
 
 	/**
-	 * Returns the last powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the last powwow server in the ordered set where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching powwow server, or <code>null</code> if a matching powwow server could not be found
 	 */
-	public static PowwowServer fetchByPT_A_Last(
-		String providerType, boolean active,
-		OrderByComparator<PowwowServer> orderByComparator) {
+	public static PowwowServer fetchByActive_Last(
+		boolean active, OrderByComparator<PowwowServer> orderByComparator) {
 
-		return getPersistence().fetchByPT_A_Last(
-			providerType, active, orderByComparator);
+		return getPersistence().fetchByActive_Last(active, orderByComparator);
 	}
 
 	/**
-	 * Returns the powwow servers before and after the current powwow server in the ordered set where providerType = &#63; and active = &#63;.
+	 * Returns the powwow servers before and after the current powwow server in the ordered set where active = &#63;.
 	 *
 	 * @param powwowServerId the primary key of the current powwow server
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next powwow server
 	 * @throws NoSuchServerException if a powwow server with the primary key could not be found
 	 */
-	public static PowwowServer[] findByPT_A_PrevAndNext(
-			long powwowServerId, String providerType, boolean active,
+	public static PowwowServer[] findByActive_PrevAndNext(
+			long powwowServerId, boolean active,
 			OrderByComparator<PowwowServer> orderByComparator)
 		throws com.liferay.powwow.exception.NoSuchServerException {
 
-		return getPersistence().findByPT_A_PrevAndNext(
-			powwowServerId, providerType, active, orderByComparator);
+		return getPersistence().findByActive_PrevAndNext(
+			powwowServerId, active, orderByComparator);
 	}
 
 	/**
-	 * Removes all the powwow servers where providerType = &#63; and active = &#63; from the database.
+	 * Removes all the powwow servers where active = &#63; from the database.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 */
-	public static void removeByPT_A(String providerType, boolean active) {
-		getPersistence().removeByPT_A(providerType, active);
+	public static void removeByActive(boolean active) {
+		getPersistence().removeByActive(active);
 	}
 
 	/**
-	 * Returns the number of powwow servers where providerType = &#63; and active = &#63;.
+	 * Returns the number of powwow servers where active = &#63;.
 	 *
-	 * @param providerType the provider type
 	 * @param active the active
 	 * @return the number of matching powwow servers
 	 */
-	public static int countByPT_A(String providerType, boolean active) {
-		return getPersistence().countByPT_A(providerType, active);
+	public static int countByActive(boolean active) {
+		return getPersistence().countByActive(active);
 	}
 
 	/**
@@ -430,15 +408,15 @@ public class PowwowServerUtil {
 	 * @param start the lower bound of the range of powwow servers
 	 * @param end the upper bound of the range of powwow servers (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
+	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of powwow servers
 	 */
 	public static List<PowwowServer> findAll(
 		int start, int end, OrderByComparator<PowwowServer> orderByComparator,
-		boolean useFinderCache) {
+		boolean retrieveFromCache) {
 
 		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
+			start, end, orderByComparator, retrieveFromCache);
 	}
 
 	/**

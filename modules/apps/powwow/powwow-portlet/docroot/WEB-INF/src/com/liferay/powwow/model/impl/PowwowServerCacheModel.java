@@ -65,7 +65,7 @@ public class PowwowServerCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(25);
+		StringBundler sb = new StringBundler(21);
 
 		sb.append("{powwowServerId=");
 		sb.append(powwowServerId);
@@ -81,10 +81,6 @@ public class PowwowServerCacheModel
 		sb.append(modifiedDate);
 		sb.append(", name=");
 		sb.append(name);
-		sb.append(", providerType=");
-		sb.append(providerType);
-		sb.append(", url=");
-		sb.append(url);
 		sb.append(", apiKey=");
 		sb.append(apiKey);
 		sb.append(", secret=");
@@ -132,20 +128,6 @@ public class PowwowServerCacheModel
 			powwowServerImpl.setName(name);
 		}
 
-		if (providerType == null) {
-			powwowServerImpl.setProviderType("");
-		}
-		else {
-			powwowServerImpl.setProviderType(providerType);
-		}
-
-		if (url == null) {
-			powwowServerImpl.setUrl("");
-		}
-		else {
-			powwowServerImpl.setUrl(url);
-		}
-
 		if (apiKey == null) {
 			powwowServerImpl.setApiKey("");
 		}
@@ -178,8 +160,6 @@ public class PowwowServerCacheModel
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
 		name = objectInput.readUTF();
-		providerType = objectInput.readUTF();
-		url = objectInput.readUTF();
 		apiKey = objectInput.readUTF();
 		secret = objectInput.readUTF();
 
@@ -211,20 +191,6 @@ public class PowwowServerCacheModel
 			objectOutput.writeUTF(name);
 		}
 
-		if (providerType == null) {
-			objectOutput.writeUTF("");
-		}
-		else {
-			objectOutput.writeUTF(providerType);
-		}
-
-		if (url == null) {
-			objectOutput.writeUTF("");
-		}
-		else {
-			objectOutput.writeUTF(url);
-		}
-
 		if (apiKey == null) {
 			objectOutput.writeUTF("");
 		}
@@ -249,8 +215,6 @@ public class PowwowServerCacheModel
 	public long createDate;
 	public long modifiedDate;
 	public String name;
-	public String providerType;
-	public String url;
 	public String apiKey;
 	public String secret;
 	public boolean active;

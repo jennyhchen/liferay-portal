@@ -11,6 +11,9 @@
 	<bean class="com.liferay.powwow.service.impl.PowwowMeetingServiceImpl" id="com.liferay.powwow.service.PowwowMeetingService" />
 	<bean class="com.liferay.powwow.service.persistence.impl.PowwowMeetingPersistenceImpl" id="com.liferay.powwow.service.persistence.PowwowMeetingPersistence" parent="basePersistence" />
 	<bean class="com.liferay.powwow.service.persistence.impl.PowwowMeetingFinderImpl" id="com.liferay.powwow.service.persistence.PowwowMeetingFinder" parent="basePersistence" />
+	<bean class="com.liferay.powwow.service.impl.PowwowMeetingOccurrenceLocalServiceImpl" id="com.liferay.powwow.service.PowwowMeetingOccurrenceLocalService" />
+	<bean class="com.liferay.powwow.service.impl.PowwowMeetingOccurrenceServiceImpl" id="com.liferay.powwow.service.PowwowMeetingOccurrenceService" />
+	<bean class="com.liferay.powwow.service.persistence.impl.PowwowMeetingOccurrencePersistenceImpl" id="com.liferay.powwow.service.persistence.PowwowMeetingOccurrencePersistence" parent="basePersistence" />
 	<bean class="com.liferay.powwow.service.impl.PowwowParticipantLocalServiceImpl" id="com.liferay.powwow.service.PowwowParticipantLocalService" />
 	<bean class="com.liferay.powwow.service.impl.PowwowParticipantServiceImpl" id="com.liferay.powwow.service.PowwowParticipantService" />
 	<bean class="com.liferay.powwow.service.persistence.impl.PowwowParticipantPersistenceImpl" id="com.liferay.powwow.service.persistence.PowwowParticipantPersistence" parent="basePersistence" />
