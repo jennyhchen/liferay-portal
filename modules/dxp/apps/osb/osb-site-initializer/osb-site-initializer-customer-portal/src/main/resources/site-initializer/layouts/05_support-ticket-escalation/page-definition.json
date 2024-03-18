@@ -134,6 +134,36 @@
 							{
 								"definition": {
 									"fragment": {
+										"key": "INPUTS-text-input"
+									},
+									"fragmentConfig": {
+										"inputFieldId": "ObjectField_phoneNumber",
+										"inputHelpText": {
+											"en_US": "Please include country code.",
+											"es_ES": "Por favor, incluye el código de tu país",
+											"ja_JP": "国コードを含めてください。",
+											"pt_BR": "Por favor, inclua o código do seu país"
+										},
+										"inputLabel": {
+											"es_ES": "Número de teléfono",
+											"ja_JP": "連絡先",
+											"pt_BR": "Número de telefone"
+										},
+										"inputShowHelpText": true,
+										"placeholder": "",
+										"showCharactersCount": false
+									},
+									"fragmentFields": [
+									],
+									"fragmentStyle": {
+										"marginBottom": "3"
+									},
+									"indexed": true
+								},
+								"type": "Fragment"
+							},							{
+								"definition": {
+									"fragment": {
 										"key": "INPUTS-textarea"
 									},
 									"fragmentConfig": {

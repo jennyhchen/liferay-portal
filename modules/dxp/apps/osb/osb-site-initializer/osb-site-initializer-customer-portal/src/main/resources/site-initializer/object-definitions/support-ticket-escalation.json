@@ -153,6 +153,27 @@
 			"unique": false
 		},
 		{
+			"DBType": "String",
+			"businessType": "Text",
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"indexedLanguageId": "en_US",
+			"label": {
+				"en_US": "Phone Number"
+			},
+			"localized": false,
+			"name": "phoneNumber",
+			"objectFieldSettings": [
+			],
+			"readOnly": "false",
+			"readOnlyConditionExpression": "",
+			"required": false,
+			"state": false,
+			"system": false,
+			"type": "String",
+			"unique": false
+		},
+		{
 			"DBType": "Clob",
 			"businessType": "LongText",
 			"indexed": true,
