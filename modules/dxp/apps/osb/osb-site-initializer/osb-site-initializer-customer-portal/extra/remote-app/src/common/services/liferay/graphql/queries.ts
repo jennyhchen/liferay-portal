@@ -475,7 +475,6 @@ export const getAccountSubscriptionGroups = gql`
 				items {
 					accountSubscriptionGroupId
 					accountKey
-					activationProductName
 					activationStatus
 					externalReferenceCode
 					hasActivation
