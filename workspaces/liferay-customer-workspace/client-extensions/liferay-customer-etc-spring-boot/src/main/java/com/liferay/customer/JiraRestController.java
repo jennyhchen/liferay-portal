@@ -162,7 +162,9 @@ public class JiraRestController extends BaseRestController {
 
 			if (ArrayUtil.isNotEmpty(filterFixVersions)) {
 				sb.append(" AND ");
-				sb.append(_FIELD_FIX_VERSION);
+				sb.append(
+					_getJQLCustomField(
+						_jiraSecurityVulnerabilityFieldFixVersions));
 				sb.append(" in ('");
 				sb.append(StringUtil.merge(filterFixVersions, "','"));
 				sb.append("')");
@@ -214,8 +216,7 @@ public class JiraRestController extends BaseRestController {
 			sb.append(" ASC");
 
 			String[] securityVulnerabilitiesIssueFields = {
-				_FIELD_COMPONENTS, _FIELD_FIX_VERSIONS, _FIELD_ISSUE_KEY,
-				_FIELD_VERSIONS,
+				_FIELD_COMPONENTS, _FIELD_ISSUE_KEY, _FIELD_VERSIONS,
 				_jiraSecurityVulnerabilityFieldAffectedVersionsDetails,
 				_jiraSecurityVulnerabilityFieldCategory,
 				_jiraSecurityVulnerabilityFieldCustomerPortalDescription,
@@ -225,6 +226,7 @@ public class JiraRestController extends BaseRestController {
 				_jiraSecurityVulnerabilityFieldCVSSBaseScore,
 				_jiraSecurityVulnerabilityFieldCVSSVectorString,
 				_jiraSecurityVulnerabilityFieldCWEIds,
+				_jiraSecurityVulnerabilityFieldFixVersions,
 				_jiraSecurityVulnerabilityFieldIssueClassification,
 				_jiraSecurityVulnerabilityFieldPartnerPublishingDate,
 				_jiraSecurityVulnerabilityFieldPublishingStatus,
@@ -257,6 +259,10 @@ public class JiraRestController extends BaseRestController {
 	}
 
 	private JSONArray _flattenJSONArray(JSONArray jsonArray) {
+		if (jsonArray == null) {
+			return new JSONArray();
+		}
+
 		JSONArray flattenedJSONArray = new JSONArray();
 
 		for (int i = 0; i < jsonArray.length(); i++) {
@@ -452,7 +458,8 @@ public class JiraRestController extends BaseRestController {
 		).put(
 			"fixVersions",
 			_flattenJSONArray(
-				issueFieldsJSONObject.getJSONArray(_FIELD_FIX_VERSIONS))
+				issueFieldsJSONObject.optJSONArray(
+					_jiraSecurityVulnerabilityFieldFixVersions))
 		).put(
 			"issueClassification",
 			_getJSONObjectFieldValue(
@@ -504,10 +511,6 @@ public class JiraRestController extends BaseRestController {
 	private static final String _FIELD_AFFECTED_VERSION = "affectedVersion";
 
 	private static final String _FIELD_COMPONENTS = "components";
-
-	private static final String _FIELD_FIX_VERSION = "fixVersion";
-
-	private static final String _FIELD_FIX_VERSIONS = "fixVersions";
 
 	private static final String _FIELD_ISSUE_KEY = "key";
 
@@ -561,6 +564,9 @@ public class JiraRestController extends BaseRestController {
 
 	@Value("${liferay.customer.jira.security.vulnerability.field.cwe.ids}")
 	private String _jiraSecurityVulnerabilityFieldCWEIds;
+
+	@Value("${liferay.customer.jira.security.vulnerability.field.fix.versions}")
+	private String _jiraSecurityVulnerabilityFieldFixVersions;
 
 	@Value(
 		"${liferay.customer.jira.security.vulnerability.field.issue.classification}"
