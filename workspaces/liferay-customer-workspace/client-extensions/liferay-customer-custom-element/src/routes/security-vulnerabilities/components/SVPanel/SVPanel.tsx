@@ -8,28 +8,18 @@ import i18n from '~/common/I18n';
 import './SVPanel.css';
 
 interface IProps {
-	link?: String;
+	link: String;
+	linkText: String;
 	text: String;
 }
 
-const SVPanel = ({link, text}: IProps) => {
-	const htmlTags: String[] = [];
-
-	if (link) {
-		htmlTags.push(`<a href='${link}'>`);
-		htmlTags.push('</a>');
-	}
-
+const SVPanel = ({link, linkText, text}: IProps) => {
 	return (
 		<div className="sv-panel-content">
 			<div className="sv-panel-box">
 				<p
 					className="align-items-start justify-content-start"
-					dangerouslySetInnerHTML={{
-						__html: link
-							? i18n.sub(text, htmlTags)
-							: i18n.translate(text),
-					}}
+					dangerouslySetInnerHTML={{__html: i18n.sub(text, '<a href="' + link + '">' + i18n.translate(linkText) + '</a>')}}
 				/>
 			</div>
 		</div>
