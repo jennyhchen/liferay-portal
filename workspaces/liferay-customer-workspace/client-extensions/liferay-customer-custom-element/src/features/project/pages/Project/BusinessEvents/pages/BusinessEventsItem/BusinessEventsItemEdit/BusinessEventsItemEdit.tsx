@@ -136,6 +136,18 @@ const BusinessEventsItemEditPage: React.FC<IProps> = ({
 
 	const [ticketOptions, setTicketOptions] = useState<ITicket[]>([]);
 
+	const handleOptionChange = useCallback(
+		(field: string, key: string, list: IOption[]) => {
+			if (key) {
+				setFieldValue(
+					field,
+					list.filter((option) => option.value === key)[0].label
+				);
+			}
+		},
+		[setFieldValue]
+	);
+
 	const handleRadioChange = (value: string) => {
 		setHasImpactingEvents(value);
 	};
@@ -541,6 +553,13 @@ const BusinessEventsItemEditPage: React.FC<IProps> = ({
 											groupStyle="pb-1"
 											label={i18n.translate('event-type')}
 											name="businessEvent.eventType.key"
+											onChange={(value: string) =>
+												handleOptionChange(
+													'businessEvent.eventType.name',
+													value,
+													businessEventTypesList
+												)
+											}
 											options={businessEventTypesList}
 											required
 										/>
@@ -555,6 +574,13 @@ const BusinessEventsItemEditPage: React.FC<IProps> = ({
 													'your-current-liferay-version'
 												)}
 												name="businessEvent.currentLiferayVersion.key"
+												onChange={(value: string) =>
+													handleOptionChange(
+														'businessEvent.currentLiferayVersion.name',
+														value,
+														dxpMinorVersionsAndPortalMajorVersions
+													)
+												}
 												options={[
 													emptyOption,
 													...dxpMinorVersionsAndPortalMajorVersions,
@@ -574,6 +600,13 @@ const BusinessEventsItemEditPage: React.FC<IProps> = ({
 													'new-version'
 												)}
 												name="businessEvent.newLiferayVersion.key"
+												onChange={(value: string) =>
+													handleOptionChange(
+														'businessEvent.newLiferayVersion.name',
+														value,
+														newLiferayVersionOptions
+													)
+												}
 												options={[
 													emptyOption,
 													...newLiferayVersionOptions,
@@ -646,7 +679,20 @@ const BusinessEventsItemEditPage: React.FC<IProps> = ({
 														'time-zone'
 													)}
 													name="businessEvent.timeZone.key"
-													options={utcTimeZonesList}
+													onChange={(value: string) =>
+														handleOptionChange(
+															'businessEvent.timeZone.name',
+															value,
+															utcTimeZonesList
+														)
+													}
+													options={[
+														{
+															...emptyOption,
+															disabled: false,
+														},
+														...utcTimeZonesList,
+													]}
 												/>
 											</ClayInput.GroupItem>
 
