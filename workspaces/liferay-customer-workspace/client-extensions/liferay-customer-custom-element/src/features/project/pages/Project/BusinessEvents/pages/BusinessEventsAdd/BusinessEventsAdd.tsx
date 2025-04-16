@@ -25,9 +25,10 @@ import AssociatedTicketsContainer from '../../components/AssociatedTicketsContai
 import useAccountBusinessEvents from '../../hooks/useAccountBusinessEvents';
 import useAccountTickets from '../../hooks/useAccountTickets';
 import useGetBusinessEventTypesList from '../../hooks/useGetBusinessEventTypesList';
-import useGetGMTTimeZonesList from '../../hooks/useGetGMTTimeZonesList';
 import useGetLiferayVersions from '../../hooks/useGetLiferayVersions';
+import useGetUTCTimeZonesList from '../../hooks/useGetUTCTimeZonesList';
 import useHasAllEventsPermissions from '../../hooks/useHasAllEventsPermissions';
+import {containsOption} from '../../utils/containsOption';
 import {getFormattedGoLiveDateTime} from '../../utils/getFormattedGoLiveDate';
 import useIsSaasOnly from '../../utils/useIsSaasOnly';
 
@@ -70,9 +71,6 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 		[]
 	);
 
-	const {gmtTimeZonesList, loading: loadingGMTTimeZonesList} =
-		useGetGMTTimeZonesList();
-
 	const {hasAllEventsPermissions} = useHasAllEventsPermissions();
 
 	const [hasImpactingEvents, setHasImpactingEvents] = useState<string>('no');
@@ -95,6 +93,9 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 	const {loading: loadingTickets, tickets} = useAccountTickets(
 		project?.accountKey || ''
 	);
+
+	const {loading: loadingUTCTimeZonesList, utcTimeZonesList} =
+		useGetUTCTimeZonesList();
 
 	const navigate = useNavigate();
 
@@ -122,6 +123,18 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 	>([]);
 
 	const [ticketOptions, setTicketOptions] = useState<ITicket[]>([]);
+
+	const handleOptionChange = useCallback(
+		(field: string, key: string, list: IOption[]) => {
+			if (key) {
+				setFieldValue(
+					field,
+					list.filter((option) => option.value === key)[0].label
+				);
+			}
+		},
+		[setFieldValue]
+	);
 
 	const handleRadioChange = (value: string) => {
 		setHasImpactingEvents(value);
@@ -194,9 +207,9 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 
 	const loading =
 		loadingBusinessEventTypesList ||
-		loadingGMTTimeZonesList ||
 		loadingLiferayVersions ||
-		loadingTickets;
+		loadingTickets ||
+		loadingUTCTimeZonesList;
 
 	useEffect(() => {
 		if (hasImpactingEvents === 'yes') {
@@ -282,15 +295,19 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 			setNewLiferayVersionOptions([
 				...dxpMinorVersionsAndPortalMajorVersions.filter(
 					(version, index, versions) => {
-						return (
-							index <
-							versions.findIndex((version) => {
-								return (
-									version.value ===
-									businessEvent.currentLiferayVersion?.key
-								);
-							})
-						);
+						if (businessEvent.currentLiferayVersion?.key) {
+							return (
+								index <
+								versions.findIndex((version) => {
+									return (
+										version.value ===
+										businessEvent.currentLiferayVersion?.key
+									);
+								})
+							);
+						}
+
+						return true;
 					}
 				),
 			]);
@@ -308,10 +325,21 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 	}, [isDescriptionRequired, setFieldValue]);
 
 	useEffect(() => {
-		if (!isNewLiferayVersionRequired) {
+		if (
+			!isNewLiferayVersionRequired ||
+			!containsOption(
+				newLiferayVersionOptions,
+				businessEvent.newLiferayVersion
+			)
+		) {
 			setFieldValue('businessEvent.newLiferayVersion.key', '');
 		}
-	}, [isNewLiferayVersionRequired, setFieldValue]);
+	}, [
+		businessEvent.newLiferayVersion,
+		isNewLiferayVersionRequired,
+		newLiferayVersionOptions,
+		setFieldValue,
+	]);
 
 	useEffect(() => {
 		setFieldValue(
@@ -383,6 +411,13 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 									link="https://help.liferay.com/hc"
 									linkText="here"
 									name="businessEvent.eventType.key"
+									onChange={(value: string) =>
+										handleOptionChange(
+											'businessEvent.eventType.name',
+											value,
+											businessEventTypesList
+										)
+									}
 									options={[
 										emptyOption,
 										...businessEventTypesList,
@@ -399,6 +434,13 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 											'your-current-liferay-version'
 										)}
 										name="businessEvent.currentLiferayVersion.key"
+										onChange={(value: string) =>
+											handleOptionChange(
+												'businessEvent.currentLiferayVersion.name',
+												value,
+												dxpMinorVersionsAndPortalMajorVersions
+											)
+										}
 										options={[
 											emptyOption,
 											...dxpMinorVersionsAndPortalMajorVersions,
@@ -412,6 +454,13 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 										badgeClassName="mt-1 mx-3"
 										label={i18n.translate('new-version')}
 										name="businessEvent.newLiferayVersion.key"
+										onChange={(value: string) =>
+											handleOptionChange(
+												'businessEvent.newLiferayVersion.name',
+												value,
+												newLiferayVersionOptions
+											)
+										}
 										options={[
 											emptyOption,
 											...newLiferayVersionOptions,
@@ -469,9 +518,19 @@ const BusinessEventsAddPage: React.FC<IProps> = ({
 											id="select-businessEvent.timeZone"
 											label={i18n.translate('time-zone')}
 											name="businessEvent.timeZone.key"
+											onChange={(value: string) =>
+												handleOptionChange(
+													'businessEvent.timeZone.name',
+													value,
+													utcTimeZonesList
+												)
+											}
 											options={[
-												emptyOption,
-												...gmtTimeZonesList,
+												{
+													...emptyOption,
+													disabled: false,
+												},
+												...utcTimeZonesList,
 											]}
 										/>
 									</ClayInput.GroupItem>

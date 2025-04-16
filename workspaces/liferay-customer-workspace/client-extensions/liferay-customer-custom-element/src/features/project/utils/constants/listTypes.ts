@@ -8,8 +8,10 @@ export const LIST_TYPES = {
 	developerKeyPortalVersion: 'Developer Key Portal Version',
 	dxpMajorVersion: 'DXP Major Version',
 	dxpMinorVersion: 'DXP Minor Version',
-	gmtTimeZones: 'GMT Time Zones',
+	dxpMinorVersionAndPortalMajorVersion:
+		'DXP Minor Version and Portal Major Version',
 	lxcPrimaryRegion: 'LXC Primary Region',
 	portalMajorVersion: 'Portal Major Version',
+	utcTimeZones: 'UTC Time Zones',
 	versionOfLiferaySoftware: 'Version of Liferay Software',
 };
