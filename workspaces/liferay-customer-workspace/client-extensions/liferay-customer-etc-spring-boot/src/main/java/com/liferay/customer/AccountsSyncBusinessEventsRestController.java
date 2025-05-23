@@ -275,6 +275,34 @@ public class AccountsSyncBusinessEventsRestController
 				LocalDate.parse(targetGoLiveDateTime.substring(0, 10))));
 	}
 
+	private JSONArray _transformToCustomFieldsJSONArray(
+		Map<Long, String> customFields) {
+
+		JSONArray jsonArray = new JSONArray();
+
+		for (Map.Entry<Long, String> entry : customFields.entrySet()) {
+			jsonArray.put(
+				new JSONObject(
+				).put(
+					"id", entry.getKey()
+				).put(
+					"value", entry.getValue()
+				));
+		}
+
+		return jsonArray;
+	}
+
+	private JSONArray _transformToTagsJSONArray(Set<String> tags) {
+		JSONArray jsonArray = new JSONArray();
+
+		for (String tag : tags) {
+			jsonArray.put(tag);
+		}
+
+		return jsonArray;
+	}
+
 	private void _updateAccountHeatTags(String externalReferenceCode)
 		throws Exception {
 
@@ -318,6 +346,8 @@ public class AccountsSyncBusinessEventsRestController
 
 		int page = 1;
 
+		JSONArray jsonArray = new JSONArray();
+
 		while (page > 0) {
 			zendeskTicketQuery.setPage(page);
 
@@ -355,14 +385,23 @@ public class AccountsSyncBusinessEventsRestController
 					}
 				}
 
-				_zendeskService.updateZendeskTicket(
-					zendeskTicket.getZendeskTicketId(), zendeskOrganizationId,
-					zendeskTicket.getRequesterId(), zendeskTicket.getStatus(),
-					customFields, tags);
+				JSONObject jsonObject = new JSONObject(
+				).put(
+					"custom_fields",
+					_transformToCustomFieldsJSONArray(customFields)
+				).put(
+					"id", zendeskTicket.getZendeskTicketId()
+				).put(
+					"tags", _transformToTagsJSONArray(tags)
+				);
+
+				jsonArray.put(jsonObject);
 			}
 
 			page = searchHits.getNextPage();
 		}
+
+		_zendeskService.updateZendeskTickets(jsonArray);
 	}
 
 	private void _updateZendeskTickets(
@@ -377,6 +416,8 @@ public class AccountsSyncBusinessEventsRestController
 		zendeskTicketQuery.addCriterion("status<solved");
 
 		int page = 1;
+
+		JSONArray jsonArray = new JSONArray();
 
 		while (page > 0) {
 			zendeskTicketQuery.setPage(page);
@@ -408,14 +449,21 @@ public class AccountsSyncBusinessEventsRestController
 
 				customFields.put(_zendeskHeatTagTicketFieldId, highestHeatTag);
 
-				_zendeskService.updateZendeskTicket(
-					zendeskTicket.getZendeskTicketId(), zendeskOrganizationId,
-					zendeskTicket.getRequesterId(), zendeskTicket.getStatus(),
-					customFields, zendeskTicket.getTags());
+				JSONObject jsonObject = new JSONObject(
+				).put(
+					"custom_fields",
+					_transformToCustomFieldsJSONArray(customFields)
+				).put(
+					"id", zendeskTicket.getZendeskTicketId()
+				);
+
+				jsonArray.put(jsonObject);
 			}
 
 			page = searchHits.getNextPage();
 		}
+
+		_zendeskService.updateZendeskTickets(jsonArray);
 	}
 
 	private static final Log _log = LogFactory.getLog(
